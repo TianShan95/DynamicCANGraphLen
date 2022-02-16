@@ -10,6 +10,8 @@ from graphModel.args import graph_model_train_log_file, graph_model_test_log_fil
 from graphModel.processData import originCanData
 import torch
 import hiddenlayer as hl
+import matplotlib.pyplot as plt
+import os
 
 
 class Task:
@@ -20,6 +22,7 @@ class Task:
         self.model = None  # 模型 变量 会在 benchmark_task_val 首次调用时定义
         self.history = hl.History()
         self.canvas = hl.Canvas()
+        self.loss_list = []
         print('self.pool_sizes: ', self.pool_sizes)
         
     def benchmark_task_val(self, epoch, step, feat, pred_hidden_dims, device, len_can,  mode, first):
@@ -82,8 +85,24 @@ class Task:
             after_train_model, after_gcn_vector, reward, loss = train(epoch, train_data, self.model, self.args, log_file=graph_model_train_log_file, device=device)
             # 训练时 实时显示 loss 变化曲线
             self.history.log((epoch, step), train_loss=loss)
+            self.loss_list.append(loss)
             with self.canvas:
                 self.canvas.draw_plot(self.history['train_loss'])
+            print(f'选取报文位置为 ( {self.origin_can_obj.point} - {self.origin_can_obj.point+len_can-1} ) / {self.origin_can_obj.data_total_len}')
+            print(f'长度为 {len_can}')
+
+            # 数据 扫瞄完毕 画出loss图线 并保存
+            if done:
+                plt_loss_file_name = 'loss' + os.path.splitext(os.path.basename(self.args.origin_can_datadir))[0]
+
+                step_all_individual_list = [i for i in range(0, len(self.loss_list))]
+                print(step_all_individual_list)
+
+                plt.plot(step_all_individual_list, self.loss_list)
+                plt.xlabel('steps')
+                plt.ylabel('train_loss')
+                plt.title('train_loss figure')
+                plt.savefig(self.args.plt_out_dir + plt_loss_file_name, dpi=300, bbox_inches='tight')
 
         elif mode == 'test':
             with open(graph_model_test_log_file, 'a') as f:
@@ -91,6 +110,7 @@ class Task:
             after_gcn_vector, reward = evaluate(train_data, self.model, self.args, log_file=graph_model_test_log_file, device=device)
 
         print(f'reward: {reward}')
+
 
 
         # print(type(after_gcn_vector))

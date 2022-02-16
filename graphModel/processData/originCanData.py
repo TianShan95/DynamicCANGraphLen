@@ -9,6 +9,7 @@ class OriginCanData:
         self.df = pd.read_csv(origin_can_dir, usecols=col_name_list)  # 读取 can报文 csv源文件
         self.point = 0  # 记录 此次取出的can数据 结束 位置
         self.max_nodes_num = max_nodes_num
+        self.data_total_len = len(self.df)
         # print(self.df.head())
         # print(self.df.tail())
 
