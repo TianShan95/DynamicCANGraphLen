@@ -106,7 +106,7 @@ def arg_parse():
                         num_gc_layers=3,
                         dropout=0.0,
                         bmname='data_can',
-                        origin_can_datadir='graphModel/data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/Pre_train_D_0.csv',
+                        origin_can_datadir='graphModel/data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/Pre_train_D_1.csv',
                         log_out_dir='log/',
                         plt_out_dir='plt/',
                         # pred_hidden = ,
@@ -114,6 +114,7 @@ def arg_parse():
 
     ensure_dir(parser.parse_args().log_out_dir)
     ensure_dir(parser.parse_args().plt_out_dir)
+    ensure_dir(parser.parse_args().directory)
 
     return parser.parse_args()
 
