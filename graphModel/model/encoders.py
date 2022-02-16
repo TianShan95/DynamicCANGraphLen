@@ -33,8 +33,8 @@ class GraphConv(nn.Module):
         if self.add_self:
             y += x
 
-        print('weight shape: ')
-        print(self.weight.shape)
+        # print('weight shape: ')
+        # print(self.weight.shape)
         y = torch.matmul(y, self.weight)
 
         if self.bias is not None:

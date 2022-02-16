@@ -58,7 +58,7 @@ class Task:
 
         # 生成训练数据
         train_data, input_dim = prepare_data(sample_graph, coarsen_graph, self.args, test_graphs=[], max_nodes=self.args.max_nodes)
-        print(f'input_dim:{input_dim}')
+        # print(f'input_dim:{input_dim}')
         if first:
 
             # 首次调用 定义模型
