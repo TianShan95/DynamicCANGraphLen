@@ -97,7 +97,7 @@ def main():
                 # 累加 奖励
                 ep_r += reward
 
-                agent.memory.push((state, next_state, action, reward, np.float(done)))
+                agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))
     #             if i+1 % 10 == 0:
     #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))
                 if len(agent.memory.storage) >= args_RL.capacity-1:
