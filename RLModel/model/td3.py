@@ -64,7 +64,9 @@ class TD3:
             # Select next action according to target policy:
             # noise = torch.ones_like(action).data.normal_(0, args_RL.policy_noise).to(device)
             # noise = noise.clamp(-args_RL.noise_clip, args_RL.noise_clip)
+            print('### td3.py next_state.shape ###', next_state.shape)
             next_action = (self.actor_target(next_state))
+            print('### td3.py next_action.shape ###', next_action.shape)
             # next_action = (self.actor_target(next_state) + noise)
             # next_action = next_action.clamp(-self.max_action, self.max_action)
 
