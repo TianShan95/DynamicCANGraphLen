@@ -14,6 +14,7 @@ class Critic(nn.Module):
 
     def forward(self, state, action):
         print('critic forward: ')
+        action = torch.unsqueeze(action, 1)
         print(state.shape)
         print(action.shape)
         state_action = torch.cat([state, action], 1)
