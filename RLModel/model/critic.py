@@ -13,7 +13,10 @@ class Critic(nn.Module):
         self.fc3 = nn.Linear(300, 1)
 
     def forward(self, state, action):
-        state_action = torch.cat([state, action], 0)
+        print('critic forward: ')
+        print(state.shape)
+        print(action.shape)
+        state_action = torch.cat([state, action], 1)
 
         q = F.relu(self.fc1(state_action))
         q = F.relu(self.fc2(q))
