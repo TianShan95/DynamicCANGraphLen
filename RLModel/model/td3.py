@@ -62,10 +62,11 @@ class TD3:
             reward = torch.FloatTensor(r).to(device)
 
             # Select next action according to target policy:
-            noise = torch.ones_like(action).data.normal_(0, args_RL.policy_noise).to(device)
-            noise = noise.clamp(-args_RL.noise_clip, args_RL.noise_clip)
-            next_action = (self.actor_target(next_state) + noise)
-            next_action = next_action.clamp(-self.max_action, self.max_action)
+            # noise = torch.ones_like(action).data.normal_(0, args_RL.policy_noise).to(device)
+            # noise = noise.clamp(-args_RL.noise_clip, args_RL.noise_clip)
+            next_action = (self.actor_target(next_state))
+            # next_action = (self.actor_target(next_state) + noise)
+            # next_action = next_action.clamp(-self.max_action, self.max_action)
 
             # Compute target Q-value:
             target_Q1 = self.critic_1_target(next_state, next_action)
