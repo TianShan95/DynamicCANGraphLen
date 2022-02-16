@@ -77,6 +77,9 @@ class TD3:
             target_Q = reward + ((1 - done) * args_RL.gamma * target_Q).detach()
 
             # Optimize Critic 1:
+            print('## Optimize Critic 1 ##')
+            print(state.shape)
+            print(action.shape)
             current_Q1 = self.critic_1(state, action)
             loss_Q1 = F.mse_loss(current_Q1, target_Q)
             self.critic_1_optimizer.zero_grad()
