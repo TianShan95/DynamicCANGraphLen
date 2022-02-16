@@ -107,8 +107,8 @@ class OriginCanData:
 
 if __name__ == '__main__':
     origin_can_dir_ = '/Users/aaron/git_project/eigenpooling/data/Car_Hacking_Challenge_Dataset_rev20Mar2021/' \
-                      '0_Preliminary/0_Training/Pre_train_D_0.csv'
-    p = OriginCanData(origin_can_dir_)
+                      '0_Preliminary/0_Training/Pre_train_D_1.csv'
+    p = OriginCanData(origin_can_dir_,300)
     # for i in range(10000):
     # p.get_ds_a(100)
     p.test(2)

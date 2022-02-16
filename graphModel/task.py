@@ -90,6 +90,7 @@ class Task:
                 self.canvas.draw_plot(self.history['train_loss'])
             print(f'选取报文位置为 ( {self.origin_can_obj.point} - {self.origin_can_obj.point+len_can-1} ) / {self.origin_can_obj.data_total_len}')
             print(f'长度为 {len_can}')
+            print(self.args.origin_can_datadir)
 
             # 数据 扫瞄完毕 画出loss图线 并保存
             if done:
