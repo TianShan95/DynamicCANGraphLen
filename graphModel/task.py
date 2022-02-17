@@ -25,7 +25,7 @@ class Task:
         self.loss_list = []
         print('self.pool_sizes: ', self.pool_sizes)
         
-    def benchmark_task_val(self, epoch, step, feat, pred_hidden_dims, device, len_can,  mode, first):
+    def benchmark_task_val(self, epoch, step, feat, pred_hidden_dims, device, rl_action,  mode, first):
         '''
         self.args:
             epoch: 代数
@@ -38,6 +38,12 @@ class Task:
             mode: train or test
             first: 是否第一次调用 第一次调用需要定义一次模型 之后再调用则不需要再次定义模型 模型变量 self.model
         '''
+
+        # 传入 的 rl_action 是一个强化学习传入的 288 维的向量（can 数据长度有 288 种选择） 若想知道传入的长度需要取 argmax
+        if isinstance(rl_action, int):
+            len_can = rl_action
+        elif type(rl_action) == np.ndarray:
+            len_can = np.argmax(rl_action) + 12  # 得到 下一块 数据的长度
     
         sample_graph, done = self.origin_can_obj.get_ds_a(len_can)  # 取出 指定长度的数据 并 转换为 图对象
 

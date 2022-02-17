@@ -50,8 +50,7 @@ def main():
             state, _, _, _ = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, device, graph_len_, 'test', first=True)
 
             while True:
-                action = agent.select_action(state)  # 从 现在的 状态 得到一个动作
-                action = np.argmax(action)  # 得到动作
+                action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 维度是 报文长度可选择数量
                 # 图操作 步数 自增 1
                 graph_step += 1
                 # 下个状态 奖励 是否完成
@@ -87,8 +86,7 @@ def main():
             # for t in range(1):
             while True:
 
-                action = agent.select_action(state)  # 从 现在的 状态 得到一个动作
-                action = np.argmax(action)  # 得到动作
+                action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
                 print('### main.py action.shape ###', action.shape)
 
                 # print(f'action: {action}')

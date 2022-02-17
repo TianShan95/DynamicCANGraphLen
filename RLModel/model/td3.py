@@ -64,9 +64,9 @@ class TD3:
             # Select next action according to target policy:
             # noise = torch.ones_like(action).data.normal_(0, args_RL.policy_noise).to(device)
             # noise = noise.clamp(-args_RL.noise_clip, args_RL.noise_clip)
-            print('### td3.py next_state.shape ###', next_state.shape)
+            # print('### td3.py next_state.shape ###', next_state.shape)
             next_action = (self.actor_target(next_state))
-            print('### td3.py next_action.shape ###', next_action.shape)
+            # print('### td3.py next_action.shape ###', next_action.shape)
             # next_action = (self.actor_target(next_state) + noise)
             # next_action = next_action.clamp(-self.max_action, self.max_action)
 
@@ -77,9 +77,9 @@ class TD3:
             target_Q = reward + ((1 - done) * args_RL.gamma * target_Q).detach()
 
             # Optimize Critic 1:
-            print('## Optimize Critic 1 ##')
-            print(state.shape)
-            print(action.shape)
+            # print('## Optimize Critic 1 ##')
+            # print(state.shape)
+            # print(action.shape)
             current_Q1 = self.critic_1(state, action)
             loss_Q1 = F.mse_loss(current_Q1, target_Q)
             self.critic_1_optimizer.zero_grad()
