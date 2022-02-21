@@ -52,8 +52,8 @@ class OriginCanData:
 
             if not done:
                 # 节点从0编号结束 打印一下 字典
-                print(f'节点ID和节点编号对应关系: {hex2num_dict}')
-                print(f'此图具有的节点个数为: {len(hex2num_dict)}')
+                # print(f'节点ID和节点编号对应关系: {hex2num_dict}')
+                # print(f'此图具有的节点个数为: {len(hex2num_dict)}')
 
                 # 得到 图实例 所需要的数据
                 for i in range(len_can):  # 遍历 本次 选出 的 报文数据
@@ -79,16 +79,16 @@ class OriginCanData:
                         print('发生读取异常 预想为读到了 canID最后一个')
                         print(f'此时的 i 为 {i}, 此时的 range(len_can) 为 {len_can}')
                         pass  # 当遍历到 数据 最后一个点 会触发异常 退出循环
-                print(f'边列表:\n {adj_list}')
-                print(f'边数{len(adj_list)}')
+                # print(f'边列表:\n {adj_list}')
+                print(f'边数 {len(adj_list)} \n')
                 # print(edge_weight_list)
                 # print(len(edge_weight_list))
-                print(f'节点编号{hex2num_dict.values()}')
+                # print(f'节点编号{hex2num_dict.values()}')
 
                 # 实例化 图
                 graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
                 graph.graph['label'] = graph_label
-                print(f'报文类型: {graph_label}')
+                print(f'报文类型: {graph_label} \n')
                 # Plot the graph 可视化建立的 图实例
                 # nx.draw(graph, with_labels=True, font_weight='bold')
                 # plt.show()

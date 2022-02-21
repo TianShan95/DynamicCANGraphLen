@@ -48,7 +48,13 @@ def main():
     if not os.path.exists(log_out_dir):
         os.makedirs(log_out_dir, exist_ok=True)
     # 定义 并创建 log 文件
-    log_out_file = log_out_dir + 'Rl' + time_mark + '.txt'
+    log_out_file = log_out_dir + 'Rl_' + time_mark + '.txt'
+
+    with open(log_out_file) as f:
+        f.write("RL 参数\n")
+        f.write(args_RL)
+        f.write("图部分参数\n")
+        f.write(args_graph)
 
     if args_RL.mode == 'test':
 
@@ -109,7 +115,7 @@ def main():
                 graph_step += 1
                 # 下个状态 奖励 是否完成
                 next_state, reward, done = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, action, 'train', first=False)
-                with open(log_out_file) as f:
+                with open(log_out_file, 'a') as f:
                     f.write(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}')
                 # 累加 奖励
                 ep_r += reward
