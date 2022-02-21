@@ -26,6 +26,11 @@ class Replay_buffer():
 
         for i in ind:
             X, Y, U, R, D = self.storage[i]
+            print(f'X: {X}\n')
+            print(f'Y: {Y}\n')
+            print(f'U: {U}\n')
+            print(f'R: {R}\n')
+            print(f'D: {D}\n')
             x.append(np.array(X, copy=False))
             y.append(np.array(Y, copy=False))
             u.append(np.array(U, copy=False))
