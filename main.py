@@ -38,7 +38,7 @@ def main():
     agent = TD3(state_dim, action_dim, 1)
     ep_r = 0
     # 实例化 图任务
-    graph_task = Task(args_graph)
+    graph_task = Task(args_graph, device)
     pred_hidden_dims = [int(i) for i in args_graph.pred_hidden.split('_')]
     graph_len_ = random.randint(12, 300)  # 第一次随机 图的长度 [12-300] 闭空间 给出强化学习的 初始 state
 
@@ -58,14 +58,14 @@ def main():
         graph_step = 0
         for i in range(args_RL.iteration):
             # 随机获取 初始状态
-            state, _, _, _ = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, device, graph_len_, 'test', first=True)
+            state, _, _, _ = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, graph_len_, 'test', first=True)
 
             while True:
                 action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 维度是 报文长度可选择数量
                 # 图操作 步数 自增 1
                 graph_step += 1
                 # 下个状态 奖励 是否完成
-                next_state, reward, done, trained_model = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, device, action,'test', first=False)
+                next_state, reward, done, trained_model = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, action,'test', first=False)
                 # 累加 奖励
                 ep_r += reward
                 # 更新 状态
@@ -91,7 +91,7 @@ def main():
 
         for i in range(args_RL.num_iteration):  # epoch
             # 随机获取 初始状态
-            state, _ , _, _ = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, device, graph_len_, 'train', first=True)
+            state, _ , _, _ = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, graph_len_, 'train', first=True)
 
             # print('### main.py state.shape ###', state.shape)
             # for t in range(1):
@@ -108,11 +108,13 @@ def main():
                 # 图操作 步数 自增 1
                 graph_step += 1
                 # 下个状态 奖励 是否完成
-                next_state, reward, done = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, device, action, 'train', first=False)
+                next_state, reward, done = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, action, 'train', first=False)
                 with open(log_out_file) as f:
                     f.write(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}')
                 # 累加 奖励
                 ep_r += reward
+                print(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}; ep_r: {ep_r}')
+
 
                 agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))
     #             if i+1 % 10 == 0:
