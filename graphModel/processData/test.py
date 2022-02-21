@@ -7,9 +7,9 @@ import os
 
 # l = list()
 # a = {1:'a', 2:'b', 3:'c'}
-b = {7:'d', 5:'e', 6:'f', 2:'g'}
-for i in b:
-    print(i)
+# b = {7:'d', 5:'e', 6:'f', 2:'g'}
+# for i in b:
+#     print(i)
 # l.append(a)
 # l.append(b)
 # n = 0
@@ -50,12 +50,16 @@ for i in b:
 #
 # print(result_dic)
 
-origin_can_dir_ = '/Users/aaron/git_project/eigenpooling/data/Car_Hacking_Challenge_Dataset_rev20Mar2021/' \
-                  '0_Preliminary/0_Training/Pre_train_D_1.csv'
-n = 0
-with open(origin_can_dir_) as f:
-    for line in f:
-        n += 1
-        print(line)
-        if n == 10:
-            break
+# origin_can_dir_ = '/Users/aaron/git_project/eigenpooling/data/Car_Hacking_Challenge_Dataset_rev20Mar2021/' \
+#                   '0_Preliminary/0_Training/Pre_train_D_1.csv'
+# n = 0
+# with open(origin_can_dir_) as f:
+#     for line in f:
+#         n += 1
+#         print(line)
+#         if n == 10:
+#             break
+
+import numpy as np
+x=np.array([[1,2,3]])
+print(x[0,0])

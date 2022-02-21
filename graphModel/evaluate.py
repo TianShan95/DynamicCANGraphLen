@@ -57,9 +57,11 @@ def evaluate(dataset, model, args, max_num_examples=None, log_file=None, device=
 
         ypred_np = ypred.cpu().detach().numpy()
         print(f'ypred: {ypred_np}')
-        raise IOError
-        # if pre_label == label:
-        #     reward = 1
+
+        if pre_label == pre_label:
+            reward = abs(ypred_np[0, 0] - ypred[0, 1])
+        else:
+            reward = - abs(ypred_np[0, 0] - ypred[0, 1])
 
         if max_num_examples is not None:
             if (batch_idx + 1) * args.batch_size > max_num_examples:
