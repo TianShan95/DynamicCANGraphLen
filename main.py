@@ -50,7 +50,7 @@ def main():
     # 定义 并创建 log 文件
     log_out_file = log_out_dir + 'Rl_' + time_mark + '.txt'
 
-    with open(log_out_file) as f:
+    with open(log_out_file, 'a') as f:
         f.write("RL 参数\n")
         f.write(args_RL)
         f.write("图部分参数\n")
