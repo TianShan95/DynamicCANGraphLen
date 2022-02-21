@@ -54,7 +54,9 @@ def evaluate(dataset, model, args, max_num_examples=None, log_file=None, device=
         # else:
         #     ypred = model(h0, adj, batch_num_nodes, assign_x=assign_input)
         _, pre_label = torch.max(ypred, 1)
-        print(f'ypred: {ypred}')
+
+        ypred_np = ypred.to("cpu").numpy()
+        print(f'ypred: {ypred_np}')
         # if pre_label == label:
         #     reward = 1
 

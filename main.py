@@ -91,7 +91,7 @@ def main():
 
         for i in range(args_RL.num_iteration):  # epoch
             # 随机获取 初始状态
-            state, _ , _, _ = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, graph_len_, 'train', first=True)
+            state, _ , _, = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, graph_len_, 'train', first=True)
 
             # print('### main.py state.shape ###', state.shape)
             # for t in range(1):
