@@ -47,6 +47,8 @@ def evaluate(dataset, model, args, max_num_examples=None, log_file=None, device=
 
             pool_matrices_dic[ind] = pool_matrices_list
 
+        print(f'h0.shape {h0.shape})')
+        print(f'adj.shape {adj.shape})')
         ypred, after_gcn_vector = model(h0, adj, adj_pooled_list, batch_num_nodes, batch_num_nodes_list, pool_matrices_dic)
 
         # else:
