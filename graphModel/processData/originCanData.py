@@ -112,9 +112,9 @@ class OriginCanData:
 
                 self.point += len_can
 
-                for u in graph.nodes():
-                    print(u)
-                    print(graph.nodes[u]['label'])
+                # for u in graph.nodes():
+                #     print(u)
+                #     print(graph.nodes[u]['label'])
 
                 # relabeling
                 mapping = {}
