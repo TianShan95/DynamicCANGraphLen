@@ -15,7 +15,7 @@ import os
 
 class Task:
     def __init__(self, args, device):
-        self.origin_can_obj = originCanData.OriginCanData(args.origin_can_datadir, args.max_nodes)
+        self.origin_can_obj = originCanData.OriginCanData(args.origin_can_datadir)
         self.args = args
         self.pool_sizes = [int(i) for i in self.args.pool_sizes.split('_')]  # 池化时 每个簇的 子图大小
         # 从指定路径 load 模型
