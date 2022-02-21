@@ -116,6 +116,22 @@ class OriginCanData:
                     print(u)
                     print(graph.nodes[u]['label'])
 
+                # relabeling
+                mapping = {}
+                it = 0
+                if float((nx.__version__)[:3]) < 2.0:
+                    for n in graph.nodes():
+                        mapping[n] = it
+                        it += 1
+                else:
+                    for n in graph.nodes:
+                        # print('###')
+                        # print(G.nodes[n]['label'])
+                        mapping[n] = it
+                        it += 1
+
+                graph = nx.relabel_nodes(graph, mapping)
+
         return graph, done
 
     def test(self, can_len):

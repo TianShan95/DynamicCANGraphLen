@@ -28,6 +28,8 @@ class GraphSampler(torch.utils.data.Dataset):
         # else:
         self.max_num_nodes = max_num_nodes  # 指定的最大节点数目
 
+        # print(f'graph_origin: {graph_origin}')
+        # print(graph_origin.nodes[0]['feat'])
         self.feat_dim = graph_origin.nodes[0]['feat'].shape[0]  # 特征维度
 
         # for G in graph_origin:
