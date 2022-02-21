@@ -78,7 +78,7 @@ def arg_parse():
                         help = 'Norm for eigens', default = 'l2')
 
     parser.add_argument('--directory', default='graphModel/graph_model_store/', type=str)
-    parser.add_argument('--model_path', default='../experiment/0.804806_better_model_2022-02-21 11_03_28_totalEpoch_5_epoch_4_ps_10_gs_300_nor_1_gs_50.pth', type=str)
+    parser.add_argument('--model_path', default='../experiment/graphSize_50_Normlize_True_20220221_105128_log/0.804806_better_model_2022-02-21 11_03_28_totalEpoch_5_epoch_4_ps_10_gs_300_nor_1_gs_50.pth', type=str)
     parser.add_argument('--load', default=False, type=bool)
 
 
