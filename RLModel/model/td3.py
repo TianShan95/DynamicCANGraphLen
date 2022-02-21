@@ -47,7 +47,7 @@ class TD3:
         state = state.reshape(1, -1).clone().detach().requires_grad_(True)
         return self.actor(state).cpu().data.numpy().flatten()
 
-    def update(self, num_iteration):
+    def update(self, num_iteration, log_file):
 
         if self.num_training % 500 == 0:
             print("====================================")
@@ -62,19 +62,18 @@ class TD3:
             reward = torch.FloatTensor(r).to(device)
 
             # Select next action according to target policy:
-            # noise = torch.ones_like(action).data.normal_(0, args_RL.policy_noise).to(device)
-            # noise = noise.clamp(-args_RL.noise_clip, args_RL.noise_clip)
+            noise = torch.ones_like(action).data.normal_(0, args_RL.policy_noise).to(device)
+            noise = noise.clamp(-args_RL.noise_clip, args_RL.noise_clip)
             # print('### td3.py next_state.shape ###', next_state.shape)
-            next_action = (self.actor_target(next_state))
             # print('### td3.py next_action.shape ###', next_action.shape)
-            # next_action = (self.actor_target(next_state) + noise)
+            next_action = (self.actor_target(next_state) + noise)
             # next_action = next_action.clamp(-self.max_action, self.max_action)
 
             # Compute target Q-value:
-            target_Q1 = self.critic_1_target(next_state, next_action)
-            target_Q2 = self.critic_2_target(next_state, next_action)
-            target_Q = torch.min(target_Q1, target_Q2)
-            target_Q = reward + ((1 - done) * args_RL.gamma * target_Q).detach()
+            target_Q1 = self.critic_1_target(next_state, next_action)  # 打分1
+            target_Q2 = self.critic_2_target(next_state, next_action)  # 打分2
+            target_Q = torch.min(target_Q1, target_Q2)  # 防止高估 取小
+            target_Q = reward + ((1 - done) * args_RL.gamma * target_Q).detach()  # 更新部分真实 reward(过程累计到现在得到的分数) 计算得到的
 
             # Optimize Critic 1:
             # print('## Optimize Critic 1 ##')
@@ -94,7 +93,14 @@ class TD3:
             loss_Q2.backward()
             self.critic_2_optimizer.step()
             self.writer.add_scalar('Loss/Q2_loss', loss_Q2, global_step=self.num_critic_update_iteration)
+
+            # 把训练 loss 写入 日志文件
+            with open(log_file, 'a') as f:
+                f.write(f'loss_Q1: {str(loss_Q1)}\n')
+                f.write(f'loss_Q2: {str(loss_Q2)}\n')
+
             # Delayed policy updates:
+            # 延迟更新 策略网络
             if i % args_RL.policy_delay == 0:
                 # Compute actor loss:
                 actor_loss = - self.critic_1(state, self.actor(state)).mean()
@@ -116,6 +122,8 @@ class TD3:
                 self.num_actor_update_iteration += 1
         self.num_critic_update_iteration += 1
         self.num_training += 1
+
+
 
     def save(self):
         torch.save(self.actor.state_dict(), args_RL.directory+'actor.pth')

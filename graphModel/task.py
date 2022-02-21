@@ -1,9 +1,8 @@
 from graphModel.processData.prepare_data import prepare_data
-from graphModel.model.train import train
-from graphModel.model.evaluate import evaluate
+from graphModel.evaluate import evaluate
 import networkx as nx
-from graphModel.model.coarsen_pooling_with_last_eigen_padding import Graphs as gp
-from graphModel.model import encoders
+from graphModel.coarsen_pooling_with_last_eigen_padding import Graphs as gp
+from graphModel import encoders
 import graphModel.gen.feat as featgen
 import numpy as np
 from graphModel.args import graph_model_train_log_file, graph_model_test_log_file
@@ -19,7 +18,23 @@ class Task:
         self.origin_can_obj = originCanData.OriginCanData(args.origin_can_datadir, args.max_nodes)
         self.args = args
         self.pool_sizes = [int(i) for i in self.args.pool_sizes.split('_')]  # 池化时 每个簇的 子图大小
-        self.model = None  # 模型 变量 会在 benchmark_task_val 首次调用时定义
+        # 从指定路径 load 模型
+        print(f'模型所在路径: {args.model_path}')
+        print(f'模型是否存在: {os.path.isfile(args.model_path)}')
+        self.model = torch.load(args.model_path, map_location=torch.device('cpu'))  # 模型 变量 会在 benchmark_task_val 首次调用时定义
+        # 模型加载参数
+        match_string_len = len("model")
+        # 模型加载 参数
+        last_char_index = args.model_path.rfind("model")
+        net_state_dict = torch.load(args.model_path[:last_char_index] +
+                                    "para" + args.model_path[last_char_index+match_string_len:],
+                                    map_location=torch.device('cpu'))
+
+        # print('load mutation folder pkl keys: \n', net_state_dict.keys())
+        # print('load mutation folder pkl : \n', net_state_dict)
+        self.model.load_state_dict(net_state_dict)
+
+
         self.history = hl.History()
         self.canvas = hl.Canvas()
         self.loss_list = []
@@ -68,59 +83,56 @@ class Task:
         # 生成训练数据
         train_data, input_dim = prepare_data(sample_graph, coarsen_graph, self.args, test_graphs=[], max_nodes=self.args.max_nodes)
         # print(f'input_dim:{input_dim}')
-        if first:
+        # if first:
+        #
+        #     # 首次调用 定义模型
+        #     self.model = encoders.WavePoolingGcnEncoder(input_dim, self.args.hidden_dim, self.args.output_dim, self.args.num_classes,
+        #                                        self.args.num_gc_layers, self.args.num_pool_matrix, self.args.num_pool_final_matrix,
+        #                                        pool_sizes=self.pool_sizes, pred_hidden_dims=pred_hidden_dims, concat=self.args.concat,
+        #                                        bn=self.args.bn, dropout=self.args.dropout, mask=self.args.mask, args=self.args, device=device)
 
-            # 首次调用 定义模型
-            self.model = encoders.WavePoolingGcnEncoder(input_dim, self.args.hidden_dim, self.args.output_dim, self.args.num_classes,
-                                               self.args.num_gc_layers, self.args.num_pool_matrix, self.args.num_pool_final_matrix,
-                                               pool_sizes=self.pool_sizes, pred_hidden_dims=pred_hidden_dims, concat=self.args.concat,
-                                               bn=self.args.bn, dropout=self.args.dropout, mask=self.args.mask, args=self.args, device=device)
-
-            # 判断是否需要 从本地 加载模型 参数
-            # 只有训练 指定需要 不加载 其他情况都需要加载
-            if mode == 'test' or self.args.load:
-                self.model.load_state_dict(torch.load(self.args.directory) + 'graph.pth')
+            # # 判断是否需要 从本地 加载模型 参数
+            # # 只有训练 指定需要 不加载 其他情况都需要加载
+            # if mode == 'test' or self.args.load:
+            #     self.model.load_state_dict(torch.load(self.args.directory) + 'graph.pth')
 
         # after_gcn_vector 是图卷积之后得到的 一维特征向量 作为强化学习下一次的 状态向量
-        after_gcn_vector = None
-        reward = 0
-        after_train_model = None
-        if mode == 'train':
-            with open(graph_model_train_log_file, 'a') as f:
-                f.write('====================================================================================\n')
-            after_train_model, after_gcn_vector, reward, loss = train(epoch, train_data, self.model, self.args, log_file=graph_model_train_log_file, device=device)
-            # 训练时 实时显示 loss 变化曲线
-            self.history.log((epoch, step), train_loss=loss)
-            self.loss_list.append(loss)
-            with self.canvas:
-                self.canvas.draw_plot(self.history['train_loss'])
-            print(f'选取报文位置为 ( {self.origin_can_obj.point} - {self.origin_can_obj.point+len_can-1} ) / {self.origin_can_obj.data_total_len}')
-            print(f'长度为 {len_can}')
-            print('step: ', step)
-            # print(self.args.origin_can_datadir)
 
-            # 数据 扫瞄完毕 画出loss图线 并保存
-            if done:
-                plt_loss_file_name = 'loss' + os.path.splitext(os.path.basename(self.args.origin_can_datadir))[0]
+        # reward = 0
+        # if mode == 'train':
+        #     with open(graph_model_train_log_file, 'a') as f:
+        #         f.write('====================================================================================\n')
+        #     after_train_model, after_gcn_vector, reward, loss = train(epoch, train_data, self.model, self.args, log_file=graph_model_train_log_file, device=device)
+        #     # 训练时 实时显示 loss 变化曲线
+        #     self.history.log((epoch, step), train_loss=loss)
+        #     self.loss_list.append(loss)
+        #     with self.canvas:
+        #         self.canvas.draw_plot(self.history['train_loss'])
+        #     print(f'选取报文位置为 ( {self.origin_can_obj.point} - {self.origin_can_obj.point+len_can-1} ) / {self.origin_can_obj.data_total_len}')
+        #     print(f'长度为 {len_can}')
+        #     print('step: ', step)
+        #     # print(self.args.origin_can_datadir)
+        #
+        #     # 数据 扫瞄完毕 画出loss图线 并保存
+        #     if done:
+        #         plt_loss_file_name = 'loss' + os.path.splitext(os.path.basename(self.args.origin_can_datadir))[0]
+        #
+        #         step_all_individual_list = [i for i in range(0, len(self.loss_list))]
+        #         print(step_all_individual_list)
+        #
+        #         plt.plot(step_all_individual_list, self.loss_list)
+        #         plt.xlabel('steps')
+        #         plt.ylabel('train_loss')
+        #         plt.title('train_loss figure')
+        #         plt.savefig(self.args.plt_out_dir + plt_loss_file_name, dpi=300, bbox_inches='tight')
+        #
+        # elif mode == 'test':
+        after_gcn_vector, reward = evaluate(train_data, self.model, self.args, log_file=graph_model_test_log_file, device=device)
 
-                step_all_individual_list = [i for i in range(0, len(self.loss_list))]
-                print(step_all_individual_list)
-
-                plt.plot(step_all_individual_list, self.loss_list)
-                plt.xlabel('steps')
-                plt.ylabel('train_loss')
-                plt.title('train_loss figure')
-                plt.savefig(self.args.plt_out_dir + plt_loss_file_name, dpi=300, bbox_inches='tight')
-
-        elif mode == 'test':
-            with open(graph_model_test_log_file, 'a') as f:
-                f.write('====================================================================================\n')
-            after_gcn_vector, reward = evaluate(train_data, self.model, self.args, log_file=graph_model_test_log_file, device=device)
+        # 写入 log 文件
+        with open(graph_model_test_log_file, 'a') as f:
+            f.write(f'reward: {reward}\n')
 
         print(f'reward: {reward}')
 
-
-
-        # print(type(after_gcn_vector))
-        print('结束 图部分')
-        return after_gcn_vector, reward, done, after_train_model
+        return after_gcn_vector, reward, done

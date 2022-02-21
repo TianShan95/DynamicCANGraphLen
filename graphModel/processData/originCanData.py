@@ -74,8 +74,8 @@ class OriginCanData:
                     pass  # 当遍历到 数据 最后一个点 会触发异常 退出循环
             print(f'边列表:\n {adj_list}')
             print(f'边数{len(adj_list)}')
-            print(edge_weight_list)
-            print(len(edge_weight_list))
+            # print(edge_weight_list)
+            # print(len(edge_weight_list))
             print(f'节点标签{hex2dec_dict.values()}')
 
             # 实例化 图

@@ -3,11 +3,11 @@ import pandas as pd
 col_name_list = ['Arbitration_ID', 'Class']
 
 # # O_Training
-# df = pd.read_csv('Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/Pre_train_D_1.csv', usecols=col_name_list)
+df = pd.read_csv('Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/Pre_train_D_2.csv', usecols=col_name_list)
 # # 1_Submission
 # df = pd.read_csv('Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/1_Submission/Pre_submit_D.csv.csv', usecols=col_name_list)
 # 1_Final
-df = pd.read_csv('Car_Hacking_Challenge_Dataset_rev20Mar2021/1_Final/Fin_host_session_submit_S.csv', usecols=col_name_list)
+# df = pd.read_csv('Car_Hacking_Challenge_Dataset_rev20Mar2021/1_Final/Fin_host_session_submit_S.csv', usecols=col_name_list)
 
 
 count_Normal = 0

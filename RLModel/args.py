@@ -13,9 +13,9 @@ def arg_parse():
     parser.add_argument('--gamma', default=0.99, type=int)  # discounted factor
     parser.add_argument('--capacity', default=100, type=int)  # replay buffer size
     parser.add_argument('--num_iteration', default=1, type=int)  # num of  games
-    parser.add_argument('--batch_size', default=288, type=int)  # mini batch size
+    parser.add_argument('--batch_size', default=64, type=int)  # mini batch size
     parser.add_argument('--seed', default=1, type=int)
-    parser.add_argument('--directory', default='RLModel/rl_model_store/', type=str)
+    parser.add_argument('--directory', default='../rl_model_store/', type=str)
 
     # optional parameters
     parser.add_argument('--num_hidden_layers', default=2, type=int)
@@ -24,7 +24,7 @@ def arg_parse():
     parser.add_argument('--render', default=False, type=bool)  # show UI or not
     parser.add_argument('--log_interval', default=50, type=int)  #
     parser.add_argument('--load', default=False, type=bool)  # load model
-    parser.add_argument('--render_interval', default=100, type=int)  # after render_interval, the env.render() will work
+    # parser.add_argument('--render_interval', default=100, type=int)  # after render_interval, the env.render() will work
     parser.add_argument('--policy_noise', default=0.2, type=float)
     parser.add_argument('--noise_clip', default=0.5, type=float)
     parser.add_argument('--policy_delay', default=2, type=int)

@@ -15,10 +15,6 @@ def arg_parse():
             help='Batch size.')
     parser.add_argument('--epochs', dest='num_epochs', type=int,
             help='Number of epochs to train.')
-    parser.add_argument('--train-ratio', dest='train_ratio', type=float,
-            help='Ratio of number of graphs training set to all graphs.')
-    parser.add_argument('--test-ratio', dest='test_ratio', type=float,
-            help='Ratio of number of graphs testing set to all graphs.')
     parser.add_argument('--num_workers', dest='num_workers', type=int,
             help='Number of workers to load processData.')
     parser.add_argument('--feature', dest='feature_type',
@@ -48,7 +44,9 @@ def arg_parse():
 
 
     parser.add_argument('--pool_sizes', type=str,
-                        help='pool_sizes', default='10')
+                        help='pool_sizes', default='10')  # 分簇时 每个簇里节点的个数
+    # parser.add_argument('--group_sizes', type=str,
+    #                     help='group_sizes', default='10')  # 分簇时 分的簇的个数
     parser.add_argument('--num_pool_matrix', type=int,
                         help='num_pooling_matrix', default=1)
     parser.add_argument('--min_nodes', type=int,
@@ -65,7 +63,7 @@ def arg_parse():
                         help = 'pred_hidden', default = '50')
 
     parser.add_argument('--out_dir', type = str,
-                        help = 'out_dir', default = 'experiment')
+                        help = 'out_dir', default='../experiment')
     parser.add_argument('--num_shuffle', type = int,
                         help = 'total num_shuffle', default = 10)
     parser.add_argument('--shuffle', type = int,
@@ -80,25 +78,25 @@ def arg_parse():
                         help = 'Norm for eigens', default = 'l2')
 
     parser.add_argument('--directory', default='graphModel/graph_model_store/', type=str)
+    parser.add_argument('--model_path', default='/Users/aaron/Hebut/征稿_图像信息安全_20211130截稿/源程序/图塌缩分类/graphModelForRl/0.804806_better_model_2022-02-21 11_03_28_totalEpoch_5_epoch_4_ps_10_gs_300_nor_1_gs_50.pth', type=str)
     parser.add_argument('--load', default=False, type=bool)
 
 
-    parser.add_argument('--with_test', type = int,
-                        help = 'with test or not', default = 0)
-    parser.add_argument('--con_final', type = int,
-                        help = 'con_final', default = 1)
-    parser.add_argument('--device', type = str,
+    parser.add_argument('--with_test', type=int,
+                        help='with test or not', default=0)
+    parser.add_argument('--con_final', type=int,
+                        help = 'con_final', default=1)
+    parser.add_argument('--device', type=str,
                         help='cpu or cuda', default='cpu')
-    parser.set_defaults(max_nodes=300,
+
+    parser.set_defaults(max_nodes=100,
                         feature_type='default',
                         datadir='processData',
                         lr=0.001,
                         clip=2.0,
-                        batch_size=1,  # 一个图的选择是一个动作
-                        num_epochs=1000,
-                        train_ratio=0.8,
-                        test_ratio=0.1,
-                        num_workers=0,
+                        batch_size=64,  # 一个图的选择是一个动作
+                        num_epochs=20,
+                        num_workers=2,
                         input_dim=10,
                         hidden_dim=20,
                         output_dim=20,

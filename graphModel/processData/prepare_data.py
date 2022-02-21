@@ -1,6 +1,8 @@
 import random
 from graphModel.processData.graph_sampler import GraphSampler
+
 import torch
+import numpy as np
 
 
 def prepare_data(graph, graphs_coarsen, args, test_graphs=None, max_nodes=0):
