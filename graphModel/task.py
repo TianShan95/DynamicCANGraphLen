@@ -14,25 +14,36 @@ import os
 
 
 class Task:
-    def __init__(self, args):
+    def __init__(self, args, device):
         self.origin_can_obj = originCanData.OriginCanData(args.origin_can_datadir, args.max_nodes)
         self.args = args
         self.pool_sizes = [int(i) for i in self.args.pool_sizes.split('_')]  # 池化时 每个簇的 子图大小
         # 从指定路径 load 模型
         print(f'模型所在路径: {args.model_path}')
         print(f'模型是否存在: {os.path.isfile(args.model_path)}')
-        self.model = torch.load(args.model_path, map_location=torch.device('cpu'))  # 模型 变量 会在 benchmark_task_val 首次调用时定义
-        # 模型加载参数
-        match_string_len = len("model")
-        # 模型加载 参数
-        last_char_index = args.model_path.rfind("model")
-        net_state_dict = torch.load(args.model_path[:last_char_index] +
-                                    "para" + args.model_path[last_char_index+match_string_len:],
-                                    map_location=torch.device('cpu'))
 
-        # print('load mutation folder pkl keys: \n', net_state_dict.keys())
-        # print('load mutation folder pkl : \n', net_state_dict)
-        self.model.load_state_dict(net_state_dict)
+
+
+        if device == 'cpu':
+            self.model = torch.load(args.model_path, map_location=torch.device('cpu'))  # 模型 变量 会在 benchmark_task_val 首次调用时定义
+            # 模型加载参数
+            match_string_len = len("model")
+            # 模型加载 参数
+            last_char_index = args.model_path.rfind("model")
+            net_state_dict = torch.load(args.model_path[:last_char_index] +
+                                        "para" + args.model_path[last_char_index+match_string_len:],
+                                        map_location=torch.device('cpu'))
+            self.model.load_state_dict(net_state_dict)
+
+        elif device == 'cuda':
+            self.model = torch.load(args.model_path)  # 模型 变量 会在 benchmark_task_val 首次调用时定义
+            # 模型加载参数
+            match_string_len = len("model")
+            # 模型加载 参数
+            last_char_index = args.model_path.rfind("model")
+            net_state_dict = torch.load(args.model_path[:last_char_index] +
+                                        "para" + args.model_path[last_char_index + match_string_len:])
+            self.model.load_state_dict(net_state_dict)
 
 
         self.history = hl.History()
@@ -40,7 +51,7 @@ class Task:
         self.loss_list = []
         print('self.pool_sizes: ', self.pool_sizes)
         
-    def benchmark_task_val(self, epoch, step, feat, pred_hidden_dims, device, rl_action,  mode, first):
+    def benchmark_task_val(self, epoch, step, feat, pred_hidden_dims, rl_action,  mode, first):
         '''
         self.args:
             epoch: 代数
