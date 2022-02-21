@@ -52,9 +52,9 @@ def main():
 
     with open(log_out_file, 'a') as f:
         f.write("RL 参数\n")
-        f.write(args_RL)
+        f.write(f'{args_RL}\n')
         f.write("图部分参数\n")
-        f.write(args_graph)
+        f.write(f'{args_graph}\n')
 
     if args_RL.mode == 'test':
 
