@@ -27,10 +27,15 @@ class Replay_buffer():
         for i in ind:
             X, Y, U, R, D = self.storage[i]
             print(f'X: {X}\n')
+            print(type(X))
             print(f'Y: {Y}\n')
+            print(type(Y))
             print(f'U: {U}\n')
+            print(type(U))
             print(f'R: {R}\n')
+            print(type(R))
             print(f'D: {D}\n')
+            print(type(U))
             x.append(np.array(X, copy=False))
             y.append(np.array(Y, copy=False))
             u.append(np.array(U, copy=False))
