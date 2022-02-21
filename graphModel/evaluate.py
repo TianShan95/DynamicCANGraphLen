@@ -55,7 +55,7 @@ def evaluate(dataset, model, args, max_num_examples=None, log_file=None, device=
         #     ypred = model(h0, adj, batch_num_nodes, assign_x=assign_input)
         _, pre_label = torch.max(ypred, 1)
 
-        ypred_np = ypred.tensor.detach().numpy()
+        ypred_np = ypred.detach().numpy()
         print(f'ypred: {ypred_np}')
         raise IOError
         # if pre_label == label:
