@@ -89,7 +89,7 @@ def arg_parse():
     parser.add_argument('--device', type=str,
                         help='cpu or cuda', default='cpu')
 
-    parser.set_defaults(max_nodes=100,
+    parser.set_defaults(max_nodes=81,
                         feature_type='default',
                         datadir='processData',
                         lr=0.001,
