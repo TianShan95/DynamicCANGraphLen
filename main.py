@@ -7,6 +7,9 @@ from RLModel.model.td3 import TD3
 from graphModel.task import Task
 import time
 
+import warnings
+
+warnings.filterwarnings('ignore')
 
 # Set seeds
 # env.seed(args.seed)
