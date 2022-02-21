@@ -99,7 +99,7 @@ class OriginCanData:
                 # 节点标签从 1 开始
                 # 这里读到的节点的标签 需要和 在图坍缩是的 节点ID和标签的对应关系一致
                 # 图坍缩 的 节点ID 和 标签 的对应关系 在同路径下的 node_label_dict.txt 文件里
-                node_label_df = pd.read_csv('node_label_dict.txt', sep='  ', usecols=['label', 'id'], engine='python')
+                node_label_df = pd.read_csv('graphModel/processData/node_label_dict.txt', sep='  ', usecols=['label', 'id'], engine='python')
                 result_dic = node_label_df.groupby('id')['label'].apply(list).to_dict()
 
                 # 添加图标签 使用十进制的 图标签 的 one-hot 作为 图节点标签
