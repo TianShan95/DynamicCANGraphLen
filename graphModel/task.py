@@ -22,7 +22,7 @@ class Task:
         print(f'模型所在路径: {args.model_path}')
         print(f'模型是否存在: {os.path.isfile(args.model_path)}')
 
-
+        self.device = device
 
         if device == 'cpu':
             self.model = torch.load(args.model_path, map_location=torch.device('cpu'))  # 模型 变量 会在 benchmark_task_val 首次调用时定义
@@ -138,7 +138,7 @@ class Task:
         #         plt.savefig(self.args.plt_out_dir + plt_loss_file_name, dpi=300, bbox_inches='tight')
         #
         # elif mode == 'test':
-        after_gcn_vector, reward = evaluate(train_data, self.model, self.args, log_file=graph_model_test_log_file, device=device)
+        after_gcn_vector, reward = evaluate(train_data, self.model, self.args, log_file=graph_model_test_log_file, device=self.device)
 
         # 写入 log 文件
         with open(graph_model_test_log_file, 'a') as f:
