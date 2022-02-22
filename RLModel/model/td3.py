@@ -47,12 +47,12 @@ class TD3:
         state = state.reshape(1, -1).clone().detach().requires_grad_(True)
         return self.actor(state).cpu().data.numpy().flatten()
 
-    def update(self, num_iteration, log_file):
+    def update(self, num_iteration, log_file):  # 在经验里随机取 10 次
 
-        if self.num_training % 500 == 0:
-            print("====================================")
-            print("model has been trained for {} times...".format(self.num_training))
-            print("====================================")
+        # if self.num_training % 500 == 0:
+        print("====================================")
+        print("model has been trained for {} times...".format(self.num_training))
+        print("====================================")
         for i in range(num_iteration):
             x, y, u, r, d = self.memory.sample(args_RL.batch_size)
             state = torch.FloatTensor(x).to(device)
@@ -62,11 +62,13 @@ class TD3:
             reward = torch.FloatTensor(r).to(device)
 
             # Select next action according to target policy:
-            noise = torch.ones_like(action).data.normal_(0, args_RL.policy_noise).to(device)
-            noise = noise.clamp(-args_RL.noise_clip, args_RL.noise_clip)
+            # noise = torch.ones_like(action).data.normal_(0, args_RL.policy_noise).to(device)  # 加入噪声用到的步骤
+            # noise = noise.clamp(-args_RL.noise_clip, args_RL.noise_clip)  # 加入噪声 用到的步骤
             # print('### td3.py next_state.shape ###', next_state.shape)
             # print('### td3.py next_action.shape ###', next_action.shape)
-            next_action = (self.actor_target(next_state) + noise)
+            # next_action = (self.actor_target(next_state) + noise)  # 输出噪声
+            next_action = (self.actor_target(next_state))  # 对于预测的 can 长度不输出噪声
+
             # next_action = next_action.clamp(-self.max_action, self.max_action)
 
             # Compute target Q-value:
@@ -96,8 +98,9 @@ class TD3:
 
             # 把训练 loss 写入 日志文件
             with open(log_file, 'a') as f:
-                f.write(f'loss_Q1: {str(loss_Q1)}\n')
-                f.write(f'loss_Q2: {str(loss_Q2)}\n')
+                f.write(f'loss_Q1: {loss_Q1.item()}\n')
+                f.write(f'loss_Q2: {loss_Q2.item()}\n')
+                f.write("model has been trained for {} times...\n".format(self.num_training))
 
             # Delayed policy updates:
             # 延迟更新 策略网络

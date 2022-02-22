@@ -11,3 +11,18 @@ def setup_seed(seed):
     np.random.seed(seed)
     random.seed(seed)
     # torch.backends.cudnn.deterministic = True
+
+
+
+# 存放需要的小功能函数
+import os
+
+def ensure_dir(file_path):
+    '''
+    :param file_path:  创建文件夹
+    :return: 检查 并 创建
+    '''
+    try:
+        os.mkdir(file_path)
+    except FileExistsError:
+        print("Folder already found")

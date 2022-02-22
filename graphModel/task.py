@@ -68,7 +68,7 @@ class Task:
         sample_graph, done = self.origin_can_obj.get_ds_a(len_can)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
 
         after_gcn_vector = None
-        reward = None
+        reward = 0
         if not done:
             adj = nx.adjacency_matrix(sample_graph)  # 大图 邻接矩阵
             coarsen_graph = gp(adj.todense().astype(float), self.pool_sizes)  # 实例化 要进行塌缩的 图
