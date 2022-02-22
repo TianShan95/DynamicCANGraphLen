@@ -22,7 +22,7 @@ print('use device: ', device)
 # 这里的状态表示向量分别是 第一次图卷积操作（做了三次卷积 每次卷积产生 20 维向量） 图塌缩后 第二次卷积 同样是 产生 3 * 20 维
 state_dim = ((prog_args.num_gc_layers - 1) * prog_args.hidden_dim + prog_args.output_dim) * 2  # 60 * 2
 # 动作维度
-action_dim = prog_args.msg_biggest_num - prog_args.msg_smallest_num  # 每个图可选取报文长度的范围
+action_dim = 1  # 每个图可选取报文长度的范围
 
 
 '''
@@ -31,14 +31,14 @@ Original paper: https://arxiv.org/abs/1802.09477
 Not the author's implementation !
 '''
 '''
-每个 can 长度的选项都是 一个维度
-每次识别 can 报文的长度 就是 强化学习网络的输出维度
+强化学习输出一个维度
+使用强化学习的输出 乘以 CAN报文范围的最大值
 '''
 
 
 def main():
 
-    agent = TD3(state_dim, action_dim, 1)
+    agent = TD3(state_dim, action_dim, prog_args.msg_biggest_num)
     # 累加奖励
     ep_r = 0
     # 实例化 图任务
