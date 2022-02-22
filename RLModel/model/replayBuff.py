@@ -1,5 +1,4 @@
 import numpy as np
-from RLModel.args import args_RL
 
 
 class Replay_buffer():
@@ -8,7 +7,7 @@ class Replay_buffer():
     https://github.com/openai/baselines/blob/master/baselines/deepq/replay_buffer.py
     Expects tuples of (state, next_state, action, reward, done)
     '''
-    def __init__(self, max_size=args_RL.capacity):
+    def __init__(self, max_size):
         self.storage = []
         self.max_size = max_size
         self.ptr = 0

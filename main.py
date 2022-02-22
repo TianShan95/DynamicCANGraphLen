@@ -38,7 +38,7 @@ Not the author's implementation !
 
 def main():
 
-    agent = TD3(state_dim, action_dim, 1)
+    agent = TD3(state_dim, action_dim, 1, prog_args)
     # 累加奖励
     ep_r = 0
     # 实例化 图任务
@@ -66,7 +66,7 @@ def main():
         graph_step = 0
         # for i in range(prog_args.train_epoch):
         # 随机获取 初始状态
-        state, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_,)
+        state, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
 
         while True:
             action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 维度是 报文长度可选择数量
@@ -154,7 +154,10 @@ def main():
                 #     agent.save()
                 #     break
             # 保存 模型
-            agent.save()
+            agent.save(log_out_dir)
+            time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+            f.write(time_mark)
+            f.write('END')
 
     else:
         raise NameError("mode wrong!!!")
