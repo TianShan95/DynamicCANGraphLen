@@ -9,7 +9,7 @@ class OriginCanData:
     def __init__(self, args):
         col_name_list = ['Arbitration_ID', 'Class']  # 需要取出 文件 的 列名称
 
-        can_csv_dir = args.datadir + args.bmname  #  ../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/Pre_train
+        can_csv_dir = args.origin_can_datadir + args.bmname  #  ../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/Pre_train
 
         csv_names = list()
         if args.dataset_name == 'Car_Hacking_Challenge_Dataset_rev20Mar2021':

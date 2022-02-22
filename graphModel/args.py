@@ -37,8 +37,6 @@ def arg_parse():
     parser.add_argument('--nobias', dest='bias', action='store_const',
             const=False, default=True,
             help='Whether to add bias. Default to True.')
-    parser.add_argument('--datadir', dest='datadir',
-            help='Directory where benchmark is located')
     parser.add_argument('--origin-can-datadir', dest='origin_can_datadir',
                         help='Directory where origin can dataset is located')
 
@@ -107,7 +105,6 @@ def arg_parse():
 
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
-                        datadir='processData',
                         lr=0.001,
                         clip=2.0,
                         batch_size=64,  # 一个图的选择是一个动作
