@@ -158,6 +158,8 @@ class Graphs():
 
                     if j < len(clusters[i]):  # 如果小于 这个 簇 的节点个数
                         if U_i[0, j] < 0:
+                            print(- U_i[:, j])
+                            print(type(- U_i[:, j]))
                             pooling_matrices[j][clusters[i], i] = - U_i[:, j].reshape(-1, 1)
                         else:
                             pooling_matrices[j][clusters[i], i] = U_i[:, j].reshape(-1, 1)
