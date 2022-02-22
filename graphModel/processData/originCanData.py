@@ -62,12 +62,12 @@ class OriginCanData:
                 if can_id_list[i] not in hex2num_dict.keys():  # 如果 此十六进制 ID 未出现过
                     hex2num_dict[can_id_list[i]] = len(hex2num_dict) + 1  # 新出现一个 十六进制ID 则加入新键值对 键值 为 递增 节点标签 从 0 递增
             except IndexError:
-                print(i)
-                print('can报文 文件读取完毕')
+                # print(i)
+                # print('can报文 文件读取完毕')
                 done = True
                 break
 
-        print(f'节点数: {len(hex2num_dict)}')
+        # print(f'节点数: {len(hex2num_dict)}')
 
         if not done:
             # 节点从0编号结束 打印一下 字典
@@ -99,7 +99,7 @@ class OriginCanData:
                     # print(f'读取完毕: 此时的 i 为 {i}, 此时的 range(len_can) 为 {len_can}')
                     pass  # 当遍历到 数据 最后一个点 会触发异常 退出循环
             # print(f'边列表:\n {adj_list}')
-            print(f'边数 {len(adj_list)} \n')
+            # print(f'边数 {len(adj_list)} \n')
             # print(edge_weight_list)
             # print(len(edge_weight_list))
             # print(f'节点编号{hex2num_dict.values()}')
@@ -107,7 +107,7 @@ class OriginCanData:
             # 实例化 图
             graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
             graph.graph['label'] = graph_label
-            print(f'报文类型: {graph_label} \n')
+            print(f'报文类型: {graph_label}')
             # Plot the graph 可视化建立的 图实例
             # nx.draw(graph, with_labels=True, font_weight='bold')
             # plt.show()

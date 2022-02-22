@@ -51,9 +51,9 @@ class TD3:
     def update(self, num_iteration, log_file):  # 在经验里随机取 10 次
 
         # if self.num_training % 500 == 0:
-        print("====================================")
+        # print("====================================")
         print("model has been trained for {} times...".format(self.num_training))
-        print("====================================")
+        # print("====================================")
         for i in range(num_iteration):
             x, y, u, r, d = self.memory.sample(self.args.batch_size)
             state = torch.FloatTensor(x).to(device)
