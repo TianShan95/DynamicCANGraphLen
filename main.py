@@ -49,16 +49,13 @@ def main():
 
     # 定义此次实验的 log 文件夹
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-    log_out_dir = prog_args.out_dir + '/' + 'Rl_' + time_mark + '_log/'
+    log_out_dir = prog_args.out_dir + '/' + 'Rl_' + time_mark + '_multiDim_log/'
     if not os.path.exists(log_out_dir):
         os.makedirs(log_out_dir, exist_ok=True)
     # 定义 并创建 log 文件
     log_out_file = log_out_dir + 'Rl_' + time_mark + '.txt'
 
     with open(log_out_file, 'w+') as f:
-        f.write("RL 参数\n")
-        f.write(f'{prog_args}\n')
-        f.write("图部分参数\n")
         f.write(f'{prog_args}\n')
 
     if prog_args.mode == 'test':
