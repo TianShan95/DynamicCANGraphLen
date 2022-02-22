@@ -54,13 +54,14 @@ def arg_parse():
 
     parser.add_argument('--weight_decay', type=float,
                         help='weight_decay', default=0.0)
+
     parser.add_argument('--num_pool_final_matrix', type = int,
                         help = 'number of final pool matrix', default = 0)
 
     parser.add_argument('--normalize', type = int,
                         help = 'nomrlaized laplacian or not', default = 0)
-    parser.add_argument('--pred_hidden', type = str,
-                        help = 'pred_hidden', default = '50')
+    parser.add_argument('--pred_hidden', type=str,
+                        help='pred_hidden', default='50')
 
     parser.add_argument('--out_dir', type = str,
                         help = 'out_dir', default='../experiment')
@@ -85,9 +86,24 @@ def arg_parse():
     parser.add_argument('--with_test', type=int,
                         help='with test or not', default=0)
     parser.add_argument('--con_final', type=int,
-                        help = 'con_final', default=1)
+                        help='con_final', default=1)
     parser.add_argument('--device', type=str,
                         help='cpu or cuda', default='cpu')
+
+    # 使用 Car_Hacking_Challenge_Dataset_rev20Mar2021 数据集
+    # 生成数据集需要修改的参数
+    parser.add_argument('--dataset_name', type=str,
+                        help='dynamic or static', default='Car_Hacking_Challenge_Dataset_rev20Mar2021')  # 0 or 1 or 2
+
+    parser.add_argument('--ds', type=list,
+                        help='dynamic or static', default=['D'])  # D or S 车辆动态报文 或者 车辆静止报文
+    parser.add_argument('--csv_num', nargs='+', type=int,
+                        help='csv num', default=[1, 2])  # 0 or 1 or 2  # csv文件标号
+    parser.add_argument('--msg_smallest_num', type=int,
+                        help='the smallest num of msg of a graph', default=50)  # 强化学习 每个步骤取一个图 构成这个图报文最小的条数
+    parser.add_argument('--msg_biggest_num', type=int,
+                        help='the biggest num of msg of a graph', default=300)  # 强化学习 每个步骤取一个图 构成这个图报文最大的条数
+
 
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
@@ -103,8 +119,8 @@ def arg_parse():
                         num_classes=2,  # 正常报文和入侵报文
                         num_gc_layers=3,
                         dropout=0.0,
-                        bmname='data_can',
-                        origin_can_datadir='graphModel/data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/Pre_train_D_1.csv',
+                        bmname='Pre_train',
+                        origin_can_datadir='../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/',
                         log_out_dir='log/',
                         plt_out_dir='plt/',
                         # pred_hidden = ,

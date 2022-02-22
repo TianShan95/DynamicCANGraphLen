@@ -1,4 +1,5 @@
 import argparse
+import time
 
 
 def arg_parse():
@@ -15,7 +16,14 @@ def arg_parse():
     parser.add_argument('--num_iteration', default=1, type=int)  # num of  games
     parser.add_argument('--batch_size', default=64, type=int)  # mini batch size
     parser.add_argument('--seed', default=1, type=int)
-    parser.add_argument('--directory', default='../rl_model_store/', type=str)
+
+    # 定义 并创建 此次实验的 log 文件夹
+    time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+    parser.add_argument('--model_store_dir', default='../rl_model_store/' + time_mark, type=str)
+
+    parser.add_argument('--model_load_dir', default='', type=str)
+
+    parser.add_argument('--directory', default='../rl_model_log/', type=str)
 
     # optional parameters
     parser.add_argument('--num_hidden_layers', default=2, type=int)

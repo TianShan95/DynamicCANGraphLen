@@ -1,13 +1,31 @@
 import pandas as pd
 import networkx as nx
+import copy
 import collections
 import matplotlib.pyplot as plt
 
 
 class OriginCanData:
-    def __init__(self, origin_can_dir):
+    def __init__(self, args):
         col_name_list = ['Arbitration_ID', 'Class']  # 需要取出 文件 的 列名称
-        self.df = pd.read_csv(origin_can_dir, usecols=col_name_list)  # 读取 can报文 csv源文件
+
+        can_csv_dir = args.datadir + args.bmname  #  ../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/Pre_train
+
+        csv_names = list()
+        if args.dataset_name == 'Car_Hacking_Challenge_Dataset_rev20Mar2021':
+            for i in args.ds:  # 遍历完 动态 和 静态
+                read_can_csv_dir_suffix = can_csv_dir + '_' + i
+                for j in args.csv_num:
+                    read_can_csv_dir = read_can_csv_dir_suffix + '_' + str(j) + '.csv'
+                    # frames.append(pd.read_csv(read_can_csv_dir, usecols=col_names))
+                    # 把文件名 存起来
+                    csv_names.append(copy.deepcopy(read_can_csv_dir))
+
+        frames = list()
+        for csv_file in csv_names:
+            frames.append(pd.read_csv(csv_file, usecols=col_name_list))  # 读取 can报文 csv源文件
+        self.df = pd.concat(frames)  # 得到全部数据
+
         self.point = 0  # 记录 此次取出的can数据 结束 位置
         self.data_total_len = len(self.df)
         # print(self.df.head())

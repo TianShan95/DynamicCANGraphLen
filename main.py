@@ -5,29 +5,24 @@ from graphModel.args import args_graph
 from RLModel.args import args_RL
 from RLModel.model.td3 import TD3
 from graphModel.task import Task
+from utils import setup_seed
 import time
 
 import warnings
-
-warnings.filterwarnings('ignore')
+warnings.filterwarnings('ignore')  # 忽略警告
 
 # Set seeds
-# env.seed(args.seed)
-# torch.manual_seed(args.seed)
-# np.random.seed(args.seed)
+setup_seed(args_RL.seed)
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print('use device: ', device)
 
-# 选取 CAN 报文数据 数量范围
-get_node_num_max = 300
-get_node_num_min = 50
 # 状态维度
 # 这里的状态表示向量分别是 第一次图卷积操作（做了三次卷积 每次卷积产生 20 维向量） 图塌缩后 第二次卷积 同样是 产生 3 * 20 维
 state_dim = ((args_graph.num_gc_layers - 1) * args_graph.hidden_dim + args_graph.output_dim) * 2  # 60 * 2
 # 动作维度
-action_dim = get_node_num_max - get_node_num_min  # 288
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+action_dim = args_RL.msg_biggest_num - args_RL.msg_smallest_num  # 每个图可选取报文长度的范围
 
-print('use device: ', device)
 
 '''
 Implementation of TD3 with pytorch 
@@ -39,11 +34,13 @@ Not the author's implementation !
 def main():
 
     agent = TD3(state_dim, action_dim, 1)
+    # 累加奖励
     ep_r = 0
     # 实例化 图任务
     graph_task = Task(args_graph, device)
     pred_hidden_dims = [int(i) for i in args_graph.pred_hidden.split('_')]
-    graph_len_ = random.randint(12, 300)  # 第一次随机 图的长度 [12-300] 闭空间 给出强化学习的 初始 state
+    # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
+    graph_len_ = random.randint(args_graph.msg_smallest_num, args_graph.msg_biggest_num)
 
     # 定义此次实验的 log 文件夹
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
@@ -109,7 +106,7 @@ def main():
                 action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
                 action = action + np.random.normal(0.2, args_RL.exploration_noise, size=action.shape[0])
                 # action = action.clip(env.action_space.low, env.action_space.high)
-                print('### main.py action.shape ###', action.shape)
+                # print('### main.py action.shape ###', action.shape)
 
                 # print(f'action: {action}')
                 # print(action)
@@ -118,13 +115,14 @@ def main():
                 graph_step += 1
                 # 下个状态 奖励 是否完成
                 next_state, reward, done = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, action, 'train', first=False)
-                with open(log_out_file, 'a') as f:
-                    f.write(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}')
                 # 累加 奖励
                 ep_r += reward
+                with open(log_out_file, 'a') as f:
+                    f.write(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}; ep_r: {ep_r}')
+
                 print(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}; ep_r: {ep_r}')
 
-
+                # 存入 经验
                 agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))
     #             if i+1 % 10 == 0:
     #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))

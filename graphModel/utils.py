@@ -17,7 +17,6 @@ def sparse_mx_to_torch_sparse_tensor(sparse_mx):
 # 存放需要的小功能函数
 import os
 
-
 def ensure_dir(file_path):
     '''
     :param file_path:  创建文件夹
