@@ -162,6 +162,7 @@ class Graphs():
                             print(- U_i[:, j].reshape(-1, 1))
                             print(f'i: {i}')
                             print(f'clusters[i]: {clusters[i]}')
+                            print(f'shape(pooling_matrices[j][clusters[i], i]): {pooling_matrices[j][clusters[i], i].shape}')
                             print(type(- U_i[:, j]))
                             pooling_matrices[j][clusters[i], i] = - U_i[:, j].reshape(-1, 1)
                         else:
