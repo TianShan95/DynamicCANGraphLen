@@ -5,7 +5,6 @@ from graphModel.coarsen_pooling_with_last_eigen_padding import Graphs as gp
 from graphModel import encoders
 import graphModel.gen.feat as featgen
 import numpy as np
-from graphModel.args import graph_model_train_log_file, graph_model_test_log_file
 from graphModel.processData import originCanData
 import torch
 # import hiddenlayer as hl
