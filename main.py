@@ -67,29 +67,29 @@ def main():
         agent.load()
         # 记录 图模型 执行 步数
         graph_step = 0
-        for i in range(prog_args.iteration):
-            # 随机获取 初始状态
-            state, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_,)
+        # for i in range(prog_args.train_epoch):
+        # 随机获取 初始状态
+        state, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_,)
 
-            while True:
-                action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 维度是 报文长度可选择数量
-                # 图操作 步数 自增 1
-                graph_step += 1
-                # 下个状态 奖励 是否完成
-                len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-                next_state, reward, done, trained_model = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
-                # 累加 奖励
-                ep_r += reward
-                # 更新 状态
-                state = next_state
+        while True:
+            action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 维度是 报文长度可选择数量
+            # 图操作 步数 自增 1
+            graph_step += 1
+            # 下个状态 奖励 是否完成
+            len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+            next_state, reward, done, trained_model = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
+            # 累加 奖励
+            ep_r += reward
+            # 更新 状态
+            state = next_state
 
-                # 数据读取完毕
-                # if done:
-                #     agent.writer.add_scalar('ep_r', ep_r, global_step=i)
-                #     if i % args_RL.print_log == 0:
-                #         print("Ep_i \t{}, the ep_r is \t{:0.2f}, the step is \t{}".format(i, ep_r, t))
-                #     ep_r = 0
-                #     break
+            # 数据读取完毕
+            # if done:
+            #     agent.writer.add_scalar('ep_r', ep_r, global_step=i)
+            #     if i % args_RL.print_log == 0:
+            #         print("Ep_i \t{}, the ep_r is \t{:0.2f}, the step is \t{}".format(i, ep_r, t))
+            #     ep_r = 0
+            #     break
 
     elif prog_args.mode == 'train':
         print("====================================")
@@ -101,7 +101,7 @@ def main():
         # 记录 图模型 执行 步数
         graph_step = 0
 
-        for i in range(prog_args.iteration):  # epoch
+        for i in range(prog_args.train_epoch):  # epoch
             # 随机获取 初始状态
             state, _ , _, = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, )
 
