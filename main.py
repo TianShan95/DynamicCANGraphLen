@@ -45,7 +45,7 @@ def main():
     graph_task = Task(prog_args, device)
     pred_hidden_dims = [int(i) for i in prog_args.pred_hidden.split('_')]
     # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
-    graph_len_ = random.randint(prog_args.msg_smallest_num, args_graph.msg_biggest_num)
+    graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
 
     # 定义此次实验的 log 文件夹
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
