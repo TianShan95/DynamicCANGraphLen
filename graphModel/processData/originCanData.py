@@ -37,120 +37,119 @@ class OriginCanData:
         graph = None
         df = self.df.iloc[self.point:self.point+len_can, :]  # 取出 特定长度 的can报文
 
-        if not done:  # 如果数据没有 读完
-            # 图相关
-            graph_label = 0  # 标识图标签 0：正常报文 1：入侵报文
+        # 图相关
+        graph_label = 0  # 标识图标签 0：正常报文 1：入侵报文
 
-            # 边相关
-            adj_list = list()  # 存储 每条 连接边
-            edge_weight_list = list()  # 存储 每条边的权重 每重复连接一次 加1
+        # 边相关
+        adj_list = list()  # 存储 每条 连接边
+        edge_weight_list = list()  # 存储 每条边的权重 每重复连接一次 加1
 
-            # 节点相关
-            can_id_list = df.get("Arbitration_ID").values  # 取出 ID 得到numpy类型 数据
-            can_type_list = df.get("Class").values  # 取出 can 数据 的 报文类型 数据
+        # 节点相关
+        can_id_list = df.get("Arbitration_ID").values  # 取出 ID 得到numpy类型 数据
+        can_type_list = df.get("Class").values  # 取出 can 数据 的 报文类型 数据
 
-            # print(type(can_id))
-            print(f'取出原始can报文 {self.point} - {self.point+len_can-1} 长度为 {len(can_id_list)}')
-            # print(df)
-            # print('***')
+        # print(type(can_id))
+        print(f'取出原始can报文 {self.point} - {self.point+len_can-1} 长度为 {len(can_id_list)}/{self.data_total_len}')
+        # print(df)
+        # print('***')
 
-            # 转换为 十六进制ID 为键 十进制节点编号(从1开始) 为键值 的 节点字典
-            hex2num_dict = dict()
-            # print('###')
-            # print(len(can_id))
-            for i in range(len_can):
+        # 转换为 十六进制ID 为键 十进制节点编号(从1开始) 为键值 的 节点字典
+        hex2num_dict = dict()
+        # print('###')
+        # print(len(can_id))
+        for i in range(len_can):
+            try:
+                if can_id_list[i] not in hex2num_dict.keys():  # 如果 此十六进制 ID 未出现过
+                    hex2num_dict[can_id_list[i]] = len(hex2num_dict) + 1  # 新出现一个 十六进制ID 则加入新键值对 键值 为 递增 节点标签 从 0 递增
+            except IndexError:
+                print(i)
+                print('can报文 文件读取完毕')
+                done = True
+                break
+
+        print(f'节点数: {len(hex2num_dict)}')
+
+        if not done:
+            # 节点从0编号结束 打印一下 字典
+            # print(f'节点ID和节点编号对应关系: {hex2num_dict}')
+            # print(f'此图具有的节点个数为: {len(hex2num_dict)}')
+
+            # 得到 图实例 所需要的数据
+            for i in range(len_can):  # 遍历 本次 选出 的 报文数据
                 try:
-                    if can_id_list[i] not in hex2num_dict.keys():  # 如果 此十六进制 ID 未出现过
-                        hex2num_dict[can_id_list[i]] = len(hex2num_dict) + 1  # 新出现一个 十六进制ID 则加入新键值对 键值 为 递增 节点标签 从 0 递增
+                    # 图标签
+                    if can_type_list[i] != 'Normal':  # 如果含有入侵数据 则 判定为 入侵报文
+                        graph_label = 1
+
+                    # 节点
+                    # 图的节点标签 直接 从 节点十六进制 到 十进制 的字典得到
+
+                    # 边 用节点编号表示的边
+                    if (hex2num_dict[can_id_list[i]], hex2num_dict[can_id_list[i+1]]) not in adj_list:  # 如果边没在 列表中 则 添加入 列表
+                        adj_list.append((hex2num_dict[can_id_list[i]], hex2num_dict[can_id_list[i+1]]))
+
+                    # 以下代码为 考虑 边权重 情况
+                    #     edge_weight_list.append(1)
+                    # else:  # 边已经 被储存在 列表
+                    #     print(f'节点 {i} {adj_list.index((can_id[i], can_id[i+1]))} 重复连接')
+                    #     edge_weight_list[adj_list.index((can_id[i], can_id[i+1]))] += 1
+
                 except IndexError:
-                    print(i)
-                    print('can报文 文件读取完毕')
-                    done = True
-                    break
+                    # print('发生读取异常 预想为读到了 canID最后一个')
+                    # print(f'读取完毕: 此时的 i 为 {i}, 此时的 range(len_can) 为 {len_can}')
+                    pass  # 当遍历到 数据 最后一个点 会触发异常 退出循环
+            # print(f'边列表:\n {adj_list}')
+            print(f'边数 {len(adj_list)} \n')
+            # print(edge_weight_list)
+            # print(len(edge_weight_list))
+            # print(f'节点编号{hex2num_dict.values()}')
 
-            print(f'节点数: {len(hex2num_dict)}')
+            # 实例化 图
+            graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
+            graph.graph['label'] = graph_label
+            print(f'报文类型: {graph_label} \n')
+            # Plot the graph 可视化建立的 图实例
+            # nx.draw(graph, with_labels=True, font_weight='bold')
+            # plt.show()
 
-            if not done:
-                # 节点从0编号结束 打印一下 字典
-                # print(f'节点ID和节点编号对应关系: {hex2num_dict}')
-                # print(f'此图具有的节点个数为: {len(hex2num_dict)}')
+            # 给每个节点编号 加 节点标签
+            # 每个标签代表了一种 canID
+            # 字典的键名表示 CAN ID 键值 表示 标签
+            # 节点标签从 1 开始
+            # 这里读到的节点的标签 需要和 在图坍缩是的 节点ID和标签的对应关系一致
+            # 图坍缩 的 节点ID 和 标签 的对应关系 在同路径下的 node_label_dict.txt 文件里
+            node_label_df = pd.read_csv('graphModel/processData/node_label_dict.txt', sep='  ', usecols=['label', 'id'], engine='python')
+            result_dic = node_label_df.groupby('id')['label'].apply(list).to_dict()
 
-                # 得到 图实例 所需要的数据
-                for i in range(len_can):  # 遍历 本次 选出 的 报文数据
-                    try:
-                        # 图标签
-                        if can_type_list[i] != 'Normal':  # 如果含有入侵数据 则 判定为 入侵报文
-                            graph_label = 1
+            # 添加图标签 使用十进制的 图标签 的 one-hot 作为 图节点标签
+            for u in graph.nodes():
+                node_label_one_hot = [0] * len(result_dic) # 图标签 种类数 个零 的 一个 列表 保持每次训练的一致性 把节点特征维度设为最大节点数
+                canId = [k for k, v in hex2num_dict.items() if v == u][0]  # 根据键值找到 canID
+                node_label = result_dic[canId][0]
+                node_label_one_hot[node_label-1] = 1  # u 是节点编号 且从 1 开始  节点标签也是从 1 开始
+                graph.nodes[u]['label'] = node_label_one_hot
 
-                        # 节点
-                        # 图的节点标签 直接 从 节点十六进制 到 十进制 的字典得到
+            self.point += len_can
 
-                        # 边 用节点编号表示的边
-                        if (hex2num_dict[can_id_list[i]], hex2num_dict[can_id_list[i+1]]) not in adj_list:  # 如果边没在 列表中 则 添加入 列表
-                            adj_list.append((hex2num_dict[can_id_list[i]], hex2num_dict[can_id_list[i+1]]))
+            # for u in graph.nodes():
+            #     print(u)
+            #     print(graph.nodes[u]['label'])
 
-                        # 以下代码为 考虑 边权重 情况
-                        #     edge_weight_list.append(1)
-                        # else:  # 边已经 被储存在 列表
-                        #     print(f'节点 {i} {adj_list.index((can_id[i], can_id[i+1]))} 重复连接')
-                        #     edge_weight_list[adj_list.index((can_id[i], can_id[i+1]))] += 1
+            # relabeling
+            mapping = {}
+            it = 0
+            if float((nx.__version__)[:3]) < 2.0:
+                for n in graph.nodes():
+                    mapping[n] = it
+                    it += 1
+            else:
+                for n in graph.nodes:
+                    # print('###')
+                    # print(G.nodes[n]['label'])
+                    mapping[n] = it
+                    it += 1
 
-                    except IndexError:
-                        # print('发生读取异常 预想为读到了 canID最后一个')
-                        print(f'读取完毕: 此时的 i 为 {i}, 此时的 range(len_can) 为 {len_can}')
-                        pass  # 当遍历到 数据 最后一个点 会触发异常 退出循环
-                # print(f'边列表:\n {adj_list}')
-                print(f'边数 {len(adj_list)} \n')
-                # print(edge_weight_list)
-                # print(len(edge_weight_list))
-                # print(f'节点编号{hex2num_dict.values()}')
-
-                # 实例化 图
-                graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
-                graph.graph['label'] = graph_label
-                print(f'报文类型: {graph_label} \n')
-                # Plot the graph 可视化建立的 图实例
-                # nx.draw(graph, with_labels=True, font_weight='bold')
-                # plt.show()
-
-                # 给每个节点编号 加 节点标签
-                # 每个标签代表了一种 canID
-                # 字典的键名表示 CAN ID 键值 表示 标签
-                # 节点标签从 1 开始
-                # 这里读到的节点的标签 需要和 在图坍缩是的 节点ID和标签的对应关系一致
-                # 图坍缩 的 节点ID 和 标签 的对应关系 在同路径下的 node_label_dict.txt 文件里
-                node_label_df = pd.read_csv('graphModel/processData/node_label_dict.txt', sep='  ', usecols=['label', 'id'], engine='python')
-                result_dic = node_label_df.groupby('id')['label'].apply(list).to_dict()
-
-                # 添加图标签 使用十进制的 图标签 的 one-hot 作为 图节点标签
-                for u in graph.nodes():
-                    node_label_one_hot = [0] * len(result_dic) # 图标签 种类数 个零 的 一个 列表 保持每次训练的一致性 把节点特征维度设为最大节点数
-                    canId = [k for k, v in hex2num_dict.items() if v == u][0]  # 根据键值找到 canID
-                    node_label = result_dic[canId][0]
-                    node_label_one_hot[node_label-1] = 1  # u 是节点编号 且从 1 开始  节点标签也是从 1 开始
-                    graph.nodes[u]['label'] = node_label_one_hot
-
-                self.point += len_can
-
-                # for u in graph.nodes():
-                #     print(u)
-                #     print(graph.nodes[u]['label'])
-
-                # relabeling
-                mapping = {}
-                it = 0
-                if float((nx.__version__)[:3]) < 2.0:
-                    for n in graph.nodes():
-                        mapping[n] = it
-                        it += 1
-                else:
-                    for n in graph.nodes:
-                        # print('###')
-                        # print(G.nodes[n]['label'])
-                        mapping[n] = it
-                        it += 1
-
-                graph = nx.relabel_nodes(graph, mapping)
+            graph = nx.relabel_nodes(graph, mapping)
 
         return graph, done
 

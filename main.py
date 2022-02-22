@@ -64,14 +64,15 @@ def main():
         graph_step = 0
         for i in range(args_RL.iteration):
             # 随机获取 初始状态
-            state, _, _, _ = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, graph_len_, 'test', first=True)
+            state, _, _, _ = graph_task.benchmark_task_val(args_graph.feat, pred_hidden_dims, graph_len_,)
 
             while True:
                 action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 维度是 报文长度可选择数量
                 # 图操作 步数 自增 1
                 graph_step += 1
                 # 下个状态 奖励 是否完成
-                next_state, reward, done, trained_model = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, action,'test', first=False)
+                len_can = np.argmax(action) + args_graph.msg_smallest_num  # 得到 下一块 数据的长度
+                next_state, reward, done, trained_model = graph_task.benchmark_task_val(args_graph.feat, pred_hidden_dims, len_can)
                 # 累加 奖励
                 ep_r += reward
                 # 更新 状态
@@ -97,31 +98,33 @@ def main():
 
         for i in range(args_RL.num_iteration):  # epoch
             # 随机获取 初始状态
-            state, _ , _, = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, graph_len_, 'train', first=True)
+            state, _ , _, = graph_task.benchmark_task_val(args_graph.feat, pred_hidden_dims, graph_len_, )
 
             # print('### main.py state.shape ###', state.shape)
             # for t in range(1):
             while True:
 
+                # 强化学习网络
+                print("====================================" * 3)
                 action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
                 action = action + np.random.normal(0.2, args_RL.exploration_noise, size=action.shape[0])
                 # action = action.clip(env.action_space.low, env.action_space.high)
                 # print('### main.py action.shape ###', action.shape)
-
                 # print(f'action: {action}')
                 # print(action)
 
                 # 图操作 步数 自增 1
                 graph_step += 1
                 # 下个状态 奖励 是否完成
-                next_state, reward, done = graph_task.benchmark_task_val(i, graph_step, args_graph.feat, pred_hidden_dims, action, 'train', first=False)
+                len_can = np.argmax(action) + args_graph.msg_smallest_num  # 得到 下一块 数据的长度
+                next_state, reward, done = graph_task.benchmark_task_val(args_graph.feat, pred_hidden_dims, len_can)
                 # 累加 奖励
                 ep_r += reward
                 with open(log_out_file, 'a') as f:
-                    f.write(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}; ep_r: {ep_r}')
+                    f.write("====================================")
+                    f.write(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}')
 
-                print("===================================="*3)
-                print(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}; ep_r: {ep_r}')
+                print(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}')
 
                 # 存入 经验
                 agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))
@@ -141,10 +144,12 @@ def main():
                     ep_r = 0
                     break
 
-                # 保存 模型
-                if graph_step % args_RL.log_interval == 0:
-                    agent.save()
-                    break
+                # # 保存 模型
+                # if graph_step % args_RL.log_interval == 0:
+                #     agent.save()
+                #     break
+            # 保存 模型
+            agent.save()
 
     else:
         raise NameError("mode wrong!!!")

@@ -48,7 +48,7 @@ class Task:
 
         print('self.pool_sizes: ', self.pool_sizes)
         
-    def benchmark_task_val(self, epoch, step, feat, pred_hidden_dims, rl_action,  mode, first):
+    def benchmark_task_val(self, feat, pred_hidden_dims, len_can):
         '''
         self.args:
             epoch: 代数
@@ -63,11 +63,7 @@ class Task:
         '''
 
         # 传入 的 rl_action 是一个强化学习传入的 288 维的向量（can 数据长度有 288 种选择） 若想知道传入的长度需要取 argmax
-        len_can = None
-        if isinstance(rl_action, int):
-            len_can = rl_action
-        elif type(rl_action) == np.ndarray:
-            len_can = np.argmax(rl_action) + self.args.msg_smallest_num  # 得到 下一块 数据的长度
+
     
         sample_graph, done = self.origin_can_obj.get_ds_a(len_can)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
 
