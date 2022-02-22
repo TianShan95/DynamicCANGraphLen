@@ -120,6 +120,7 @@ def main():
                 with open(log_out_file, 'a') as f:
                     f.write(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}; ep_r: {ep_r}')
 
+                print("===================================="*3)
                 print(f'epoch: {i}; graph_step: {graph_step}; reward: {reward}; ep_r: {ep_r}')
 
                 # 存入 经验
@@ -140,9 +141,10 @@ def main():
                     ep_r = 0
                     break
 
-            # 保存 模型
-            # if i % args_RL.log_interval == 0:
-            agent.save()
+                # 保存 模型
+                if graph_step % args_RL.log_interval == 0:
+                    agent.save()
+                    break
 
     else:
         raise NameError("mode wrong!!!")

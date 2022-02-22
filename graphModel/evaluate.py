@@ -4,7 +4,7 @@ from torch.autograd import Variable
 import sklearn.metrics as metrics
 
 
-def evaluate(dataset, model, args, max_num_examples=None, device='cpu'):
+def evaluate(dataset, model, args, device='cpu'):
 
     # 载入 模型参数
     model.eval()
@@ -57,15 +57,15 @@ def evaluate(dataset, model, args, max_num_examples=None, device='cpu'):
 
         ypred_np = ypred.cpu().detach().numpy()
         print(f'ypred: {ypred_np}')
+        print(f'graph_label: {labels[batch_idx]}')
+        print(f'pred_result: {pre_label}')
 
-        if pre_label == pre_label:
+        # 制定 reward
+        if pre_label == labels[batch_idx]:
             reward = abs(ypred_np[0, 0] - ypred[0, 1])
         else:
             reward = - abs(ypred_np[0, 0] - ypred[0, 1])
 
-        if max_num_examples is not None:
-            if (batch_idx + 1) * args.batch_size > max_num_examples:
-                break
 
     # preds = []
     # preds.append(indices.cpu().data.numpy())

@@ -68,6 +68,8 @@ class OriginCanData:
                     done = True
                     break
 
+            print(f'节点数: {len(hex2num_dict)}')
+
             if not done:
                 # 节点从0编号结束 打印一下 字典
                 # print(f'节点ID和节点编号对应关系: {hex2num_dict}')
@@ -94,8 +96,8 @@ class OriginCanData:
                         #     edge_weight_list[adj_list.index((can_id[i], can_id[i+1]))] += 1
 
                     except IndexError:
-                        print('发生读取异常 预想为读到了 canID最后一个')
-                        print(f'此时的 i 为 {i}, 此时的 range(len_can) 为 {len_can}')
+                        # print('发生读取异常 预想为读到了 canID最后一个')
+                        print(f'读取完毕: 此时的 i 为 {i}, 此时的 range(len_can) 为 {len_can}')
                         pass  # 当遍历到 数据 最后一个点 会触发异常 退出循环
                 # print(f'边列表:\n {adj_list}')
                 print(f'边数 {len(adj_list)} \n')
