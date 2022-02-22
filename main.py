@@ -21,7 +21,7 @@ print('use device: ', device)
 # 这里的状态表示向量分别是 第一次图卷积操作（做了三次卷积 每次卷积产生 20 维向量） 图塌缩后 第二次卷积 同样是 产生 3 * 20 维
 state_dim = ((args_graph.num_gc_layers - 1) * args_graph.hidden_dim + args_graph.output_dim) * 2  # 60 * 2
 # 动作维度
-action_dim = args_RL.msg_biggest_num - args_RL.msg_smallest_num  # 每个图可选取报文长度的范围
+action_dim = args_graph.msg_biggest_num - args_graph.msg_smallest_num  # 每个图可选取报文长度的范围
 
 
 '''
