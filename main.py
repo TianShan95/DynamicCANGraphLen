@@ -77,7 +77,7 @@ def main():
             graph_step += 1
             # 下个状态 奖励 是否完成
             # len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-            len_can = int(action[0, 0])
+            len_can = int(max(action[0], prog_args.msg_smallest_num))
             next_state, reward, done, trained_model = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
             # 累加 奖励
             ep_r += reward
@@ -122,8 +122,8 @@ def main():
                 # 图操作 步数 自增 1
                 graph_step += 1
                 # 下个状态 奖励 是否完成
-                print(f'action: {action}')
-                len_can = int(action[0, 0])
+                # print(f'action: {action}')
+                len_can = int(max(action[0], prog_args.msg_smallest_num))
                 # len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
                 next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
 
