@@ -58,7 +58,7 @@ def evaluate(dataset, model, args, device='cpu'):
         ypred_np = ypred.cpu().detach().numpy()
         print(f'ypred: {ypred_np}')
         print(f'graph_label: {labels[batch_idx]}')
-        print(f'pred_result: {pre_label}')
+        print(f'pred_result: {pre_label.item()}')
 
         # 制定 reward
         if pre_label == labels[batch_idx]:
