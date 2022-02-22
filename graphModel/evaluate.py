@@ -57,13 +57,15 @@ def evaluate(dataset, model, args, device='cpu'):
 
         ypred_np = ypred.cpu().detach().numpy()
         print(f'ypred: {ypred_np}')
-        print(f'graph_label: {labels[batch_idx]}')
+        print(f'graph_label: {labels[batch_idx].astype(int)}')
         print(f'pred_result: {pre_label.item()}')
 
         # 制定 reward
-        if pre_label == labels[batch_idx]:
+        if pre_label == labels[batch_idx].astype(int):
+            print('预测正确')
             reward = abs(ypred_np[0, 0] - ypred[0, 1])
         else:
+            print('预测错误')
             reward = - abs(ypred_np[0, 0] - ypred[0, 1])
 
 
