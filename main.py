@@ -95,7 +95,11 @@ def main():
         print("====================================")
 
         # 若指定 载入模型参数 则 载入
-        if prog_args.load: agent.load()
+        if prog_args.load:
+            print(f'加载模型 {prog_args.model_load_dir}')
+            with open(log_out_file, 'a') as f:
+                f.write(f'加载模型... {prog_args.model_load_dir}\n')
+            agent.load()
 
 
         for i in range(prog_args.train_epoch):  # epoch
@@ -151,11 +155,6 @@ def main():
 
                 # 更新 状态
                 state = next_state
-
-                if graph_step >= 500:
-                    break
-
-
 
                 # # 保存 模型
                 # if graph_step % args_RL.log_interval == 0:
