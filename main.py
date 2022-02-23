@@ -152,7 +152,7 @@ def main():
                 # 更新 状态
                 state = next_state
 
-                if graph_step >= 3000:
+                if graph_step >= 500:
                     break
 
 
