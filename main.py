@@ -152,7 +152,7 @@ def main():
                 # 更新 状态
                 state = next_state
 
-                break
+                # break
 
 
 
@@ -161,6 +161,7 @@ def main():
                 #     agent.save()
                 #     break
             # 保存 模型
+            print(f'epoch {i} over.')
             agent.save(log_out_dir)
             time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
             with open(log_out_file, 'a') as f:

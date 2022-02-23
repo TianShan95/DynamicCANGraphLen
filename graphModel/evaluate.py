@@ -19,7 +19,7 @@ def evaluate(dataset, model, args, log_out_file, device):
 
         # 报文标签 输出到 log 文件
         with open(log_out_file, 'a') as f:
-            f.write(f'graph_label: {labels[batch_idx].astype(int)[0]}')
+            f.write(f'graph_label: {labels[batch_idx].astype(int)[0]}\n')
 
         adj_pooled_list = []
         batch_num_nodes_list = []
