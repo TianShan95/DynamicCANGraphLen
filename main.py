@@ -105,10 +105,13 @@ def main():
 
 
         for i in range(prog_args.train_epoch):  # epoch
+            print(f'epoch {i} 开始')
             # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
             graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
             # 随机获取 初始状态
+            print(f'随机取的长度是 {graph_len_}')
             state, _ , _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, log_out_file)
+            print(f'随机得到的状态是 {state}')
             # 记录 图模型 执行 步数
             graph_step = 0
             # 记录正确预测的 报文 个数
@@ -168,8 +171,10 @@ def main():
                 state = next_state
 
                 # 短期退出 epoch 验证 程序可运行行
-                # if graph_step > 20:
-                #     break
+                if graph_step > 20:
+                    print(f'大于 20步')
+                    print(f'i {i}')
+                    break
 
                 # # 保存 模型
                 # if graph_step % args_RL.log_interval == 0:
