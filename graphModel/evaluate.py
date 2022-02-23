@@ -65,7 +65,7 @@ def evaluate(dataset, model, args, log_out_file, device):
         if pre_label == labels[batch_idx].astype(int)[0]:
             reward = abs(ypred_np[0, 0] - ypred[0, 1])
         else:
-            reward = - abs(ypred_np[0, 0] - ypred[0, 1])
+            reward = - abs(ypred_np[0, 0] - ypred[0, 1]) * 10  # 加大对错误的惩罚
 
 
     # preds = []
