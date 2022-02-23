@@ -44,8 +44,7 @@ def main():
     # 实例化 图任务
     graph_task = Task(prog_args, device)
     pred_hidden_dims = [int(i) for i in prog_args.pred_hidden.split('_')]
-    # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
-    graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
+
 
     # 定义此次实验的 log 文件夹
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
@@ -67,6 +66,9 @@ def main():
         graph_step = 0
         # for i in range(prog_args.train_epoch):
         # 随机获取 初始状态
+        # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
+        graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
+
         state, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, log_out_file)
 
         while True:
@@ -103,6 +105,8 @@ def main():
 
 
         for i in range(prog_args.train_epoch):  # epoch
+            # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
+            graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
             # 随机获取 初始状态
             state, _ , _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, log_out_file)
             # 记录 图模型 执行 步数
@@ -111,6 +115,7 @@ def main():
             pred_correct = 0
             # print('### main.py state.shape ###', state.shape)
             # for t in range(1):
+
             while True:
 
                 # 强化学习网络
