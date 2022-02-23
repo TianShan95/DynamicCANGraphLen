@@ -4,7 +4,7 @@ from torch.autograd import Variable
 import sklearn.metrics as metrics
 
 
-def evaluate(dataset, model, args, device='cpu'):
+def evaluate(dataset, model, args, log_out_file, device):
 
     # 载入 模型参数
     model.eval()
@@ -17,6 +17,9 @@ def evaluate(dataset, model, args, device='cpu'):
         labels.append(data['label'].long().numpy())
         batch_num_nodes = data['num_nodes'].int().numpy()
 
+        # 报文标签 输出到 log 文件
+        with open(log_out_file, 'a') as f:
+            f.write(f'graph_label: {labels[batch_idx].astype(int)[0]}')
 
         adj_pooled_list = []
         batch_num_nodes_list = []

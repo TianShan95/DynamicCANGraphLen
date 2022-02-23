@@ -66,7 +66,7 @@ def main():
         graph_step = 0
         # for i in range(prog_args.train_epoch):
         # 随机获取 初始状态
-        state, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
+        state, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, log_out_file)
 
         while True:
             action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 维度是 报文长度可选择数量
@@ -74,7 +74,7 @@ def main():
             graph_step += 1
             # 下个状态 奖励 是否完成
             len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-            next_state, reward, done, trained_model = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
+            next_state, reward, done, trained_model = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can, log_out_file)
             # 累加 奖励
             ep_r += reward
             # 更新 状态
@@ -95,13 +95,15 @@ def main():
 
         # 若指定 载入模型参数 则 载入
         if prog_args.load: agent.load()
-        # 记录 图模型 执行 步数
-        graph_step = 0
+
 
         for i in range(prog_args.train_epoch):  # epoch
             # 随机获取 初始状态
-            state, _ , _, = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, )
-
+            state, _ , _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, log_out_file)
+            # 记录 图模型 执行 步数
+            graph_step = 0
+            # 记录正确预测的 报文 个数
+            pred_correct = 0
             # print('### main.py state.shape ###', state.shape)
             # for t in range(1):
             while True:
@@ -119,7 +121,7 @@ def main():
                 graph_step += 1
                 # 下个状态 奖励 是否完成
                 len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-                next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
+                next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can, log_out_file)
 
                 # 数据读取完毕 跳出本轮
                 if done:
@@ -131,11 +133,13 @@ def main():
 
                 # 累加 奖励
                 ep_r += reward
+                if reward > 0:
+                    pred_correct += 1
                 with open(log_out_file, 'a') as f:
                     f.write("====================================\n")
-                    f.write(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}\n')
+                    f.write(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
-                print(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}')
+                print(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
                 # 存入 经验
                 agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))
@@ -156,8 +160,9 @@ def main():
             # 保存 模型
             agent.save(log_out_dir)
             time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-            f.write(time_mark)
-            f.write('END')
+            with open(log_out_file, 'a') as f:
+                f.write(time_mark)
+                f.write('END')
 
     else:
         raise NameError("mode wrong!!!")

@@ -47,7 +47,7 @@ class Task:
 
         print('self.pool_sizes: ', self.pool_sizes)
         
-    def benchmark_task_val(self, feat, pred_hidden_dims, len_can):
+    def benchmark_task_val(self, feat, pred_hidden_dims, len_can, log_out_file):
         '''
         self.args:
             epoch: 代数
@@ -83,7 +83,7 @@ class Task:
             train_data = prepare_data(sample_graph, coarsen_graph, self.args, max_nodes=self.args.max_nodes)
 
             # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
-            after_gcn_vector, reward = evaluate(train_data, self.model, self.args, device=self.device)
+            after_gcn_vector, reward = evaluate(train_data, self.model, self.args, log_out_file, device=self.device)
 
 
         return after_gcn_vector, reward, done
