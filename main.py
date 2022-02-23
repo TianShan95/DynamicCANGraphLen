@@ -152,7 +152,8 @@ def main():
                 # 更新 状态
                 state = next_state
 
-                # break
+                if graph_step >= 3000:
+                    break
 
 
 
@@ -165,7 +166,7 @@ def main():
             agent.save(log_out_dir)
             time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
             with open(log_out_file, 'a') as f:
-                f.write(time_mark)
+                f.write(time_mark + '\n')
                 f.write('END')
 
     else:
