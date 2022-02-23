@@ -127,7 +127,7 @@ def main():
                 # 下个状态 奖励 是否完成
                 # 选取 前5 个最大的可能里 选择报文数最大的
                 alter = random.randint(0, 4)  # 在 前 5 个最大的可能里 随机选择一个报文长度
-                len_can = max(action.argsort()[::-1][0:5][alter]) + prog_args.msg_smallest_num
+                len_can = action.argsort()[::-1][0:5][0, alter] + prog_args.msg_smallest_num
                 # len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
                 next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can, log_out_file)
 
