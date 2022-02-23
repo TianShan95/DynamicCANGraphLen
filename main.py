@@ -165,8 +165,8 @@ def main():
                 state = next_state
 
                 # 短期退出 epoch 验证 程序可运行行
-                if graph_step > 20:
-                    break
+                # if graph_step > 20:
+                #     break
 
                 # # 保存 模型
                 # if graph_step % args_RL.log_interval == 0:
