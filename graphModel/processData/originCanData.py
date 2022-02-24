@@ -49,7 +49,7 @@ class OriginCanData:
         can_type_list = df.get("Class").values  # 取出 can 数据 的 报文类型 数据
 
         # print(type(can_id))
-        print(f'取出原始can报文 {self.point} - {self.point+len_can-1} 长度为 {len(can_id_list)}/{self.data_total_len}')
+        print(f'canData length: {len(can_id_list)} range: {self.point} - {self.point+len_can-1}/{self.data_total_len}')
         with open(log_out_file, 'a') as f:
             f.write(f'processing CAN {self.point}/{self.data_total_len}\n')
         # print(df)

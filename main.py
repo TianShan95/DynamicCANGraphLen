@@ -190,11 +190,11 @@ def main():
                     # 更新 状态
                     state = next_state
 
-                    # 短期退出 epoch 验证 程序可运行行
-                    if graph_step > 20:
-                        print(f'大于 20步')
-                        print(f'i {i}')
-                        break
+                    # # 短期退出 epoch 验证 程序可运行行
+                    # if graph_step > 20:
+                    #     print(f'大于 20步')
+                    #     print(f'i {i}')
+                    #     break
 
                     # # 保存 模型
                     # if graph_step % args_RL.log_interval == 0:
@@ -202,7 +202,7 @@ def main():
                     #     break
                 # 跳出whileTrue 结束epoch 保存模型
                 print(f'epoch {i} over.')
-                agent.save(log_out_dir)
+                agent.save(i, log_out_dir)
                 time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
                 with open(log_out_file, 'a') as f:
                     f.write(time_mark + '_END\n')
