@@ -23,5 +23,5 @@ def packresult(dir_path):
     return outFullName
 
 if __name__ == '__main__':
-    a = 'a/'
+    a = 'a'
     packresult(a)
