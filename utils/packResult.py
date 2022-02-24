@@ -21,3 +21,7 @@ def packresult(dir_path):
     print("打包成功")
 
     return outFullName
+
+if __name__ == '__main__':
+    a = 'a/'
+    packresult(a)
