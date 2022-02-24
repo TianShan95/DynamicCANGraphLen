@@ -191,10 +191,10 @@ def main():
                     state = next_state
 
                     # 短期退出 epoch 验证 程序可运行行
-                    # if graph_step > 20:
-                    #     print(f'大于 20步')
-                    #     print(f'i {i}')
-                    #     break
+                    if graph_step > 20:
+                        print(f'大于 20步')
+                        print(f'i {i}')
+                        break
 
                     # # 保存 模型
                     # if graph_step % args_RL.log_interval == 0:
@@ -219,7 +219,7 @@ def main():
             content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
                       f'retrain: {retrain}'\
                       f'error: {error}\n'
-                      
+
             send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers, prog_args.smtp_server, prog_args.port, content,resultfile)
 
     else:
