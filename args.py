@@ -81,8 +81,11 @@ def arg_parse():
     parser.add_argument('--weight_decay', type=float,
                         help='weight_decay', default=0.0)
 
-    parser.add_argument('--num_pool_final_matrix', type = int,
-                        help = 'number of final pool matrix', default = 0)
+    parser.add_argument('--choice_graph_len_mode', type=int,
+                        help='choice graphLen mode', default=0)  # 0: 只选择最可能的维度 1: 从前5个中选最大 2: 从前5个中随机选
+
+    parser.add_argument('--num_pool_final_matrix', type=int,
+                        help = 'number of final pool matrix', default=0)
     parser.add_argument('--normalize', type = int,
                         help='nomrlaized laplacian or not', default=1)
     parser.add_argument('--pred_hidden', type=str,
