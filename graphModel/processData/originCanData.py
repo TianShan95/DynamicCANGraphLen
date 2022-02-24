@@ -151,6 +151,9 @@ class OriginCanData:
 
             graph = nx.relabel_nodes(graph, mapping)
 
+        else:
+            self.point = 0
+
         return graph, done
 
     def test(self, can_len):

@@ -1,4 +1,3 @@
-import random
+import datetime
 
-alter = random.randint(0, 4)
-print(alter)
+print(datetime.datetime.today().strftime("%m-%d %H：%M"))

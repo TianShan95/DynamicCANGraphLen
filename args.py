@@ -1,5 +1,5 @@
 import argparse
-from utils import ensure_dir
+from utils.utils import ensure_dir
 import time
 
 
@@ -113,6 +113,21 @@ def arg_parse():
                         help='the smallest num of msg of a graph', default=50)  # 强化学习 每个步骤取一个图 构成这个图报文最小的条数
     parser.add_argument('--msg_biggest_num', type=int,
                         help='the biggest num of msg of a graph', default=300)  # 强化学习 每个步骤取一个图 构成这个图报文最大的条数
+
+
+    # 实验结果发送邮件相关
+    parser.add_argument('--username', type=str,
+                        help='user name', default="976362661@qq.com")  # 用户名
+    parser.add_argument('--password', type=str,
+                        help='password', default="vsgbohogiqerbcji")  # 授权码
+    parser.add_argument('--sender', type=str,
+                        help='sender email', default='976362661@qq.com')  # 发送邮箱
+    parser.add_argument('--receivers', type=str,
+                        help='recervers email', default='976362661@qq.com')  # 接收邮箱
+    parser.add_argument('--smtp_server', type=str,
+                        help='smtp server', default="smtp.qq.com")  # smtp 服务器
+    parser.add_argument('--port', type=int,
+                        help='smtp port', default=465)  # smtp 端口
 
 
     parser.set_defaults(max_nodes=81,
