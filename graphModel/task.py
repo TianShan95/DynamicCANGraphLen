@@ -64,7 +64,7 @@ class Task:
         # 传入 的 rl_action 是一个强化学习传入的 288 维的向量（can 数据长度有 288 种选择） 若想知道传入的长度需要取 argmax
 
     
-        sample_graph, done = self.origin_can_obj.get_ds_a(len_can)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
+        sample_graph, done = self.origin_can_obj.get_ds_a(len_can, log_out_file)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
 
         after_gcn_vector = None
         reward = 0

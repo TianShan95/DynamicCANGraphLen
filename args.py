@@ -123,7 +123,7 @@ def arg_parse():
     parser.add_argument('--sender', type=str,
                         help='sender email', default='976362661@qq.com')  # 发送邮箱
     parser.add_argument('--receivers', type=str,
-                        help='recervers email', default='976362661@qq.com')  # 接收邮箱
+                        help='recervers email', default='ts_951117aaron@163.com')  # 接收邮箱
     parser.add_argument('--smtp_server', type=str,
                         help='smtp server', default="smtp.qq.com")  # smtp 服务器
     parser.add_argument('--port', type=int,

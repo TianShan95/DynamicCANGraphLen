@@ -220,7 +220,7 @@ def main():
             # 发送邮件
             print(f'正在发送邮件...')
             content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
-                      f'retrain: {retrain}'\
+                      f'retrain: {retrain}\n'\
                       f'error: {error}\n'
 
             send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers, prog_args.smtp_server, prog_args.port, content,resultfile)
