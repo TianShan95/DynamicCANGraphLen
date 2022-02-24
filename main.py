@@ -215,13 +215,14 @@ def main():
             # 无论实验是否执行完毕 都把结果发送邮件
             # 跑完所有的 epoch 打包实验结果
             resultfile = packresult(log_out_dir)
+            print(f'打包完毕')
             # 发送邮件
             content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
                       f'retrain: {retrain}'\
                       f'error: {error}\n'
 
             send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers, prog_args.smtp_server, prog_args.port, content,resultfile)
-
+            print(f'发送邮件完毕')
     else:
         raise NameError("mode wrong!!!")
 

@@ -50,4 +50,4 @@ if __name__ == '__main__':
     sender_ = '976362661@qq.com'
     receivers_ = '976362661@qq.com'
     port_ = 465
-    send_email(username_, password_, sender_, receivers_, smtp_server_, port_, '测试邮件', '/Users/aaron/Hebut/征稿_图像信息安全_20211130截稿/源程序/图塌缩分类/log/drive-download-20220221T024621Z-001.zip')
+    send_email(username_, password_, sender_, receivers_, smtp_server_, port_, '测试邮件', 'a.txt')
