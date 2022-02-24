@@ -19,7 +19,7 @@ def packresult(dir_path):
          testcase_zip.write(os.path.join(path, filename), arcname=os.path.basename(path) + '/' + filename)
     testcase_zip.close()
     print("打包成功")
-
+    print(f'打包文件输出路径 {outFullName}')
     return outFullName
 
 if __name__ == '__main__':
