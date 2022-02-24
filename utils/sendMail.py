@@ -12,7 +12,7 @@ from email.header import Header
 def send_email(username, password, sender, receivers, smtp_server, port, content, file_path):
     message = MIMEMultipart()
 
-    title = os.path.basename(file_path)
+    title = os.path.basename(os.path.splitext(os.path.basename(file_path))[0])
     # 邮件主题
     subject = title
     message['Subject'] = subject
@@ -50,4 +50,4 @@ if __name__ == '__main__':
     sender_ = '976362661@qq.com'
     receivers_ = '976362661@qq.com'
     port_ = 465
-    send_email(username_, password_, sender_, receivers_, smtp_server_, port_, '测试邮件', 'a.txt')
+    send_email(username_, password_, sender_, receivers_, smtp_server_, port_, '测试邮件', 'a.zip')

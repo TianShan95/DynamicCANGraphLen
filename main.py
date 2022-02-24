@@ -213,7 +213,7 @@ def main():
             pass
         finally:
             # 无论实验是否执行完毕 都把结果发送邮件
-            # 跑完所有的 epoch 打包实验结果
+            # 跑完所有的 epoch 打包实验结果 返回带 .zip 的文件路径
             resultfile = packresult(log_out_dir)
             print(f'打包完毕')
             # 发送邮件
