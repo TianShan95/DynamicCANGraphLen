@@ -72,6 +72,7 @@ def main():
         f.write(f'{prog_args}\n')
 
     error = None  # 表示实验是否发生异常
+    retrain = False  # 表示模型是否是从开开始训练 False: 从头训练 True: 继续训练
 
     if prog_args.mode == 'test':
 
@@ -117,6 +118,9 @@ def main():
             with open(log_out_file, 'a') as f:
                 f.write(f'加载模型... {prog_args.model_load_dir}\n')
             agent.load()
+        else:
+            with open(log_out_file, 'a') as f:
+                f.write(f'模型从头开始训练\n')
 
         try:
             for i in range(prog_args.train_epoch):  # epoch
@@ -212,7 +216,10 @@ def main():
             # 跑完所有的 epoch 打包实验结果
             resultfile = packresult(log_out_dir)
             # 发送邮件
-            content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\nerror: {error}'
+            content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
+                      f'retrain: {retrain}'\
+                      f'error: {error}\n'
+                      
             send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers, prog_args.smtp_server, prog_args.port, content,resultfile)
 
     else:
