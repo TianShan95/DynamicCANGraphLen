@@ -205,8 +205,7 @@ def main():
                 agent.save(log_out_dir)
                 time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
                 with open(log_out_file, 'a') as f:
-                    f.write(time_mark + '\n')
-                    f.write('END')
+                    f.write(time_mark + '_END\n')
                 print(f'epoch {i} END')
         except Exception as e:
             error = e

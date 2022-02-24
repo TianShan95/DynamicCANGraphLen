@@ -51,7 +51,7 @@ class OriginCanData:
         # print(type(can_id))
         print(f'取出原始can报文 {self.point} - {self.point+len_can-1} 长度为 {len(can_id_list)}/{self.data_total_len}')
         with open(log_out_file, 'a') as f:
-            f.write(f'{self.point}/{self.data_total_len}')
+            f.write(f'processing CAN {self.point}/{self.data_total_len}\n')
         # print(df)
         # print('***')
 
