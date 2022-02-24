@@ -131,7 +131,7 @@ def main():
                 # 随机获取 初始状态
                 print(f'随机取的长度是 {graph_len_}')
                 state, _ , _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, log_out_file)
-                print(f'随机得到的状态是 {state}')
+                # print(f'随机得到的状态是 {state}')
                 # 记录 图模型 执行 步数
                 graph_step = 0
                 # 记录正确预测的 报文 个数
@@ -214,9 +214,11 @@ def main():
         finally:
             # 无论实验是否执行完毕 都把结果发送邮件
             # 跑完所有的 epoch 打包实验结果 返回带 .zip 的文件路径
+            print(f'正在打包结果文件...')
             resultfile = packresult(log_out_dir)
             print(f'打包完毕')
             # 发送邮件
+            print(f'正在发送邮件...')
             content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
                       f'retrain: {retrain}'\
                       f'error: {error}\n'

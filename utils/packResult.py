@@ -9,14 +9,19 @@ def packresult(dir_path):
     :param dir_path: 目标文件夹路径
     :return:
     """
-    outFullName = dir_path + '.zip'  # 压缩包输出路径
+    dir_name = os.path.basename(dir_path)
+    outFullName = dir_name + '.zip'  # 压缩包输出路径
+    print(f'压缩文件 {outFullName}')
     # baseName1 = os.path.basename(dir_path)
     testcase_zip = zipfile.ZipFile(outFullName, 'w', zipfile.ZIP_DEFLATED)
+    print(f'遍历文件夹 {dir_name}')
     for path, dir_names, file_names in os.walk(dir_path):
         # if baseName1 == os.path.basename(path):
         #     continue
+        print(f'进入文件夹 {path}')
         for filename in file_names:
-         testcase_zip.write(os.path.join(path, filename), arcname=os.path.basename(path) + '/' + filename)
+            print(filename)
+            testcase_zip.write(os.path.join(path, filename), arcname=os.path.basename(path) + '/' + filename)
     testcase_zip.close()
     print("打包成功")
     print(f'打包文件输出路径 {outFullName}')
