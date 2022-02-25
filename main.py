@@ -243,6 +243,7 @@ def main():
                 print(f'epoch {i} END')
         except Exception as e:
             error = e
+            print(f'发生异常 {e}')
             pass
         finally:
             # 无论实验是否执行完毕 都把结果发送邮件
