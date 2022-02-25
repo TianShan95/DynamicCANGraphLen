@@ -31,7 +31,7 @@ class OriginCanData:
         # print(self.df.head())
         # print(self.df.tail())
 
-    def get_ds_a(self, len_can, log_out_file):
+    def get_ds_a(self, len_can, logger):
 
         done = False
         graph = None
@@ -50,8 +50,9 @@ class OriginCanData:
 
         # print(type(can_id))
         print(f'canData length: {len(can_id_list)} range: {self.point} - {self.point+len_can-1}/{self.data_total_len}')
-        with open(log_out_file, 'a') as f:
-            f.write(f'processing CAN {self.point}/{self.data_total_len}\n')
+        # with open(log_out_file, 'a') as f:
+        #     f.write(f'processing CAN {self.point}/{self.data_total_len}\n')
+        logger.info(f'processing CAN {self.point}/{self.data_total_len}')
         # print(df)
         # print('***')
 

@@ -15,7 +15,7 @@ from graphModel.task import Task
 from utils.utils import setup_seed
 from utils.packResult import packresult
 from utils.sendMail import send_email
-from utils.logger import logger
+# from utils.logger import logger
 # 警告处理
 import warnings
 warnings.filterwarnings('ignore')  # 忽略警告
@@ -90,19 +90,19 @@ def main():
     # LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    # logger = logging.getLogger(__name__)
-    # logger.setLevel(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(level=logging.INFO)
     handler = logging.FileHandler(log_out_file1)
     handler.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
 
-    # console = logging.StreamHandler()
-    # console.setLevel(logging.INFO)
-    # console.setFormatter(formatter)
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    console.setFormatter(formatter)
 
     logger.addHandler(handler)
-    # logger.addHandler(console)
+    logger.addHandler(console)
 
     # logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
     # handler = logging.FileHandler(log_out_file1)
@@ -136,7 +136,7 @@ def main():
             graph_step += 1
             # 下个状态 奖励 是否完成
             len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-            next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can, log_out_file)
+            next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can, logger)
             # 累加 奖励
             ep_r += reward
             # 更新 状态
