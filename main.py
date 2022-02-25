@@ -43,12 +43,12 @@ Not the author's implementation !
 每个 can 长度的选项都是 一个维度
 每次识别 can 报文的长度 就是 强化学习网络的输出维度
 '''
-global sys_cst_time  # 系统时间
+global sys_cst_time, train_times, avg_Q1_loss, avg_Q2_loss  # 系统时间
 
 
 def main():
 
-    global sys_cst_time
+    global sys_cst_time, train_times, avg_Q1_loss, avg_Q2_loss
 
     # 如果系统是 linux 则对系统时区进行设置
     # 避免日志文件中的日期 不是大陆时区
@@ -208,23 +208,23 @@ def main():
                     if reward > 0:
                         pred_correct += 1
                     # 结果写入 log
-                    logger.info(f'epoch: {i:<3}; graph_step: {graph_step:<8}; label: {label}; pred: {pred}; len_can: {len_can:<3}; reward: {reward:<10.4f}; acc: {pred_correct/graph_step:<10.4f}; ep_r: {ep_r:.2f}')
+                    logger.info(f'epoch: {i:<3}; step: {graph_step:<8}; label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; acc: {pred_correct/graph_step:<4.1f}; trainTimes: {train_times}; avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
 
                     # 存入 经验
                     agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))
         #             if i+1 % 10 == 0:
         #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))
                     if len(agent.memory.storage) >= prog_args.capacity-1:
-                        agent.update(10)  # 使用经验回放 更新网络
+                        train_times, avg_Q1_loss, avg_Q2_loss = agent.update(10)  # 使用经验回放 更新网络
 
                     # 更新 状态
                     state = next_state
 
-                    # # 短期退出 epoch 验证 程序可运行行
-                    # if graph_step > 20:
-                    #     print(f'大于 20步')
-                    #     print(f'i {i}')
-                    #     break
+                    # 短期退出 epoch 验证 程序可运行行
+                    if graph_step > 20:
+                        print(f'大于 20步')
+                        print(f'i {i}')
+                        break
                     #     raise Exception
 
                     # # 保存 模型
@@ -234,13 +234,13 @@ def main():
                 # 跳出whileTrue 结束epoch 保存模型
                 agent.save(i, log_out_dir)
 
-                # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
-                content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
-                          f'epoch: {i}\n'\
-                          f'retrain: {retrain}\n'
-                resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
-                send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers,
-                           prog_args.smtp_server, prog_args.port, content, resultfile)
+                # # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
+                # content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
+                #           f'epoch: {i}\n'\
+                #           f'retrain: {retrain}\n'
+                # resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
+                # send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers,
+                #            prog_args.smtp_server, prog_args.port, content, resultfile)
 
         except Exception as e:  # 捕捉所有异常
             print(f'发生异常 {e}')
@@ -260,12 +260,23 @@ def main():
             print(f'打包完毕')
             # 发送邮件
             print(f'正在发送邮件...')
-            content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
+            content = f'platform: {prog_args.gpu_device}'\
+                      f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
                       f'retrain: {retrain}\n'\
                       f'error: {error}\n'
 
             send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers, prog_args.smtp_server, prog_args.port, content,resultfile)
             print(f'发送邮件完毕')
+
+            # 如果是在 share_gpu 上运行的 把数据都拷贝到 oss 个人数据下
+            if prog_args.gpu_device == 'share_gpu':
+                # 全部打包
+                resultfile = packresult(log_out_dir[:-1], i, allfile=True)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
+                os.system(f"oss cp {resultfile} oss://backup/")
+                print('关机...')
+                os.system("shutdown")
+
+
     else:
         raise NameError("mode wrong!!!")
 

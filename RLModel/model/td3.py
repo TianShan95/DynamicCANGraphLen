@@ -55,6 +55,8 @@ class TD3:
         # print("====================================")
         # print("model has been trained for {} times...".format(self.num_training))
         # print("====================================")
+        loss_q1_list = []
+        loss_q2_list = []
         for i in range(num_iteration):
             x, y, u, r, d = self.memory.sample(self.args.batch_size)
             state = torch.FloatTensor(x).to(device)
@@ -88,6 +90,7 @@ class TD3:
             self.critic_1_optimizer.zero_grad()
             loss_Q1.backward()
             self.critic_1_optimizer.step()
+            loss_q1_list.append(loss_Q1.item())
             self.writer.add_scalar('Loss/Q1_loss', loss_Q1, global_step=self.num_critic_update_iteration)
 
             # Optimize Critic 2:
@@ -96,16 +99,8 @@ class TD3:
             self.critic_2_optimizer.zero_grad()
             loss_Q2.backward()
             self.critic_2_optimizer.step()
+            loss_q2_list.append(loss_Q2.item())
             self.writer.add_scalar('Loss/Q2_loss', loss_Q2, global_step=self.num_critic_update_iteration)
-
-            # 把训练 loss 写入 日志文件
-            # with open(log_file, 'a') as f:
-            #     f.write(f'loss_Q1: {loss_Q1.item()}\n')
-            #     f.write(f'loss_Q2: {loss_Q2.item()}\n')
-            #     f.write("model has been trained for {} times...\n".format(self.num_training))
-
-            logger.info(f"model has been trained for {self.num_training} times; loss_Q1: {loss_Q1.item()}; loss_Q2: {loss_Q2}")
-
 
             # Delayed policy updates:
             # 延迟更新 策略网络
@@ -130,8 +125,10 @@ class TD3:
                 self.num_actor_update_iteration += 1
         self.num_critic_update_iteration += 1
         self.num_training += 1
-
-
+        # 返回此次训练平均的 loss_Q1 loss_Q2
+        logger.info(f'loss_q1_list: {loss_q1_list}')
+        logger.info(f'loss_q2_list: {loss_q2_list}')
+        return self.num_training, sum(loss_q1_list)/len(loss_q1_list), sum(loss_q2_list)/len(loss_q2_list)
 
     def save(self, epcoh, save_dir):
         import time

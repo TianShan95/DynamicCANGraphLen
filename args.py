@@ -132,6 +132,10 @@ def arg_parse():
     parser.add_argument('--port', type=int,
                         help='smtp port', default=465)  # smtp 端口
 
+    # 显卡平台选择 涉及数据保存
+    parser.add_argument('--gpu_device', type=int,
+                        help='gpu platform', default="colab")  # colab or share_gpu
+
 
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
