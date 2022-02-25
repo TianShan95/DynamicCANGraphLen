@@ -14,7 +14,7 @@ def packresult(dir_path):
     print(f'压缩文件 {outFullName}')
     # baseName1 = os.path.basename(dir_path)
     testcase_zip = zipfile.ZipFile(outFullName, 'w', zipfile.ZIP_DEFLATED)
-    print(f'遍历文件夹 {dir_name}')
+    print(f'遍历文件夹 {dir_path}')
     for path, dir_names, file_names in os.walk(dir_path):
         # if baseName1 == os.path.basename(path):
         #     continue

@@ -22,3 +22,4 @@ import os
 
 a = '/Users/aaron/Hebut/征稿_图像信息安全_20211130截稿/源程序/图塌缩分类/DynamicCANGraphLen/utils'
 print(os.path.split(a)[0])
+print(os.path.basename(a))
