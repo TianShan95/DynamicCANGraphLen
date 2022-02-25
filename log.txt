@@ -1,0 +1,3 @@
+2022-02-25 21:21:00,710 - __main__ - INFO - Start print log
+2022-02-25 21:21:00,710 - __main__ - WARNING - Something maybe fail.
+2022-02-25 21:21:00,710 - __main__ - INFO - Finish

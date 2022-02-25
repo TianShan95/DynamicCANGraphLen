@@ -88,6 +88,11 @@ def main():
     # 配置日志 输出格式
     LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
     logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
+    # log 信息输出到 屏幕
+    logger = logging.getLogger(__name__)
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    logger.addHandler(console)
 
     with open(log_out_file, 'w+') as f:
         f.write(f'{prog_args}\n')
@@ -205,13 +210,13 @@ def main():
                     ep_r += reward
                     if reward > 0:
                         pred_correct += 1
-                    with open(log_out_file, 'a') as f:
-                        f.write("====================================\n")
-                        f.write(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
+                    # with open(log_out_file, 'a') as f:
+                    #     f.write("====================================\n")
+                    #     f.write(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
-                    logging.info(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
+                    logging.info(f'log epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
-                    print(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
+                    # print(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
                     # 存入 经验
                     agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))
@@ -223,13 +228,12 @@ def main():
                     # 更新 状态
                     state = next_state
 
-                    # # 短期退出 epoch 验证 程序可运行行
-                    if graph_step > 200:
+                    # 短期退出 epoch 验证 程序可运行行
+                    if graph_step > 20:
                         print(f'大于 20步')
                         print(f'i {i}')
                         break
-                        # raise Exception
-
+                    #     raise Exception
 
                     # # 保存 模型
                     # if graph_step % args_RL.log_interval == 0:
