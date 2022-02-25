@@ -10,13 +10,16 @@ def mylogger():
     # 输出到 文件
     # handler = logging.FileHandler("log.txt")
     # handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
     # handler.setFormatter(formatter)
+
     # 输出到 屏幕
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
     console.setFormatter(formatter)
 
+    # 加入输出
     # logger.addHandler(handler)
     logger.addHandler(console)
 

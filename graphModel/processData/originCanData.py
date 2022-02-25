@@ -3,6 +3,7 @@ import networkx as nx
 import copy
 import collections
 import matplotlib.pyplot as plt
+from utils.logger import logger
 
 
 class OriginCanData:
@@ -31,7 +32,7 @@ class OriginCanData:
         # print(self.df.head())
         # print(self.df.tail())
 
-    def get_ds_a(self, len_can, logger):
+    def get_ds_a(self, len_can, logger1):
 
         done = False
         graph = None
@@ -49,10 +50,9 @@ class OriginCanData:
         can_type_list = df.get("Class").values  # 取出 can 数据 的 报文类型 数据
 
         # print(type(can_id))
-        print(f'canData length: {len(can_id_list)} range: {self.point} - {self.point+len_can-1}/{self.data_total_len}')
+        # print(f'canData length: {len(can_id_list)} range: {self.point} - {self.point+len_can-1}/{self.data_total_len}')
         # with open(log_out_file, 'a') as f:
         #     f.write(f'processing CAN {self.point}/{self.data_total_len}\n')
-        logger.info(f'processing CAN {self.point}/{self.data_total_len}')
         # print(df)
         # print('***')
 
@@ -110,7 +110,9 @@ class OriginCanData:
             # 实例化 图
             graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
             graph.graph['label'] = graph_label
-            print(f'报文类型: {graph_label}')
+            # print(f'报文类型: {graph_label}')
+            logger.info(f'label: {graph_label} canData length: {len(can_id_list)} processing CAN {self.point}/{self.data_total_len}')
+
             # Plot the graph 可视化建立的 图实例
             # nx.draw(graph, with_labels=True, font_weight='bold')
             # plt.show()

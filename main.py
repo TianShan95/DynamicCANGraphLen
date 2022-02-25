@@ -15,7 +15,7 @@ from graphModel.task import Task
 from utils.utils import setup_seed
 from utils.packResult import packresult
 from utils.sendMail import send_email
-# from utils.logger import logger
+from utils.logger import logger
 # 警告处理
 import warnings
 warnings.filterwarnings('ignore')  # 忽略警告
@@ -82,27 +82,17 @@ def main():
         os.makedirs(log_out_dir, exist_ok=True)
 
     # 定义 并创建 log 文件
-    log_out_file = log_out_dir + 'Rl_' + time_mark + '.txt'
-    log_out_file1 = log_out_dir + 'Rl_' + time_mark + '.log'
+    # log_out_file = log_out_dir + 'Rl_' + time_mark + '.txt'
+    log_out_file = log_out_dir + 'Rl_' + time_mark + '.log'
 
-    print(f'log 路径: {log_out_file}')
+    print(f'输出 log 文件路径: {log_out_file}')
+
     # 配置日志 输出格式
-    # LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    logger = logging.getLogger(__name__)
-    logger.setLevel(level=logging.INFO)
-    handler = logging.FileHandler(log_out_file1)
+    handler = logging.FileHandler(log_out_file)
     handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
     handler.setFormatter(formatter)
-
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    console.setFormatter(formatter)
-
     logger.addHandler(handler)
-    logger.addHandler(console)
 
     # logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
     # handler = logging.FileHandler(log_out_file1)
