@@ -83,8 +83,8 @@ class Task:
             train_data = prepare_data(sample_graph, coarsen_graph, self.args, max_nodes=self.args.max_nodes)
 
             # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
-            after_gcn_vector, reward = evaluate(train_data, self.model, self.args, device=self.device)
+            after_gcn_vector, reward, label, pred = evaluate(train_data, self.model, self.args, device=self.device)
 
 
-        return after_gcn_vector, reward, done
+        return after_gcn_vector, reward, done, label, pred
 

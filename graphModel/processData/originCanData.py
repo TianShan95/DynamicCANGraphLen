@@ -111,7 +111,7 @@ class OriginCanData:
             graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
             graph.graph['label'] = graph_label
             # print(f'报文类型: {graph_label}')
-            logger.info(f'label: {graph_label}; canData length: {len(can_id_list):3}; schedule: {self.point:7}/{self.data_total_len}')
+            # logger.info(f'label: {graph_label}; canData length: {len(can_id_list):3}; schedule: {self.point:7}/{self.data_total_len}')
 
             # Plot the graph 可视化建立的 图实例
             # nx.draw(graph, with_labels=True, font_weight='bold')
