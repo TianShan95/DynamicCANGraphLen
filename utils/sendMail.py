@@ -9,18 +9,20 @@ from email.mime.base import MIMEBase
 from email.header import Header
 
 
-def send_email(username, password, sender, receivers, smtp_server, port, content, file_path):
+def send_email(username, password, sender, receivers, smtp_server, port, content, file_path=None):
     message = MIMEMultipart()
 
-    title = os.path.basename(os.path.splitext(os.path.basename(file_path))[0])
-    # 邮件主题
-    subject = title
-    message['Subject'] = subject
+
+
+
     # 邮件正文
     message.attach(MIMEText(content, 'plain', _charset='utf-8'))
     # 附件
     print(f'file_path {file_path}')
     if file_path:
+        # 邮件主题
+        title = os.path.basename(os.path.splitext(os.path.basename(file_path))[0])
+        # 读取文件 添加附件
         data = open(file_path, 'rb')
         ctype, encoding = mimetypes.guess_type(file_path)
         if ctype is None or encoding is not None:
@@ -32,6 +34,13 @@ def send_email(username, password, sender, receivers, smtp_server, port, content
         encoders.encode_base64(file_msg)  # 把附件编码
         file_msg.add_header('Content-Disposition', 'attachment', filename=title + ".zip")  # 修改邮件头
         message.attach(file_msg)
+
+    else:
+        title = 'epoch 结束校验'
+
+    # 邮件主题
+    subject = title
+    message['Subject'] = subject
 
     try:
         server = smtplib.SMTP_SSL(smtp_server, port)

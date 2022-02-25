@@ -208,7 +208,7 @@ def main():
                     if reward > 0:
                         pred_correct += 1
                     # 结果写入 log
-                    logger.info(f'epoch: {i:<3}; graph_step: {graph_step:<8}; label: {label}; pred: {pred}; len_can: {len_can:<3}; reward: {reward:<10.4g}; ; acc: {pred_correct/graph_step:<10.4g}; ep_r: {ep_r:<.2g}')
+                    logger.info(f'epoch: {i:<3}; graph_step: {graph_step:<8}; label: {label}; pred: {pred}; len_can: {len_can:<3}; reward: {reward:<10.4f}; acc: {pred_correct/graph_step:<10.4f}; ep_r: {ep_r:.2f}')
 
                     # 存入 经验
                     agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))
@@ -220,11 +220,11 @@ def main():
                     # 更新 状态
                     state = next_state
 
-                    # 短期退出 epoch 验证 程序可运行行
-                    if graph_step > 20:
-                        print(f'大于 20步')
-                        print(f'i {i}')
-                        break
+                    # # 短期退出 epoch 验证 程序可运行行
+                    # if graph_step > 20:
+                    #     print(f'大于 20步')
+                    #     print(f'i {i}')
+                    #     break
                     #     raise Exception
 
                     # # 保存 模型
@@ -233,6 +233,14 @@ def main():
                     #     break
                 # 跳出whileTrue 结束epoch 保存模型
                 agent.save(i, log_out_dir)
+
+                # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
+                content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
+                          f'epoch: {i}\n'\
+                          f'retrain: {retrain}\n'
+                resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
+                send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers,
+                           prog_args.smtp_server, prog_args.port, content, resultfile)
 
         except Exception as e:  # 捕捉所有异常
             print(f'发生异常 {e}')
