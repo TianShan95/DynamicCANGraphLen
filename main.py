@@ -88,13 +88,12 @@ def main():
     print(f'log 路径: {log_out_file}')
     # 配置日志 输出格式
     # LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
     # logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
     handler = logging.FileHandler(log_out_file1)
     handler.setLevel(logging.DEBUG)
-    # log 信息输出到 屏幕
-    # logger = logging.getLogger(__name__)
-    # console = logging.StreamHandler()
-    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(formatter)
     logger.addHandler(handler)
 
     # with open(log_out_file, 'w+') as f:
@@ -217,7 +216,7 @@ def main():
                     #     f.write("====================================\n")
                     #     f.write(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
-                    logger.info(f'log epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
+                    logger.info(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
                     # print(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
