@@ -15,6 +15,7 @@ from graphModel.task import Task
 from utils.utils import setup_seed
 from utils.packResult import packresult
 from utils.sendMail import send_email
+from utils.logger import logger
 # 警告处理
 import warnings
 warnings.filterwarnings('ignore')  # 忽略警告
@@ -86,16 +87,18 @@ def main():
 
     print(f'log 路径: {log_out_file}')
     # 配置日志 输出格式
-    LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
-    logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
+    # LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+    # logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
+    handler = logging.FileHandler(log_out_file1)
+    handler.setLevel(logging.DEBUG)
     # log 信息输出到 屏幕
-    logger = logging.getLogger(__name__)
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    logger.addHandler(console)
+    # logger = logging.getLogger(__name__)
+    # console = logging.StreamHandler()
+    # console.setLevel(logging.DEBUG)
+    # logger.addHandler(logging.StreamHandler())
 
-    with open(log_out_file, 'w+') as f:
-        f.write(f'{prog_args}\n')
+    # with open(log_out_file, 'w+') as f:
+    #     f.write(f'{prog_args}\n')
         # f.close()
 
     error = None  # 表示实验是否发生异常
@@ -145,13 +148,13 @@ def main():
             with open(log_out_file, 'a') as f:
                 f.write(f'加载模型... {prog_args.model_load_dir}\n')
                 # f.close()
-            logging.info(f'加载模型... {prog_args.model_load_dir}\n')
+            logger.info(f'加载模型... {prog_args.model_load_dir}\n')
             agent.load()  # 载入模型
         else:
             with open(log_out_file, 'a') as f:
                 f.write(f'模型从头开始训练\n')
                 # f.close()
-            logging.info(f'模型从头开始训练\n')
+            logger.info(f'模型从头开始训练\n')
 
 
         try:
@@ -214,7 +217,7 @@ def main():
                     #     f.write("====================================\n")
                     #     f.write(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
-                    logging.info(f'log epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
+                    logger.info(f'log epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
                     # print(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
@@ -254,10 +257,10 @@ def main():
 
         finally:
             # 异常信息写入 log
-            logging.warning(f'error: {error}')
+            logger.warning(f'error: {error}')
             # 程序执行失败信息写入 log
             traceback.print_exc()
-            logging.warning(f"执行失败信息: {traceback.format_exc()}")
+            logger.warning(f"执行失败信息: {traceback.format_exc()}")
             # 无论实验是否执行完毕 都把结果发送邮件
             # 跑完所有的 epoch 打包实验结果 返回带 .zip 的文件路径
             print(f'正在打包结果文件夹  {log_out_dir}')
