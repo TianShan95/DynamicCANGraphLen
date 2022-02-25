@@ -81,10 +81,12 @@ def main():
 
     # 定义 并创建 log 文件
     log_out_file = log_out_dir + 'Rl_' + time_mark + '.txt'
+    log_out_file1 = log_out_dir + 'Rl_' + time_mark + '.log'
+
     print(f'log 路径: {log_out_file}')
     # 配置日志 输出格式
     LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
-    logging.basicConfig(filename=log_out_file, level=logging.DEBUG, format=LOG_FORMAT)
+    logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
 
     with open(log_out_file, 'w+') as f:
         f.write(f'{prog_args}\n')
