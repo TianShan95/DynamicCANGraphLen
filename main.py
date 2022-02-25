@@ -208,7 +208,7 @@ def main():
                     if reward > 0:
                         pred_correct += 1
                     # 结果写入 log
-                    logger.info(f'epoch: {i:3}; graph_step: {graph_step:8}; label: {label}; pred: {pred}; len_can: {len_can:3}; reward: {reward:.4f}; ep_r: {ep_r:.4f}; acc: {pred_correct/graph_step:.4f}')
+                    logger.info(f'epoch: {i:<3}; graph_step: {graph_step:<8}; label: {label}; pred: {pred}; len_can: {len_can:<3}; reward: {reward:<10.4g}; ; acc: {pred_correct/graph_step:<10.4g}; ep_r: {ep_r:<.2g}')
 
                     # 存入 经验
                     agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))

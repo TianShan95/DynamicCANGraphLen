@@ -29,21 +29,42 @@ import re
 # print(re.search(r"\d+", a).group(0))
 # print(os.path.splitext(a)[1])
 
-import logging
-logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.INFO)
-handler = logging.FileHandler("log.txt")
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
+# import logging
+# logger = logging.getLogger(__name__)
+# logger.setLevel(level=logging.INFO)
+# handler = logging.FileHandler("log.txt")
+# handler.setLevel(logging.INFO)
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# handler.setFormatter(formatter)
+#
+# console = logging.StreamHandler()
+# console.setLevel(logging.INFO)
+#
+# logger.addHandler(handler)
+# logger.addHandler(console)
+#
+# logger.info("Start print log")
+# logger.debug("Do something")
+# logger.warning("Something maybe fail.")
+# logger.info("Finish")
 
-console = logging.StreamHandler()
-console.setLevel(logging.INFO)
+# # 整数
+# print("显示占位符%d---"%(1314))#%d表示占位整数
+# print("显示占位符%3d--"%(1314))#%3d表示占位整数不小于3个位数
+# print("显示占位符%13d--"%(1314))#%13d表示占位整数不小于13个位数，不满足在整数左边空格补齐
+# print("显示占位符%-13d--"%(1314))#%13d表示占位整数不小于13个位数，不满足在整数右边空格补齐
+# print("显示占位符%07d--"%(1314))#%07d表示占位整数不小于7个位数，不满足在整数左边0补齐;不存在右边0补齐的情况，整数右边补0，整数的数值发生变化
+#
+# print('================================')
+# # 浮点数
+# print("浮点数%f-"%(3.14))# %f补齐六位小数点
+# print("浮点数%g-"%(3.14))# %g显示小数，末位的0不显示
+# print("浮点数%g-"%(3.14000))
 
-logger.addHandler(handler)
-logger.addHandler(console)
+#%m.nf n 表示保留几个小数，m表示占用的列数；小数点也算一位，保留小数时会进行四舍五入，默认补齐位数空格左补齐；使用“-”表示右补齐；优先执行小数点位数的显示，然后计算补齐位数，一般m>n+2
+print("浮点数%7.3f--"%(3.14))
+print("浮点数%-7.3f--"%(3.14))
+print("浮点数%2.5f--"%(3.14))
+print("浮点数%3.2f--"%(3.14))
 
-logger.info("Start print log")
-logger.debug("Do something")
-logger.warning("Something maybe fail.")
-logger.info("Finish")
+print(f'{3.14:<10.3g}')
