@@ -6,11 +6,11 @@ import os
 def packresult(dir_path):
     """
     压缩指定文件夹
-    :param dir_path: 目标文件夹路径
+    :param dir_path: 目标文件夹路径 不带最后的斜杠 /
     :return:
     """
-    dir_name = os.path.basename(dir_path)
-    outFullName = dir_name + '.zip'  # 压缩包输出路径
+    # dir_name = os.path.basename(dir_path)
+    outFullName = dir_path + '.zip'  # 压缩包输出路径
     print(f'压缩文件 {outFullName}')
     # baseName1 = os.path.basename(dir_path)
     testcase_zip = zipfile.ZipFile(outFullName, 'w', zipfile.ZIP_DEFLATED)
