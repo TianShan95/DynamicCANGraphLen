@@ -1,5 +1,6 @@
-# import time
+import time
 import os
+import re
 #
 # timestr = 'Fri Feb 25 18:23:08 CST 2022'
 #
@@ -20,6 +21,9 @@ import os
 # else:
 #     print(abs(time.mktime(time.strptime(timestr, '%a %b %d %H:%M:%S CST %Y')) - time.time()))
 
-a = '/Users/aaron/Hebut/征稿_图像信息安全_20211130截稿/源程序/图塌缩分类/DynamicCANGraphLen/utils'
-print(os.path.split(a)[0])
-print(os.path.basename(a))
+# a = '/Users/aaron/Hebut/征稿_图像信息安全_20211130截稿/源程序/图塌缩分类/DynamicCANGraphLen/utils'
+# print(os.path.split(a)[0])
+# print(os.path.basename(a))
+a = 'epoch_01_20220225_002202critic_2_target.pth'
+print(re.search(r"\d+", a).group())
+print(os.path.splitext(a)[1])

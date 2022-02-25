@@ -227,7 +227,8 @@ def main():
                     if graph_step > 200:
                         print(f'大于 20步')
                         print(f'i {i}')
-                        raise Exception
+                        break
+                        # raise Exception
 
 
                     # # 保存 模型
@@ -242,18 +243,22 @@ def main():
                     f.write(time_mark + '_END\n')
                     # f.close()
                 print(f'epoch {i} END')
+
         except Exception as e:  # 捕捉所有异常
             print(f'发生异常 {e}')
             error = e
-            traceback.print_exc()
 
         finally:
+            # 异常信息写入 log
             logging.warning(f'error: {error}')
+            # 程序执行失败信息写入 log
+            traceback.print_exc()
             logging.warning(f"执行失败信息: {traceback.format_exc()}")
             # 无论实验是否执行完毕 都把结果发送邮件
             # 跑完所有的 epoch 打包实验结果 返回带 .zip 的文件路径
             print(f'正在打包结果文件夹  {log_out_dir}')
-            resultfile = packresult(log_out_dir[:-1])  # 传入参数 去掉最后的 /
+            agent.save(i, log_out_dir)  # 保存 最新的模型参数
+            resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
             print(f'打包完毕')
             # 发送邮件
             print(f'正在发送邮件...')
