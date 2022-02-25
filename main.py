@@ -41,20 +41,20 @@ Not the author's implementation !
 每个 can 长度的选项都是 一个维度
 每次识别 can 报文的长度 就是 强化学习网络的输出维度
 '''
+global sys_cst_time  # 系统时间
 
 
 def main():
+
+    global sys_cst_time
 
     # 如果系统是 linux 则对系统时区进行设置
     # 避免日志文件中的日期 不是大陆时区
     if platform.system().lower() == 'linux':
         print("linux")
         os.system("cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime")
-        print(os.popen('date').read())
-
-    # 配置日志 输出格式
-    LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
-    logging.basicConfig(filename='fileWriteTest1.txt', level=logging.DEBUG, format=LOG_FORMAT)
+        sys_cst_time = os.popen('date').read()
+        print(f'系统时间: {sys_cst_time}')
 
     agent = TD3(state_dim, action_dim, 1, prog_args)
     # 累加奖励
@@ -63,19 +63,31 @@ def main():
     graph_task = Task(prog_args, device)
     pred_hidden_dims = [int(i) for i in prog_args.pred_hidden.split('_')]
 
+    # 授时之后 系统时间更改 但是python获取的时间会有延迟
+    # 验证时间 python 取到的时间是否和系统相符
+    # timestr = 'Fri Feb 25 17:35:08 CST 2022'
+    while True:
+        # python时间 和 系统时间 同步 退出
+        if abs(time.mktime(time.strptime(sys_cst_time, '%a %b %d %H:%M:%S CST %Y')) - time.time()) < 120:
+            break
+        time.sleep(0.5)
 
     # 定义此次实验的 log 文件夹
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
     log_out_dir = prog_args.out_dir + '/' + 'Rl_' + time_mark + '_multiDim_log/'
     if not os.path.exists(log_out_dir):
         os.makedirs(log_out_dir, exist_ok=True)
+
     # 定义 并创建 log 文件
     log_out_file = log_out_dir + 'Rl_' + time_mark + '.txt'
     print(f'log 路径: {log_out_file}')
+    # 配置日志 输出格式
+    LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+    logging.basicConfig(filename=log_out_file, level=logging.DEBUG, format=LOG_FORMAT)
 
     with open(log_out_file, 'w+') as f:
         f.write(f'{prog_args}\n')
-        f.close()
+        # f.close()
 
     error = None  # 表示实验是否发生异常
     retrain = False  # 表示模型是否是从开开始训练 False: 从头训练 True: 继续训练
@@ -123,13 +135,13 @@ def main():
             print(f'加载模型 {prog_args.model_load_dir}')
             with open(log_out_file, 'a') as f:
                 f.write(f'加载模型... {prog_args.model_load_dir}\n')
-                f.close()
+                # f.close()
             logging.info(f'加载模型... {prog_args.model_load_dir}\n')
             agent.load()  # 载入模型
         else:
             with open(log_out_file, 'a') as f:
                 f.write(f'模型从头开始训练\n')
-                f.close()
+                # f.close()
             logging.info(f'模型从头开始训练\n')
 
 
@@ -212,7 +224,7 @@ def main():
                         print(f'大于 20步')
                         print(f'i {i}')
                         raise Exception
-                        
+
 
                     # # 保存 模型
                     # if graph_step % args_RL.log_interval == 0:
@@ -224,7 +236,7 @@ def main():
                 time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
                 with open(log_out_file, 'a') as f:
                     f.write(time_mark + '_END\n')
-                    f.close()
+                    # f.close()
                 print(f'epoch {i} END')
         except Exception as e:
             error = e
