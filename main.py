@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import time
 import logging
+import traceback
 # 工程参数
 from args import arg_parse
 # 强化学习
@@ -241,10 +242,13 @@ def main():
                     f.write(time_mark + '_END\n')
                     # f.close()
                 print(f'epoch {i} END')
-        except Exception as e:
-            error = e
+        except Exception as e:  # 捕捉所有异常
             print(f'发生异常 {e}')
-            pass
+            error = e
+            traceback.print_exc()
+            logging.warning(e)
+            logging.warning("exec failed, failed msg:" + traceback.format_exc())
+
         finally:
             # 无论实验是否执行完毕 都把结果发送邮件
             # 跑完所有的 epoch 打包实验结果 返回带 .zip 的文件路径
