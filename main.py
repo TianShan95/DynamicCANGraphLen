@@ -246,10 +246,10 @@ def main():
             print(f'发生异常 {e}')
             error = e
             traceback.print_exc()
-            logging.warning(e)
-            logging.warning("exec failed, failed msg:" + traceback.format_exc())
 
         finally:
+            logging.warning(f'error: {error}')
+            logging.warning(f"执行失败信息: {traceback.format_exc()}")
             # 无论实验是否执行完毕 都把结果发送邮件
             # 跑完所有的 epoch 打包实验结果 返回带 .zip 的文件路径
             print(f'正在打包结果文件夹  {log_out_dir}')
