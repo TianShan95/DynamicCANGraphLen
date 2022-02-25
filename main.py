@@ -71,6 +71,7 @@ def main():
         if abs(time.mktime(time.strptime(sys_cst_time, '%a %b %d %H:%M:%S CST %Y')) - time.time()) < 120:
             break
         time.sleep(0.5)
+    print(f'python 时间同步完成')
 
     # 定义此次实验的 log 文件夹
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
