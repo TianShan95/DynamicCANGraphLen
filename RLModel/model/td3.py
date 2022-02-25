@@ -5,6 +5,7 @@ from RLModel.model.replayBuff import Replay_buffer
 from tensorboardX import SummaryWriter
 import torch.optim as optim
 import torch.nn.functional as F
+from utils.logger import logger
 
 
 '''
@@ -48,11 +49,11 @@ class TD3:
         state = state.reshape(1, -1).clone().detach().requires_grad_(True)
         return self.actor(state).cpu().data.numpy().flatten()
 
-    def update(self, num_iteration, log_file):  # 在经验里随机取 10 次
+    def update(self, num_iteration):  # 在经验里随机取 10 次
 
         # if self.num_training % 500 == 0:
         # print("====================================")
-        print("model has been trained for {} times...".format(self.num_training))
+        # print("model has been trained for {} times...".format(self.num_training))
         # print("====================================")
         for i in range(num_iteration):
             x, y, u, r, d = self.memory.sample(self.args.batch_size)
@@ -98,10 +99,13 @@ class TD3:
             self.writer.add_scalar('Loss/Q2_loss', loss_Q2, global_step=self.num_critic_update_iteration)
 
             # 把训练 loss 写入 日志文件
-            with open(log_file, 'a') as f:
-                f.write(f'loss_Q1: {loss_Q1.item()}\n')
-                f.write(f'loss_Q2: {loss_Q2.item()}\n')
-                f.write("model has been trained for {} times...\n".format(self.num_training))
+            # with open(log_file, 'a') as f:
+            #     f.write(f'loss_Q1: {loss_Q1.item()}\n')
+            #     f.write(f'loss_Q2: {loss_Q2.item()}\n')
+            #     f.write("model has been trained for {} times...\n".format(self.num_training))
+
+            logger.info(f"model has been trained for {self.num_training} times; loss_Q1: {loss_Q1.item()}; loss_Q2: {loss_Q2}")
+
 
             # Delayed policy updates:
             # 延迟更新 策略网络
@@ -138,9 +142,10 @@ class TD3:
         torch.save(self.critic_1_target.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'_critic_1_target.pth')
         torch.save(self.critic_2.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'_critic_2.pth')
         torch.save(self.critic_2_target.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'critic_2_target.pth')
-        print("====================================")
-        print("Model has been saved...")
-        print("====================================")
+        # print("====================================")
+        # print("Model has been saved...")
+        # print("====================================")
+        logger.info("Model has been saved...")
 
     def load(self):
         self.actor.load_state_dict(torch.load(self.args.model_load_dir + '_actor.pth'))
@@ -149,7 +154,8 @@ class TD3:
         self.critic_1_target.load_state_dict(torch.load(self.args.model_load_dir + '_critic_1_target.pth'))
         self.critic_2.load_state_dict(torch.load(self.args.model_load_dir + '_critic_2.pth'))
         self.critic_2_target.load_state_dict(torch.load(self.args.model_load_dir + '_critic_2_target.pth'))
-        print("====================================")
-        print("model has been loaded...")
-        print("====================================")
+        # print("====================================")
+        # print("model has been loaded...")
+        # print("====================================")
+        logger.info("model has been loaded...")
 

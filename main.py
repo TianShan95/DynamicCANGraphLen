@@ -82,27 +82,18 @@ def main():
         os.makedirs(log_out_dir, exist_ok=True)
 
     # 定义 并创建 log 文件
-    # log_out_file = log_out_dir + 'Rl_' + time_mark + '.txt'
     log_out_file = log_out_dir + 'Rl_' + time_mark + '.log'
 
     print(f'输出 log 文件路径: {log_out_file}')
 
     # 配置日志 输出格式
     handler = logging.FileHandler(log_out_file)
-    handler.setLevel(logging.INFO)
+    handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-
-    # logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
-    # handler = logging.FileHandler(log_out_file1)
-    # handler.setLevel(logging.DEBUG)
-    # handler.setFormatter(formatter)
-    # logger.addHandler(handler)
-
-    # with open(log_out_file, 'w+') as f:
-    #     f.write(f'{prog_args}\n')
-        # f.close()
+    # log 写入 参数
+    logger.info(f'{prog_args}')
 
     error = None  # 表示实验是否发生异常
     retrain = False  # 表示模型是否是从开开始训练 False: 从头训练 True: 继续训练
@@ -118,7 +109,7 @@ def main():
         # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
         graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
 
-        state, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, log_out_file)
+        state, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
 
         while True:
             action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 维度是 报文长度可选择数量
@@ -126,7 +117,7 @@ def main():
             graph_step += 1
             # 下个状态 奖励 是否完成
             len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-            next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can, logger)
+            next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
             # 累加 奖励
             ep_r += reward
             # 更新 状态
@@ -166,7 +157,7 @@ def main():
                 # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
                 graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
                 # 随机获取 初始状态
-                state, _ , _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, logger)
+                state, _ , _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
                 # print(f'随机得到的状态是 {state}')
                 # 记录 图模型 执行 步数
                 graph_step = 0
@@ -202,7 +193,7 @@ def main():
                         alter = random.randint(0, 4)
                         len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
 
-                    next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can, logger)
+                    next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
 
                     # 数据读取完毕 跳出本轮
                     if done:
@@ -229,7 +220,7 @@ def main():
         #             if i+1 % 10 == 0:
         #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))
                     if len(agent.memory.storage) >= prog_args.capacity-1:
-                        agent.update(10, log_out_file)  # 使用经验回放 更新网络
+                        agent.update(10)  # 使用经验回放 更新网络
 
                     # 更新 状态
                     state = next_state
@@ -246,13 +237,7 @@ def main():
                     #     agent.save()
                     #     break
                 # 跳出whileTrue 结束epoch 保存模型
-                print(f'epoch {i} over.')
                 agent.save(i, log_out_dir)
-                time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-                with open(log_out_file, 'a') as f:
-                    f.write(time_mark + '_END\n')
-                    # f.close()
-                print(f'epoch {i} END')
 
         except Exception as e:  # 捕捉所有异常
             print(f'发生异常 {e}')

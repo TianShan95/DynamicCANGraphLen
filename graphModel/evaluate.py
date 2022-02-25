@@ -2,9 +2,10 @@ import torch
 import numpy as np
 from torch.autograd import Variable
 import sklearn.metrics as metrics
+from utils.logger import logger
 
 
-def evaluate(dataset, model, args, logger, device):
+def evaluate(dataset, model, args, device):
 
     # 载入 模型参数
     model.eval()
@@ -20,7 +21,7 @@ def evaluate(dataset, model, args, logger, device):
         # 报文标签 输出到 log 文件
         # with open(log_out_file, 'a') as f:
         #     f.write(f'graph_label: {labels[batch_idx].astype(int)[0]}\n')
-        logger.info(f'graph_label: {labels[batch_idx].astype(int)[0]}')
+        # logger.info(f'graph_label: {labels[batch_idx].astype(int)[0]}')
 
         adj_pooled_list = []
         batch_num_nodes_list = []
@@ -60,13 +61,13 @@ def evaluate(dataset, model, args, logger, device):
         _, pre_label = torch.max(ypred, 1)
 
         ypred_np = ypred.cpu().detach().numpy()
-        print(f'ypred: {ypred_np} graph_label: {labels[batch_idx].astype(int)[0]} pred_result: {pre_label.item()} {labels[batch_idx].astype(int)[0] == pre_label.item()}')
+        logger.info(f'pred_result: {pre_label.item()}; {labels[batch_idx].astype(int)[0] == pre_label.item()}')
 
         # 制定 reward
         if pre_label == labels[batch_idx].astype(int)[0]:
             reward = abs(ypred_np[0, 0] - ypred[0, 1])
         else:
-            reward = - abs(ypred_np[0, 0] - ypred[0, 1]) * 1000  # 加大对错误的惩罚
+            reward = - abs(ypred_np[0, 0] - ypred[0, 1]) * 100  # 加大对错误的惩罚
 
 
     # preds = []
