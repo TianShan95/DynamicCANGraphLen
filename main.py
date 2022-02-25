@@ -95,7 +95,7 @@ def main():
     # logger = logging.getLogger(__name__)
     # console = logging.StreamHandler()
     handler.setLevel(logging.DEBUG)
-    # logger.addHandler(logging.StreamHandler())
+    logger.addHandler(handler)
 
     # with open(log_out_file, 'w+') as f:
     #     f.write(f'{prog_args}\n')
