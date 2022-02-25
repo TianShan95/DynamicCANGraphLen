@@ -207,13 +207,8 @@ def main():
                     ep_r += reward
                     if reward > 0:
                         pred_correct += 1
-                    # with open(log_out_file, 'a') as f:
-                    #     f.write("====================================\n")
-                    #     f.write(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
-
-                    logger.info(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
-
-                    # print(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
+                    # 结果写入 log
+                    logger.info(f'epoch: {i:3}; graph_step: {graph_step:8}; len_can: {len_can:3}; reward: {reward:.4f}; ep_r: {ep_r:.4f}; acc: {pred_correct/graph_step:.4f}')
 
                     # 存入 经验
                     agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))

@@ -61,7 +61,7 @@ def evaluate(dataset, model, args, device):
         _, pre_label = torch.max(ypred, 1)
 
         ypred_np = ypred.cpu().detach().numpy()
-        logger.info(f'pred_result: {pre_label.item()}; {labels[batch_idx].astype(int)[0] == pre_label.item()}')
+        logger.info(f'pred: {pre_label.item()}; {labels[batch_idx].astype(int)[0] == pre_label.item()}')
 
         # 制定 reward
         if pre_label == labels[batch_idx].astype(int)[0]:
