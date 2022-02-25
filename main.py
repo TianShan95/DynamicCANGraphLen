@@ -68,7 +68,7 @@ def main():
     # timestr = 'Fri Feb 25 17:35:08 CST 2022'
     while True:
         # python时间 和 系统时间 同步 退出
-        if abs(time.mktime(time.strptime(str(sys_cst_time), '%a %b %d %H:%M:%S CST %Y')) - time.time()) < 120:
+        if abs(time.mktime(time.strptime(sys_cst_time.strip('\n'), '%a %b %d %H:%M:%S CST %Y')) - time.time()) < 120:
             break
         time.sleep(0.5)
     print(f'python 时间同步完成')

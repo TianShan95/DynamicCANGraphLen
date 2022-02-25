@@ -11,8 +11,9 @@ time1 = time.strptime(timestr, '%a %b %d %H:%M:%S CST %Y')
 # print(f'time1: {time1}')
 # print(f'localtime: {time.localtime()}')
 # print(abs(time.time() - time.mktime(time1)))
-sys_cst_time = os.popen('date').read()
-print(str(sys_cst_time))
+sys_cst_time = os.popen('date').read().strip('\n')
+
+print(sys_cst_time)
 print('##')
 if abs(time.mktime(time.strptime(str(sys_cst_time), '%a %b %d %H:%M:%S CST %Y')) - time.time()) < 120:
     print('ok')
