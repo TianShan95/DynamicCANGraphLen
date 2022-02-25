@@ -3,6 +3,7 @@ import platform
 import numpy as np
 import torch
 import time
+import logging
 # 工程参数
 from args import arg_parse
 # 强化学习
@@ -45,11 +46,15 @@ Not the author's implementation !
 def main():
 
     # 如果系统是 linux 则对系统时区进行设置
-    # 避免日志文件中的日期有误
+    # 避免日志文件中的日期 不是大陆时区
     if platform.system().lower() == 'linux':
         print("linux")
         os.system("cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime")
         print(os.popen('date').read())
+
+    # 配置日志 输出格式
+    LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+    logging.basicConfig(filename='fileWriteTest1.txt', level=logging.DEBUG, format=LOG_FORMAT)
 
     agent = TD3(state_dim, action_dim, 1, prog_args)
     # 累加奖励
@@ -70,6 +75,7 @@ def main():
 
     with open(log_out_file, 'w+') as f:
         f.write(f'{prog_args}\n')
+        f.close()
 
     error = None  # 表示实验是否发生异常
     retrain = False  # 表示模型是否是从开开始训练 False: 从头训练 True: 继续训练
@@ -117,19 +123,22 @@ def main():
             print(f'加载模型 {prog_args.model_load_dir}')
             with open(log_out_file, 'a') as f:
                 f.write(f'加载模型... {prog_args.model_load_dir}\n')
-            agent.load()
+                f.close()
+            logging.info(f'加载模型... {prog_args.model_load_dir}\n')
+            agent.load()  # 载入模型
         else:
             with open(log_out_file, 'a') as f:
                 f.write(f'模型从头开始训练\n')
+                f.close()
+            logging.info(f'模型从头开始训练\n')
+
 
         try:
             for i in range(prog_args.train_epoch):  # epoch
 
-                print(f'epoch {i} 开始')
                 # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
                 graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
                 # 随机获取 初始状态
-                print(f'随机取的长度是 {graph_len_}')
                 state, _ , _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, log_out_file)
                 # print(f'随机得到的状态是 {state}')
                 # 记录 图模型 执行 步数
@@ -184,6 +193,8 @@ def main():
                         f.write("====================================\n")
                         f.write(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
+                    logging.info(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
+
                     print(f'epoch: {i}; graph_step: {graph_step}; len_can: {len_can}; reward: {reward}; ep_r: {ep_r}; acc: {pred_correct/graph_step:.4f}\n')
 
                     # 存入 经验
@@ -197,10 +208,11 @@ def main():
                     state = next_state
 
                     # # 短期退出 epoch 验证 程序可运行行
-                    # if graph_step > 20:
-                    #     print(f'大于 20步')
-                    #     print(f'i {i}')
-                    #     break
+                    if graph_step > 20:
+                        print(f'大于 20步')
+                        print(f'i {i}')
+                        raise Exception
+                        
 
                     # # 保存 模型
                     # if graph_step % args_RL.log_interval == 0:
@@ -212,6 +224,7 @@ def main():
                 time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
                 with open(log_out_file, 'a') as f:
                     f.write(time_mark + '_END\n')
+                    f.close()
                 print(f'epoch {i} END')
         except Exception as e:
             error = e
