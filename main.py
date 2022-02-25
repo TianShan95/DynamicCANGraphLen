@@ -15,7 +15,7 @@ from graphModel.task import Task
 from utils.utils import setup_seed
 from utils.packResult import packresult
 from utils.sendMail import send_email
-from utils.logger import logger
+# from utils.logger import logger
 # 警告处理
 import warnings
 warnings.filterwarnings('ignore')  # 忽略警告
@@ -90,11 +90,24 @@ def main():
     # LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    # logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(level=logging.INFO)
     handler = logging.FileHandler(log_out_file1)
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
+
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+
     logger.addHandler(handler)
+    logger.addHandler(console)
+
+    # logging.basicConfig(filename=log_out_file1, level=logging.DEBUG, format=LOG_FORMAT)
+    # handler = logging.FileHandler(log_out_file1)
+    # handler.setLevel(logging.DEBUG)
+    # handler.setFormatter(formatter)
+    # logger.addHandler(handler)
 
     # with open(log_out_file, 'w+') as f:
     #     f.write(f'{prog_args}\n')
