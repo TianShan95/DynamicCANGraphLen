@@ -176,7 +176,7 @@ def main():
                 # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
                 graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
                 # 随机获取 初始状态
-                state, _ , _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, log_out_file)
+                state, _ , _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_, logger)
                 # print(f'随机得到的状态是 {state}')
                 # 记录 图模型 执行 步数
                 graph_step = 0
@@ -212,7 +212,7 @@ def main():
                         alter = random.randint(0, 4)
                         len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
 
-                    next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can, log_out_file)
+                    next_state, reward, done = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can, logger)
 
                     # 数据读取完毕 跳出本轮
                     if done:
