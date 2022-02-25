@@ -2,19 +2,20 @@ import logging
 
 
 def mylogger():
-    LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+    # LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+    # logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
 
     logger = logging.getLogger(__name__)
     logger.setLevel(level=logging.INFO)
     # 输出到 文件
     # handler = logging.FileHandler("log.txt")
     # handler.setLevel(logging.DEBUG)
-    # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     # handler.setFormatter(formatter)
     # 输出到 屏幕
     console = logging.StreamHandler()
-    # console.setLevel(logging.DEBUG)
+    console.setLevel(logging.DEBUG)
+    console.setFormatter(formatter)
 
     # logger.addHandler(handler)
     logger.addHandler(console)
