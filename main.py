@@ -223,7 +223,7 @@ def main():
                     state = next_state
 
                     # # 短期退出 epoch 验证 程序可运行行
-                    if graph_step > 20:
+                    if graph_step > 200:
                         print(f'大于 20步')
                         print(f'i {i}')
                         raise Exception
