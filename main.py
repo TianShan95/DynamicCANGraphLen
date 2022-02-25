@@ -94,7 +94,7 @@ def main():
     # log 信息输出到 屏幕
     # logger = logging.getLogger(__name__)
     # console = logging.StreamHandler()
-    # console.setLevel(logging.DEBUG)
+    handler.setLevel(logging.DEBUG)
     # logger.addHandler(logging.StreamHandler())
 
     # with open(log_out_file, 'w+') as f:
