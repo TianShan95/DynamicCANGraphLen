@@ -50,7 +50,7 @@ def arg_parse():
             help='Maximum number of nodes (ignore graghs with nodes exceeding the number.')
 
     parser.add_argument('--graph_model_path',
-                        default='../experiment/graphSize_50_Normlize_True_20220221_105128_log/0.804806_model_totalEpoch_5_epoch_4_ps_10_gs_300_nor_1_gs_50.pth',
+                        default='../experiment/graphSize_50_Normlize_True_20220221_105128_log/model_gs_50.pth',
                         type=str)
     parser.add_argument('--num_workers', dest='num_workers', type=int,
             help='Number of workers to load processData.')
