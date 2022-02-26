@@ -18,8 +18,8 @@ def arg_parse():
 
     parser.add_argument('--learning_rate', default=3e-4, type=float)
     parser.add_argument('--gamma', default=0.99, type=int)  # discounted factor
-    parser.add_argument('--capacity', default=1000, type=int)  # replay buffer size
-    parser.add_argument('--batch_size', default=100, type=int)  # mini batch size
+    parser.add_argument('--capacity', default=1000, type=int)  # replay buffer size 1000
+    parser.add_argument('--batch_size', default=100, type=int)  # mini batch size  100
     parser.add_argument('--seed', default=1, type=int)
 
 
@@ -50,7 +50,7 @@ def arg_parse():
             help='Maximum number of nodes (ignore graghs with nodes exceeding the number.')
 
     parser.add_argument('--graph_model_path',
-                        default='../experiment/graphSize_50_Normlize_True_20220221_105128_log/0.804806_better_model_2022-02-21 11:03:28_totalEpoch_5_epoch_4_ps_10_gs_300_nor_1_gs_50.pth',
+                        default='../experiment/graphSize_50_Normlize_True_20220221_105128_log/0.804806_model_totalEpoch_5_epoch_4_ps_10_gs_300_nor_1_gs_50.pth',
                         type=str)
     parser.add_argument('--num_workers', dest='num_workers', type=int,
             help='Number of workers to load processData.')

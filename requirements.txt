@@ -1,2 +1,4 @@
+networkx
 tensorboardx
 scipy==1.6.0
+community

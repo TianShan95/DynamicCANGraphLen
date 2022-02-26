@@ -126,8 +126,8 @@ class TD3:
         self.num_critic_update_iteration += 1
         self.num_training += 1
         # 返回此次训练平均的 loss_Q1 loss_Q2
-        logger.info(f'loss_q1_list: {loss_q1_list}')
-        logger.info(f'loss_q2_list: {loss_q2_list}')
+        # logger.info(f'loss_q1_list: {loss_q1_list}')
+        # logger.info(f'loss_q2_list: {loss_q2_list}')
         return self.num_training, sum(loss_q1_list)/len(loss_q1_list), sum(loss_q2_list)/len(loss_q2_list)
 
     def save(self, epcoh, save_dir):

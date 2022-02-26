@@ -68,6 +68,8 @@ class Task:
 
         after_gcn_vector = None
         reward = 0
+        label = None
+        pred = None
         if not done:
             adj = nx.adjacency_matrix(sample_graph)  # 大图 邻接矩阵
             coarsen_graph = gp(adj.todense().astype(float), self.pool_sizes)  # 实例化 要进行塌缩的 图
