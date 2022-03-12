@@ -145,6 +145,7 @@ class TD3:
         logger.info("Model has been saved...")
 
     def load(self):
+        print(f'模型路径为: {self.args.model_load_dir}_')
         self.actor.load_state_dict(torch.load(self.args.model_load_dir + '_actor.pth'))
         self.actor_target.load_state_dict(torch.load(self.args.model_load_dir + '_actor_target.pth'))
         self.critic_1.load_state_dict(torch.load(self.args.model_load_dir + '_critic_1.pth'))
