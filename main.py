@@ -261,6 +261,11 @@ def main():
                         f'val_acc: {val_acc:<4.6f}')
             # 跳出whileTrue 结束epoch 保存模型
             # 如果此次的验证精度上升则保存模型
+
+            # 置位完成标识位
+            graph_task.origin_can_obj.train_done = False
+            graph_task.origin_can_obj.val_done = False
+
             if val_acc > last_val_acc:
                 agent.save(i, str('%.4f' % train_acc), log_out_dir)
 

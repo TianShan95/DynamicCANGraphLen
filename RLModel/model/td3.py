@@ -133,12 +133,12 @@ class TD3:
     def save(self, epcoh, val_acc, save_dir):
         import time
         time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-        torch.save(self.actor.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'_actor.pth')
-        torch.save(self.actor_target.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'_actor_target.pth')
-        torch.save(self.critic_1.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'_critic_1.pth')
-        torch.save(self.critic_1_target.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'_critic_1_target.pth')
-        torch.save(self.critic_2.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'_critic_2.pth')
-        torch.save(self.critic_2_target.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'critic_2_target.pth')
+        torch.save(self.actor.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+val_acc+'_'+time_mark+'_actor.pth')
+        torch.save(self.actor_target.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+val_acc+'_'+time_mark+'_actor_target.pth')
+        torch.save(self.critic_1.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+val_acc+'_'+time_mark+'_critic_1.pth')
+        torch.save(self.critic_1_target.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+val_acc+'_'+time_mark+'_critic_1_target.pth')
+        torch.save(self.critic_2.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+val_acc+'_'+time_mark+'_critic_2.pth')
+        torch.save(self.critic_2_target.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+val_acc+'_'+time_mark+'_critic_2_target.pth')
         # print("====================================")
         # print("Model has been saved...")
         # print("====================================")
