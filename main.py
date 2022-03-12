@@ -148,133 +148,133 @@ def main():
             logger.info(f'模型从头开始训练\n')
 
 
-        try:
-            for i in range(prog_args.train_epoch):  # epoch
+        # try:
+        for i in range(prog_args.train_epoch):  # epoch
 
-                # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
-                graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
-                # 随机获取 初始状态
-                state, _ , _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
-                # print(f'随机得到的状态是 {state}')
-                # 记录 图模型 执行 步数
-                graph_train_step = 0
-                graph_val_step = 0
-                # 记录正确预测的 报文 个数
-                pred_train_correct = 0
-                pred_val_correct = 0
-                last_val_acc = 0  # 记录上一轮的验证精度 如果精度上升则保存模型
-                train_acc = 0  # 训练精度
-                val_acc = 0  # 验证精度
+            # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
+            graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
+            # 随机获取 初始状态
+            state, _ , _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
+            # print(f'随机得到的状态是 {state}')
+            # 记录 图模型 执行 步数
+            graph_train_step = 0
+            graph_val_step = 0
+            # 记录正确预测的 报文 个数
+            pred_train_correct = 0
+            pred_val_correct = 0
+            last_val_acc = 0  # 记录上一轮的验证精度 如果精度上升则保存模型
+            train_acc = 0  # 训练精度
+            val_acc = 0  # 验证精度
 
-                while True:
+            while True:
 
-                    # 强化学习网络
-                    action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
-                    # action = action + np.random.normal(0.2, args_RL.exploration_noise, size=action.shape[0])  # 给强化学习的输出加入噪声
-                    # action = action.clip(env.action_space.low, env.action_space.high)
+                # 强化学习网络
+                action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
+                # action = action + np.random.normal(0.2, args_RL.exploration_noise, size=action.shape[0])  # 给强化学习的输出加入噪声
+                # action = action.clip(env.action_space.low, env.action_space.high)
 
-                    # 下个状态 奖励 是否完成
+                # 下个状态 奖励 是否完成
 
-                    len_can = 0
+                len_can = 0
+                # 选取 前5 个最大的可能里 选择报文数最大的
+                if prog_args.choice_graph_len_mode == 0:
+                    len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+                elif prog_args.choice_graph_len_mode == 1:
                     # 选取 前5 个最大的可能里 选择报文数最大的
-                    if prog_args.choice_graph_len_mode == 0:
-                        len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-                    elif prog_args.choice_graph_len_mode == 1:
-                        # 选取 前5 个最大的可能里 选择报文数最大的
-                        len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
-                    elif prog_args.choice_graph_len_mode == 2:
-                        # 在 前 5 个最大的可能里 随机选择一个报文长度
-                        alter = random.randint(0, 4)
-                        len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
+                    len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
+                elif prog_args.choice_graph_len_mode == 2:
+                    # 在 前 5 个最大的可能里 随机选择一个报文长度
+                    alter = random.randint(0, 4)
+                    len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
 
-                    next_state, reward, train_done, val_done, label, pred = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
+                next_state, reward, train_done, val_done, label, pred = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
 
-                    # 最后结束
-                    if val_done:
-                        agent.writer.add_scalar('ep_r', ep_r, global_step=i)
-                        # if i % args_RL.print_log == 0:
-                        #     print("Ep_i \t{}, the ep_r is \t{:0.2f}, the step is \t{}".format(i, ep_r, t))
-                        ep_r = 0
-                        break  # break true
+                # 最后结束
+                if val_done:
+                    agent.writer.add_scalar('ep_r', ep_r, global_step=i)
+                    # if i % args_RL.print_log == 0:
+                    #     print("Ep_i \t{}, the ep_r is \t{:0.2f}, the step is \t{}".format(i, ep_r, t))
+                    ep_r = 0
+                    break  # break true
 
-                    # 累加 奖励
-                    ep_r += reward
+                # 累加 奖励
+                ep_r += reward
 
-                    # 训练部分
-                    if not train_done:
-                        # 图操作 训练步数 自增 1
-                        graph_train_step += 1
-                        # 计数训练时 预测正确的个数
-                        if reward > 0:
-                            pred_train_correct += 1
-                        # 得到训练精度
-                        train_acc = pred_train_correct/graph_train_step
-                        # 结果写入 log
-                        logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
-                                    f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}; '
-                                    f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
-                                    f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; '
-                                    f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
+                # 训练部分
+                if not train_done:
+                    # 图操作 训练步数 自增 1
+                    graph_train_step += 1
+                    # 计数训练时 预测正确的个数
+                    if reward > 0:
+                        pred_train_correct += 1
+                    # 得到训练精度
+                    train_acc = pred_train_correct/graph_train_step
+                    # 结果写入 log
+                    logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
+                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}; '
+                                f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
+                                f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; '
+                                f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
 
-                        # 存入 经验
-                        agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(),
-                                           action, reward, np.float(train_done)))
-            #             if i+1 % 10 == 0:
-            #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))
-                        if len(agent.memory.storage) >= prog_args.capacity-1:
-                            train_times, avg_Q1_loss, avg_Q2_loss = agent.update(10)  # 使用经验回放 更新网络
+                    # 存入 经验
+                    agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(),
+                                       action, reward, np.float(train_done)))
+        #             if i+1 % 10 == 0:
+        #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))
+                    if len(agent.memory.storage) >= prog_args.capacity-1:
+                        train_times, avg_Q1_loss, avg_Q2_loss = agent.update(10)  # 使用经验回放 更新网络
 
-                    # 验证部分
-                    else:
-                        # 图操作 验证步数自增 1
-                        graph_val_step += 1
-                        # 计数训练时 预测正确的个数
-                        if reward > 0:
-                            pred_val_correct += 1
-                        # 得到验证精度
-                        val_acc = pred_val_correct/graph_val_step
-                        # 结果写入 log
-                        logger.info(f'epoch-val: {i:<3}; step: {graph_val_step:<6}; '
-                                    f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}; '
-                                    f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
-                                    f'acc: {val_acc:<4.2f}; ep_r: {ep_r:.2f}')
+                # 验证部分
+                else:
+                    # 图操作 验证步数自增 1
+                    graph_val_step += 1
+                    # 计数训练时 预测正确的个数
+                    if reward > 0:
+                        pred_val_correct += 1
+                    # 得到验证精度
+                    val_acc = pred_val_correct/graph_val_step
+                    # 结果写入 log
+                    logger.info(f'epoch-val: {i:<3}; step: {graph_val_step:<6}; '
+                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}; '
+                                f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
+                                f'acc: {val_acc:<4.2f}; ep_r: {ep_r:.2f}')
 
-                    # 更新 状态
-                    state = next_state
+                # 更新 状态
+                state = next_state
 
-                    # # 短期退出 epoch 验证 程序可运行行
-                    # if graph_step > 20:
-                    #     print(f'大于 20步')
-                    #     print(f'i {i}')
-                    #     break
-                    #     raise Exception
+                # # 短期退出 epoch 验证 程序可运行行
+                # if graph_step > 20:
+                #     print(f'大于 20步')
+                #     print(f'i {i}')
+                #     break
+                #     raise Exception
 
-                    # # 保存 模型
-                    # if graph_step % args_RL.log_interval == 0:
-                    #     agent.save()
-                    #     break
+                # # 保存 模型
+                # if graph_step % args_RL.log_interval == 0:
+                #     agent.save()
+                #     break
 
-                # 记录此次的训练精度 和 验证精度
-                logger.info(f'epoch-{i}-over '
-                            f'trian-times: {train_times}'
-                            f'train_acc: {train_acc:<4.6f} '
-                            f'val_acc: {val_acc:<4.6f}')
-                # 跳出whileTrue 结束epoch 保存模型
-                # 如果此次的验证精度上升则保存模型
-                if val_acc > last_val_acc:
-                    agent.save(i, str('%.4f' % train_acc), log_out_dir)
+            # 记录此次的训练精度 和 验证精度
+            logger.info(f'epoch-{i}-over '
+                        f'trian-times: {train_times}'
+                        f'train_acc: {train_acc:<4.6f} '
+                        f'val_acc: {val_acc:<4.6f}')
+            # 跳出whileTrue 结束epoch 保存模型
+            # 如果此次的验证精度上升则保存模型
+            if val_acc > last_val_acc:
+                agent.save(i, str('%.4f' % train_acc), log_out_dir)
 
-                # # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
-                # content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
-                #           f'epoch: {i}\n'\
-                #           f'retrain: {retrain}\n'
-                # resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
-                # send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers,
-                #            prog_args.smtp_server, prog_args.port, content, resultfile)
+            # # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
+            # content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
+            #           f'epoch: {i}\n'\
+            #           f'retrain: {retrain}\n'
+            # resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
+            # send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers,
+            #            prog_args.smtp_server, prog_args.port, content, resultfile)
 
-        except Exception as e:  # 捕捉所有异常
-            logger.info(f'发生异常 {e}')
-            error = e
+        # except Exception as e:  # 捕捉所有异常
+        #     logger.info(f'发生异常 {e}')
+        #     error = e
 
         # finally:
         #     # 异常信息写入 log
