@@ -26,8 +26,8 @@ def arg_parse():
     # 定义 并创建 此次实验的 log 文件夹
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
     # parser.add_argument('--model_store_dir', default='../rl_model_store/' + time_mark + '_', type=str)
-    parser.add_argument('--model_load_dir', default='', type=str)
-    parser.add_argument('--directory', default='../experiment/Rl_20220312_174654_multiDim_log/epoch_0_20220312_214619', type=str)
+    parser.add_argument('--model_load_dir', default='../experiment/Rl_20220312_174654_multiDim_log/epoch_0_20220312_214619', type=str)
+    parser.add_argument('--directory', default='../rl_model_log/', type=str)
 
     parser.add_argument('--out_dir', type=str,
                         help='out_dir', default='../experiment')  # 实验结果输出文件夹
