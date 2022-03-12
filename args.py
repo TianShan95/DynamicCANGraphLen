@@ -143,6 +143,7 @@ def arg_parse():
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
                         lr=0.001,
+                        train_ratio=0.8,
                         batch_size=64,  # 一个图的选择是一个动作
                         num_epochs=20,
                         num_workers=2,
