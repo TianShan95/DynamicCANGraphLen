@@ -30,8 +30,8 @@ class OriginCanData:
         self.point = 0  # 记录 此次取出的can数据 结束 位置
         self.data_total_len = len(self.df)
 
-        self.df_train = self.df[:int(self.data_total_len*args.train_ratio), :]
-        self.df_val = self.df[int(self.data_total_len*args.train_ratio):, :]
+        self.df_train = self.df.iloc[:int(self.data_total_len*args.train_ratio), :]
+        self.df_val = self.df.iloc[int(self.data_total_len*args.train_ratio):, :]
 
         self.train_done = False
         self.val_done = False
