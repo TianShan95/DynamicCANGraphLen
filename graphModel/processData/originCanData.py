@@ -33,6 +33,9 @@ class OriginCanData:
         self.df_train = self.df.iloc[:int(self.data_total_len*args.train_ratio), :]
         self.df_val = self.df.iloc[int(self.data_total_len*args.train_ratio):, :]
 
+        self.data_train_len = len(self.df_train)
+        self.data_val_len = len(self.df_val)
+
         self.train_done = False
         self.val_done = False
 

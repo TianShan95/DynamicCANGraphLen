@@ -211,7 +211,7 @@ def main():
                     train_acc = pred_train_correct/graph_train_step
                     # 结果写入 log
                     logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
-                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}; '
+                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_train_len}; '
                                 f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
                                 f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; '
                                 f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
@@ -235,7 +235,7 @@ def main():
                     val_acc = pred_val_correct/graph_val_step
                     # 结果写入 log
                     logger.info(f'epoch-val: {i:<3}; step: {graph_val_step:<6}; '
-                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}; '
+                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_val_len}; '
                                 f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
                                 f'acc: {val_acc:<4.2f}; ep_r: {ep_r:.2f}')
 
