@@ -56,11 +56,20 @@ def main():
 
     # 如果系统是 linux 则对系统时区进行设置
     # 避免日志文件中的日期 不是大陆时区
-    if platform.system().lower() == 'linux':
-        print("linux")
-        os.system("cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime")
-        sys_cst_time = os.popen('date').read()
-        print(f'系统时间: {sys_cst_time}')
+    # if platform.system().lower() == 'linux':
+    #     print("linux")
+    #     os.system("cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime")
+    #     sys_cst_time = os.popen('date').read()
+    #     print(f'系统时间: {sys_cst_time}')
+    # 授时之后 系统时间更改 但是python获取的时间会有延迟
+    # 验证时间 python 取到的时间是否和系统相符
+    # timestr = 'Fri Feb 25 17:35:08 CST 2022'
+    # while True:
+    #     # python时间 和 系统时间 同步 退出
+    #     if abs(time.mktime(time.strptime(sys_cst_time.strip('\n'), '%a %b %d %H:%M:%S CST %Y')) - time.time()) < 120:
+    #         break
+    #     time.sleep(0.5)
+    # print(f'python 时间同步完成')
 
     agent = TD3(state_dim, action_dim, 1, prog_args)
     # 累加奖励
@@ -68,16 +77,6 @@ def main():
     # 实例化 图任务
     graph_task = Task(prog_args, device)
     pred_hidden_dims = [int(i) for i in prog_args.pred_hidden.split('_')]
-
-    # 授时之后 系统时间更改 但是python获取的时间会有延迟
-    # 验证时间 python 取到的时间是否和系统相符
-    # timestr = 'Fri Feb 25 17:35:08 CST 2022'
-    while True:
-        # python时间 和 系统时间 同步 退出
-        if abs(time.mktime(time.strptime(sys_cst_time.strip('\n'), '%a %b %d %H:%M:%S CST %Y')) - time.time()) < 120:
-            break
-        time.sleep(0.5)
-    print(f'python 时间同步完成')
 
     # 定义此次实验的 log 文件夹
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
@@ -136,22 +135,16 @@ def main():
             #     break
 
     elif prog_args.mode == 'train':
-        print("====================================")
-        print("Collection Experience...")
-        print("====================================")
+        logger.info("====================================")
+        logger.info("Collection Experience...")
+        logger.info("====================================")
 
         # 若指定 载入模型参数 则 载入
         if prog_args.load:
             print(f'加载模型 {prog_args.model_load_dir}')
-            with open(log_out_file, 'a') as f:
-                f.write(f'加载模型... {prog_args.model_load_dir}\n')
-                # f.close()
             logger.info(f'加载模型... {prog_args.model_load_dir}\n')
             agent.load()  # 载入模型
         else:
-            with open(log_out_file, 'a') as f:
-                f.write(f'模型从头开始训练\n')
-                # f.close()
             logger.info(f'模型从头开始训练\n')
 
 
@@ -161,28 +154,25 @@ def main():
                 # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
                 graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
                 # 随机获取 初始状态
-                state, _ , _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
+                state, _ , _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
                 # print(f'随机得到的状态是 {state}')
                 # 记录 图模型 执行 步数
-                graph_step = 0
+                graph_train_step = 0
+                graph_val_step = 0
                 # 记录正确预测的 报文 个数
-                pred_correct = 0
-                # print('### main.py state.shape ###', state.shape)
-                # for t in range(1):
+                pred_train_correct = 0
+                pred_val_correct = 0
+                last_val_acc = 0  # 记录上一轮的验证精度 如果精度上升则保存模型
+                train_acc = 0  # 训练精度
+                val_acc = 0  # 验证精度
 
                 while True:
 
                     # 强化学习网络
-                    print("====================================" * 3)
                     action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
                     # action = action + np.random.normal(0.2, args_RL.exploration_noise, size=action.shape[0])  # 给强化学习的输出加入噪声
                     # action = action.clip(env.action_space.low, env.action_space.high)
-                    # print('### main.py action.shape ###', action.shape)
-                    # print(f'action: {action}')
-                    # print(action)
 
-                    # 图操作 步数 自增 1
-                    graph_step += 1
                     # 下个状态 奖励 是否完成
 
                     len_can = 0
@@ -197,10 +187,10 @@ def main():
                         alter = random.randint(0, 4)
                         len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
 
-                    next_state, reward, done, label, pred = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
+                    next_state, reward, train_done, val_done, label, pred = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
 
-                    # 数据读取完毕 跳出本轮
-                    if done:
+                    # 最后结束
+                    if val_done:
                         agent.writer.add_scalar('ep_r', ep_r, global_step=i)
                         # if i % args_RL.print_log == 0:
                         #     print("Ep_i \t{}, the ep_r is \t{:0.2f}, the step is \t{}".format(i, ep_r, t))
@@ -209,17 +199,45 @@ def main():
 
                     # 累加 奖励
                     ep_r += reward
-                    if reward > 0:
-                        pred_correct += 1
-                    # 结果写入 log
-                    logger.info(f'epoch: {i:<3}; step: {graph_step:<6}; schedule: {done} {graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}; label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; acc: {pred_correct/graph_step:<4.1f}; trainTimes: {train_times}; avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
 
-                    # 存入 经验
-                    agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(), action, reward, np.float(done)))
-        #             if i+1 % 10 == 0:
-        #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))
-                    if len(agent.memory.storage) >= prog_args.capacity-1:
-                        train_times, avg_Q1_loss, avg_Q2_loss = agent.update(10)  # 使用经验回放 更新网络
+                    # 训练部分
+                    if not train_done:
+                        # 图操作 训练步数 自增 1
+                        graph_train_step += 1
+                        # 计数训练时 预测正确的个数
+                        if reward > 0:
+                            pred_train_correct += 1
+                        # 得到训练精度
+                        train_acc = pred_train_correct/graph_train_step
+                        # 结果写入 log
+                        logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
+                                    f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}; '
+                                    f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
+                                    f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; '
+                                    f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
+
+                        # 存入 经验
+                        agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(),
+                                           action, reward, np.float(train_done)))
+            #             if i+1 % 10 == 0:
+            #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))
+                        if len(agent.memory.storage) >= prog_args.capacity-1:
+                            train_times, avg_Q1_loss, avg_Q2_loss = agent.update(10)  # 使用经验回放 更新网络
+
+                    # 验证部分
+                    else:
+                        # 图操作 验证步数自增 1
+                        graph_val_step += 1
+                        # 计数训练时 预测正确的个数
+                        if reward > 0:
+                            pred_val_correct += 1
+                        # 得到验证精度
+                        val_acc = pred_val_correct/graph_val_step
+                        # 结果写入 log
+                        logger.info(f'epoch-val: {i:<3}; step: {graph_val_step:<6}; '
+                                    f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}; '
+                                    f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
+                                    f'acc: {val_acc:<4.2f}; ep_r: {ep_r:.2f}')
 
                     # 更新 状态
                     state = next_state
@@ -235,52 +253,59 @@ def main():
                     # if graph_step % args_RL.log_interval == 0:
                     #     agent.save()
                     #     break
-                # 跳出whileTrue 结束epoch 保存模型
-                agent.save(i, log_out_dir)
 
-                # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
-                content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
-                          f'epoch: {i}\n'\
-                          f'retrain: {retrain}\n'
-                resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
-                send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers,
-                           prog_args.smtp_server, prog_args.port, content, resultfile)
+                # 记录此次的训练精度 和 验证精度
+                logger.info(f'epoch-{i}-over '
+                            f'trian-times: {train_times}'
+                            f'train_acc: {train_acc:<4.6f} '
+                            f'val_acc: {val_acc:<4.6f}')
+                # 跳出whileTrue 结束epoch 保存模型
+                # 如果此次的验证精度上升则保存模型
+                if val_acc > last_val_acc:
+                    agent.save(i, str('%.4f' % train_acc), log_out_dir)
+
+                # # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
+                # content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
+                #           f'epoch: {i}\n'\
+                #           f'retrain: {retrain}\n'
+                # resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
+                # send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers,
+                #            prog_args.smtp_server, prog_args.port, content, resultfile)
 
         except Exception as e:  # 捕捉所有异常
             logger.info(f'发生异常 {e}')
             error = e
 
-        finally:
-            # 异常信息写入 log
-            logger.warning(f'error: {error}')
-            # 程序执行失败信息写入 log
-            traceback.print_exc()
-            logger.warning(f"执行失败信息: {traceback.format_exc()}")
-            # 无论实验是否执行完毕 都把结果发送邮件
-            # 跑完所有的 epoch 打包实验结果 返回带 .zip 的文件路径
-            print(f'正在打包结果文件夹  {log_out_dir}')
-            agent.save(i, log_out_dir)  # 保存 最新的模型参数
-            resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
-            print(f'打包完毕')
-            # 发送邮件
-            print(f'正在发送邮件...')
-            content = f'platform: {prog_args.gpu_device}\n'\
-                      f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
-                      f'retrain: {retrain}\n' \
-                      f'schedule: {graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}\n' \
-                      f'done: {done}\n'\
-                      f'error: {error}\n'
-
-            send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers, prog_args.smtp_server, prog_args.port, content,resultfile)
-            print(f'发送邮件完毕')
-
-            # 如果是在 share_gpu 上运行的 把数据都拷贝到 oss 个人数据下
-            if prog_args.gpu_device == 'share_gpu':
-                # 全部打包
-                resultfile = packresult(log_out_dir[:-1], i, allfile=True)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
-                os.system(f"oss cp {resultfile} oss://backup/")
-                print('关机...')
-                os.system('/root/upload.sh')
+        # finally:
+        #     # 异常信息写入 log
+        #     logger.warning(f'error: {error}')
+        #     # 程序执行失败信息写入 log
+        #     traceback.print_exc()
+        #     logger.warning(f"执行失败信息: {traceback.format_exc()}")
+        #     # 无论实验是否执行完毕 都把结果发送邮件
+        #     # 跑完所有的 epoch 打包实验结果 返回带 .zip 的文件路径
+        #     print(f'正在打包结果文件夹  {log_out_dir}')
+        #     agent.save(i, log_out_dir)  # 保存 最新的模型参数
+        #     resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
+        #     print(f'打包完毕')
+        #     # 发送邮件
+        #     print(f'正在发送邮件...')
+        #     content = f'platform: {prog_args.gpu_device}\n'\
+        #               f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
+        #               f'retrain: {retrain}\n' \
+        #               f'schedule: {graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_total_len}\n' \
+        #               f'error: {error}\n'
+        #
+        #     send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers, prog_args.smtp_server, prog_args.port, content,resultfile)
+        #     print(f'发送邮件完毕')
+        #
+        #     # 如果是在 share_gpu 上运行的 把数据都拷贝到 oss 个人数据下
+        #     if prog_args.gpu_device == 'share_gpu':
+        #         # 全部打包
+        #         resultfile = packresult(log_out_dir[:-1], i, allfile=True)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
+        #         os.system(f"oss cp {resultfile} oss://backup/")
+        #         print('关机...')
+        #         os.system('/root/upload.sh')
 
 
     else:

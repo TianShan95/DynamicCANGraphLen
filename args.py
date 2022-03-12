@@ -43,14 +43,17 @@ def arg_parse():
     # parser.add_argument('--noise_clip', default=0.5, type=float)  # 噪声相关
     # parser.add_argument('--exploration_noise', default=0.1, type=float)  # 对于强化学习输出的 选择can长度加入噪声
 
-
+    parser.add_argument('--train-ratio', dest='train_ratio', type=float,
+                        help='Ratio of number of graphs training set to all graphs.')
+    parser.add_argument('--test-ratio', dest='test_ratio', type=float,
+                        help='Ratio of number of graphs testing set to all graphs.')
 
     # 图网络部分
     parser.add_argument('--max-nodes', dest='max_nodes', type=int,
             help='Maximum number of nodes (ignore graghs with nodes exceeding the number.')
 
     parser.add_argument('--graph_model_path',
-                        default='../experiment/graphSize_50_Normlize_True_20220221_105128_log/model_gs_50.pth',
+                        default='../experiment/20220311_215200_randGen_1_Normlize_True_concat_1_log/0.85_better_model__totalEpoch_300_epoch_78_ps_10_nor_1.pth',
                         type=str)
     parser.add_argument('--num_workers', dest='num_workers', type=int,
             help='Number of workers to load processData.')

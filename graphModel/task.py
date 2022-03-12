@@ -64,13 +64,14 @@ class Task:
         # 传入 的 rl_action 是一个强化学习传入的 288 维的向量（can 数据长度有 288 种选择） 若想知道传入的长度需要取 argmax
 
     
-        sample_graph, done = self.origin_can_obj.get_ds_a(len_can)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
+        sample_graph, train_done, val_done = self.origin_can_obj.get_ds_a(len_can)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
 
         after_gcn_vector = None
         reward = 0
         label = None
         pred = None
-        if not done:
+        # val_done 是最后的结束标志
+        if not val_done:
             adj = nx.adjacency_matrix(sample_graph)  # 大图 邻接矩阵
             coarsen_graph = gp(adj.todense().astype(float), self.pool_sizes)  # 实例化 要进行塌缩的 图
             coarsen_graph.coarsening_pooling(self.args.normalize)  # 进行 图 塌缩
@@ -88,5 +89,5 @@ class Task:
             after_gcn_vector, reward, label, pred = evaluate(train_data, self.model, self.args, device=self.device)
 
 
-        return after_gcn_vector, reward, done, label, pred
+        return after_gcn_vector, reward, train_done, val_done, label, pred
 

@@ -29,14 +29,25 @@ class OriginCanData:
 
         self.point = 0  # 记录 此次取出的can数据 结束 位置
         self.data_total_len = len(self.df)
+
+        self.df_train = self.df[:self.data_total_len*args.train_ratio, :]
+        self.df_val = self.df[self.data_total_len*args.train_ratio:, :]
+
+        self.train_done = False
+        self.val_done = False
+
         # print(self.df.head())
         # print(self.df.tail())
 
     def get_ds_a(self, len_can):
 
-        done = False
+        # done = False
         graph = None
-        df = self.df.iloc[self.point:self.point+len_can, :]  # 取出 特定长度 的can报文
+
+        if self.train_done:
+            df = self.df_val.iloc[self.point:self.point + len_can, :]  # 从验证can报文 取出 特定长度 的 验证 can报文
+        else:
+            df = self.df_train.iloc[self.point:self.point+len_can, :]  # 从训练can报文 取出 特定长度 的 训练 can报文
 
         # 图相关
         graph_label = 0  # 标识图标签 0：正常报文 1：入侵报文
@@ -67,12 +78,19 @@ class OriginCanData:
             except IndexError:
                 # print(i)
                 # print('can报文 文件读取完毕')
-                done = True
+                # done = True
+                if not self.train_done:
+                    # 训练阶段完成 置标志位 把报文指针置0
+                    self.point = 0
+                    self.train_done = True
+                else:
+                    self.val_done = True
+
                 break
 
         # print(f'节点数: {len(hex2num_dict)}')
 
-        if not done:
+        if not self.val_done:
             # 节点从0编号结束 打印一下 字典
             # print(f'节点ID和节点编号对应关系: {hex2num_dict}')
             # print(f'此图具有的节点个数为: {len(hex2num_dict)}')
@@ -156,10 +174,8 @@ class OriginCanData:
 
             graph = nx.relabel_nodes(graph, mapping)
 
-        else:
-            self.point = 0
 
-        return graph, done
+        return graph, self.train_done, self.val_done
 
     def test(self, can_len):
         df = self.df.iloc[179346:179349, :]  # 取出 特定长度 的can报文

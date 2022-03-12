@@ -69,13 +69,26 @@ import re
 #
 # print(f'{3.14:<10.3g}')
 
-mylist = []
-x = [1, 2, 3]
+# mylist = []
+# x = [1, 2, 3]
+#
+# a = 1
+# mylist.append(a)
+# x[0] = 3
+# a = 2
+# mylist.append(a)
+# print(mylist)
+# from pandas import Series, DataFrame
+# import pandas as pd
+#
+# data = {'水果': Series(['苹果', '梨', '草莓', '葡萄', '香蕉']),
+#         '数量': Series([3, 2, 5, 7, 9]),
+#         '价格': Series([10, 9, 8, 4, 2])}
+# df = DataFrame(data)
+# df_train = df.iloc[:20, :]
+# # df_val = df.iloc[2:, :]
+# print(df)
+# print(df_train)
+# print(df_val)
 
-a = 1
-mylist.append(a)
-x[0] = 3
-a = 2
-mylist.append(a)
-print(mylist)
-
+print('%.4f' % 3.1415926)

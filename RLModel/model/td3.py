@@ -130,7 +130,7 @@ class TD3:
         # logger.info(f'loss_q2_list: {loss_q2_list}')
         return self.num_training, sum(loss_q1_list)/len(loss_q1_list), sum(loss_q2_list)/len(loss_q2_list)
 
-    def save(self, epcoh, save_dir):
+    def save(self, epcoh, val_acc, save_dir):
         import time
         time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
         torch.save(self.actor.state_dict(), save_dir+'epoch_'+str(epcoh)+"_"+time_mark+'_actor.pth')
