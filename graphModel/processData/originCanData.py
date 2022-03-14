@@ -86,6 +86,7 @@ class OriginCanData:
                     # 训练阶段完成 置标志位 把报文指针置0
                     self.point = 0
                     self.train_done = True
+                    self.get_ds_a(len_can)
                 else:
                     self.val_done = True
 
