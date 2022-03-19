@@ -53,8 +53,11 @@ def arg_parse():
     parser.add_argument('--max-nodes', dest='max_nodes', type=int,
             help='Maximum number of nodes (ignore graghs with nodes exceeding the number.')
 
+    # parser.add_argument('--graph_model_path',
+    #                     default='../experiment/20220311_215200_randGen_1_Normlize_True_concat_1_log/0.85_better_model__totalEpoch_300_epoch_78_ps_10_nor_1.pth',
+    #                     type=str)
     parser.add_argument('--graph_model_path',
-                        default='../experiment/20220311_215200_randGen_1_Normlize_True_concat_1_log/0.85_better_model__totalEpoch_300_epoch_78_ps_10_nor_1.pth',
+                        default='',
                         type=str)
     parser.add_argument('--num_workers', dest='num_workers', type=int,
             help='Number of workers to load processData.')
@@ -139,7 +142,9 @@ def arg_parse():
     # 显卡平台选择 涉及数据保存
     parser.add_argument('--gpu_device', type=str,
                         help='gpu platform', default="colab")  # colab or share_gpu
-
+    parser.add_argument('--nobn', dest='bn', action='store_const',
+            const=False, default=True,
+            help='Whether batch normalization is used')
 
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
@@ -147,9 +152,9 @@ def arg_parse():
                         clip=2.0,
                         train_ratio=0.8,
                         batch_size=64,  # 一个图的选择是一个动作
-                        num_epochs=20,
+                        train_epoch=20,
                         num_workers=2,
-                        input_dim=10,
+                        input_dim=81,
                         hidden_dim=20,
                         output_dim=20,
                         num_classes=2,  # 正常报文和入侵报文

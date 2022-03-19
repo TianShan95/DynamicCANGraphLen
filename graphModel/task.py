@@ -4,7 +4,7 @@ from graphModel.train import train
 
 import networkx as nx
 from graphModel.coarsen_pooling_with_last_eigen_padding import Graphs as gp
-# from graphModel import encoders
+from graphModel import encoders
 # import graphModel.gen.feat as featgen
 import numpy as np
 from graphModel.processData import originCanData
@@ -12,6 +12,7 @@ import torch
 import hiddenlayer as hl
 # import matplotlib.pyplot as plt
 import os
+from utils.logger import logger
 
 
 class Task:
@@ -20,31 +21,42 @@ class Task:
         self.args = args
         self.pool_sizes = [int(i) for i in self.args.pool_sizes.split('_')]  # 池化时 每个簇的 子图大小
         # 从指定路径 load 模型
-        print(f'模型所在路径: {args.graph_model_path}')
-        print(f'模型是否存在: {os.path.isfile(args.graph_model_path)}')
+        logger.info(f'模型所在路径: {args.graph_model_path}')
+        logger.info(f'模型是否存在: {os.path.isfile(args.graph_model_path)}')
 
         self.device = device
 
-        if device == 'cpu':
-            self.model = torch.load(args.graph_model_path, map_location=torch.device('cpu'))  # 模型 变量 会在 benchmark_task_val 首次调用时定义
-            # 模型加载参数
-            match_string_len = len("model")
-            # 模型加载 参数
-            last_char_index = args.graph_model_path.rfind("model")
-            net_state_dict = torch.load(args.graph_model_path[:last_char_index] +
-                                        "para" + args.graph_model_path[last_char_index+match_string_len:],
-                                        map_location=torch.device('cpu'))
-            self.model.load_state_dict(net_state_dict)
+        if args.graph_model_path:
+            if device == 'cpu':
+                self.model = torch.load(args.graph_model_path, map_location=torch.device('cpu'))  # 模型 变量 会在 benchmark_task_val 首次调用时定义
+                # 模型加载参数
+                match_string_len = len("model")
+                # 模型加载 参数
+                last_char_index = args.graph_model_path.rfind("model")
+                net_state_dict = torch.load(args.graph_model_path[:last_char_index] +
+                                            "para" + args.graph_model_path[last_char_index+match_string_len:],
+                                            map_location=torch.device('cpu'))
+                self.model.load_state_dict(net_state_dict)
 
-        elif device == 'cuda':
-            self.model = torch.load(args.graph_model_path)  # 模型 变量 会在 benchmark_task_val 首次调用时定义
-            # 模型加载参数
-            match_string_len = len("model")
-            # 模型加载 参数
-            last_char_index = args.graph_model_path.rfind("model")
-            net_state_dict = torch.load(args.graph_model_path[:last_char_index] +
-                                        "para" + args.graph_model_path[last_char_index + match_string_len:])
-            self.model.load_state_dict(net_state_dict)
+            elif device == 'cuda':
+                self.model = torch.load(args.graph_model_path)  # 模型 变量 会在 benchmark_task_val 首次调用时定义
+                # 模型加载参数
+                match_string_len = len("model")
+                # 模型加载 参数
+                last_char_index = args.graph_model_path.rfind("model")
+                net_state_dict = torch.load(args.graph_model_path[:last_char_index] +
+                                            "para" + args.graph_model_path[last_char_index + match_string_len:])
+                self.model.load_state_dict(net_state_dict)
+        else:
+            logger.info('============= 图模型从头训练 =================')
+            pool_sizes = [int(i) for i in args.pool_sizes.split('_')]
+            pred_hidden_dims = [int(i) for i in args.pred_hidden.split('_')]
+            self.model = encoders.WavePoolingGcnEncoder(args.input_dim, args.hidden_dim, args.output_dim,
+                                                        args.num_classes, args.num_gc_layers, args.num_pool_matrix,
+                                                        args.num_pool_final_matrix, pool_sizes=pool_sizes,
+                                                        pred_hidden_dims=pred_hidden_dims,
+                                                        concat=args.concat, bn=args.bn,
+                                                        dropout=args.dropout, mask=args.mask, args=args, device=device)
 
         # 定义优化器
         self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.lr, weight_decay=args.weight_decay)
@@ -101,8 +113,6 @@ class Task:
                 # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
                 # 在进行表示学习时 进行模型更新
                 after_gcn_vector, reward, label, pred, graph_loss = train(train_data, self.model, self.args, self.optimizer, device=self.device)
-
-
 
 
         return after_gcn_vector, reward, train_done, val_done, label, pred, graph_loss
