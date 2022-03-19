@@ -154,7 +154,7 @@ def main():
             # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
             graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
             # 随机获取 初始状态
-            state, _ , _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
+            state, _ , _, _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
             # print(f'随机得到的状态是 {state}')
             # 记录 图模型 执行 步数
             graph_train_step = 0
@@ -187,7 +187,7 @@ def main():
                     alter = random.randint(0, 4)
                     len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
 
-                next_state, reward, train_done, val_done, label, pred = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
+                next_state, reward, train_done, val_done, label, pred, graph_loss = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
 
                 # 最后结束
                 if val_done:
@@ -213,7 +213,7 @@ def main():
                     logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
                                 f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_train_len}; '
                                 f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
-                                f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; '
+                                f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; g_loss: {graph_loss:<8.6f}; '
                                 f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
 
                     # 存入 经验
@@ -223,6 +223,12 @@ def main():
         #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))
                     if len(agent.memory.storage) >= prog_args.capacity-1:
                         train_times, avg_Q1_loss, avg_Q2_loss = agent.update(10)  # 使用经验回放 更新网络
+
+
+                    # 实时绘制 图神经网络的loss曲线
+                    graph_task.history1.log((i, graph_train_step), graph_train_loss=graph_loss)
+                    with graph_task.canvas1:
+                        graph_task.canvas1.draw_plot(graph_task.history1["graph_train_loss"])
 
                 # 验证部分
                 else:
@@ -267,7 +273,13 @@ def main():
             graph_task.origin_can_obj.val_done = False
 
             if val_acc > last_val_acc:
+                # 保存强化学习模型
                 agent.save(i, str('%.4f' % train_acc), log_out_dir)
+                # 保存图模型
+                graph_model_path = log_out_dir + str(i) + '_graph_model.pth'
+                graph_model_para_path = log_out_dir + str(i) + '_graph_model_para.pth'
+                torch.save(graph_task.model, graph_model_path)
+                torch.save(graph_task.model.state_dict(), graph_model_para_path)
 
             # # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
             # content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \

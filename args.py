@@ -21,7 +21,8 @@ def arg_parse():
     parser.add_argument('--capacity', default=1000, type=int)  # replay buffer size 1000
     parser.add_argument('--batch_size', default=100, type=int)  # mini batch size  100
     parser.add_argument('--seed', default=1, type=int)
-
+    parser.add_argument('--clip', dest='clip', type=float,
+            help='Gradient clipping.')
 
     # 定义 并创建 此次实验的 log 文件夹
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
@@ -143,6 +144,7 @@ def arg_parse():
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
                         lr=0.001,
+                        clip=2.0,
                         train_ratio=0.8,
                         batch_size=64,  # 一个图的选择是一个动作
                         num_epochs=20,

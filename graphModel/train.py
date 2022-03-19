@@ -1,29 +1,25 @@
 import torch
-import numpy as np
+import time
 from torch.autograd import Variable
-import sklearn.metrics as metrics
-from utils.logger import logger
+import torch.nn as nn
 
 
-def evaluate(dataset, model, args, device):
+def train(dataset, model, args, optimizer, mask_nodes=True, log_dir=None, device='cpu'):
 
-    # 载入 模型参数
-    model.eval()
-    # labels = []
-    after_gcn_vector = None
-    reward = 0
+    model.train()
+
     for batch_idx, data in enumerate(dataset):
+
+        # 模型 梯度 置0
+        model.zero_grad()
+
         adj = Variable(data['adj'].float(), requires_grad=False).to(device)
-        h0 = Variable(data['feats'].float()).to(device)
+        h0 = Variable(data['feats'].float(), requires_grad=False).to(device)
         label = Variable(data['label'].long()).to(device)
+        batch_num_nodes = data['num_nodes'].int().numpy() if mask_nodes else None
+        # assign_input = Variable(data['assign_feats'].float(), requires_grad=False).to(device)
 
-        batch_num_nodes = data['num_nodes'].int().numpy()
-
-        # 报文标签 输出到 log 文件
-        # with open(log_out_file, 'a') as f:
-        #     f.write(f'graph_label: {labels[batch_idx].astype(int)[0]}\n')
-        # logger.info(f'graph_label: {labels[batch_idx].astype(int)[0]}')
-
+        # if args.method == 'wave':
         adj_pooled_list = []
         batch_num_nodes_list = []
         pool_matrices_dic = dict()
@@ -53,32 +49,36 @@ def evaluate(dataset, model, args, device):
 
             pool_matrices_dic[ind] = pool_matrices_list
 
-        # print(f'h0.shape {h0.shape})')
-        # print(f'adj.shape {adj.shape})')
-        ypred, after_gcn_vector = model(h0, adj, adj_pooled_list, batch_num_nodes, batch_num_nodes_list, pool_matrices_dic)
 
+        ypred, after_gcn_vector = model(h0, adj, adj_pooled_list, batch_num_nodes, batch_num_nodes_list, pool_matrices_dic)
         # else:
         #     ypred = model(h0, adj, batch_num_nodes, assign_x=assign_input)
+        # if not args.method == 'soft-assign' or not args.linkpred:
+        loss = model.loss(ypred, label)
+        # else:
+        #     loss = model.loss(ypred, label, adj, batch_num_nodes)
+        loss.backward()
+
+
+        nn.utils.clip_grad_norm(model.parameters(), args.clip)
+        optimizer.step()
+
         _, pre_label = torch.max(ypred, 1)
 
         ypred_np = ypred.cpu().detach().numpy()
         # logger.info(f'pred: {pre_label.item()}; {labels[batch_idx].astype(int)[0] == pre_label.item()}')
 
         # 制定 reward
+        # print(f'pre_label: {pre_label.item()}')
+        # print(f'label: {label.item()}')
+
+
         if pre_label == label:
             reward = abs(ypred_np[0, 0] - ypred[0, 1])
         else:
             reward = - abs(ypred_np[0, 0] - ypred[0, 1]) * 100  # 加大对错误的惩罚
 
+        # print(f'reward: {reward}')
+        # raise IOError
 
-    # preds = []
-    # preds.append(indices.cpu().data.numpy())
-    # labels = np.hstack(labels)
-    # preds = np.hstack(preds)
-    #
-    # result = {'prec': metrics.precision_score(labels, preds, average='macro'),
-    #           'recall': metrics.recall_score(labels, preds, average='macro'),
-    #           'acc': metrics.accuracy_score(labels, preds),
-    #           'F1': metrics.f1_score(labels, preds, average="micro")}
-        return after_gcn_vector, reward, label.item(), pre_label.item()
-
+        return  after_gcn_vector, reward, label.item(), pre_label.item(), loss.item()

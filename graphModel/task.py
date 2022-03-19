@@ -1,14 +1,16 @@
 from graphModel.processData.prepare_data import prepare_data
 from graphModel.evaluate import evaluate
+from graphModel.train import train
+
 import networkx as nx
 from graphModel.coarsen_pooling_with_last_eigen_padding import Graphs as gp
-from graphModel import encoders
-import graphModel.gen.feat as featgen
+# from graphModel import encoders
+# import graphModel.gen.feat as featgen
 import numpy as np
 from graphModel.processData import originCanData
 import torch
-# import hiddenlayer as hl
-import matplotlib.pyplot as plt
+import hiddenlayer as hl
+# import matplotlib.pyplot as plt
 import os
 
 
@@ -44,6 +46,11 @@ class Task:
                                         "para" + args.graph_model_path[last_char_index + match_string_len:])
             self.model.load_state_dict(net_state_dict)
 
+        # 定义优化器
+        self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.lr, weight_decay=args.weight_decay)
+
+        self.history1 = hl.History()
+        self.canvas1 = hl.Canvas()
 
         print('self.pool_sizes: ', self.pool_sizes)
         
@@ -70,6 +77,7 @@ class Task:
         reward = 0
         label = None
         pred = None
+        graph_loss = 0
         # val_done 是最后的结束标志
         if not val_done:
             adj = nx.adjacency_matrix(sample_graph)  # 大图 邻接矩阵
@@ -85,9 +93,16 @@ class Task:
             # 生成训练数据
             train_data = prepare_data(sample_graph, coarsen_graph, self.args, max_nodes=self.args.max_nodes)
 
-            # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
-            after_gcn_vector, reward, label, pred = evaluate(train_data, self.model, self.args, device=self.device)
+            if train_done:
+                # # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
+                # # 在进行表示学习时 不进行模型更新
+                after_gcn_vector, reward, label, pred = evaluate(train_data, self.model, self.args, device=self.device)
+            else:
+                # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
+                # 在进行表示学习时 进行模型更新
+                after_gcn_vector, reward, label, pred, graph_loss = train(train_data, self.model, self.args, self.optimizer, device=self.device)
 
 
-        return after_gcn_vector, reward, train_done, val_done, label, pred
 
+
+        return after_gcn_vector, reward, train_done, val_done, label, pred, graph_loss
