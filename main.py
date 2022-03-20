@@ -215,7 +215,7 @@ def main():
                     train_acc = pred_train_correct/graph_train_step
                     # 结果写入 log
                     logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
-                                f'block_{graph_task.origin_can_obj.train_index}: {graph_task.origin_can_obj.train_order[graph_task.origin_can_obj.train_index]}'
+                                f'block_{graph_task.origin_can_obj.train_index}: {graph_task.origin_can_obj.train_order[graph_task.origin_can_obj.train_index]}; '
                                 f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_train_block_len}; '
                                 f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
                                 f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; g_loss: {graph_loss:<8.6f}; '
