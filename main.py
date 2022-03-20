@@ -87,8 +87,6 @@ def main():
     # 定义 并创建 log 文件
     log_out_file = log_out_dir + 'Rl_' + time_mark + '.log'
 
-    print(f'输出 log 文件路径: {log_out_file}')
-
     # 配置日志 输出格式
     handler = logging.FileHandler(log_out_file)
     handler.setLevel(logging.DEBUG)
@@ -96,7 +94,9 @@ def main():
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     # log 写入 参数
+    logger.info(f'输出 log 文件路径: {log_out_file}')
     logger.info(f'{prog_args}')
+    logger.info(f'学习率: {prog_args.lr}')
 
     error = None  # 表示实验是否发生异常
     retrain = False  # 表示模型是否是从开开始训练 False: 从头训练 True: 继续训练
@@ -147,6 +147,10 @@ def main():
         else:
             logger.info(f'模型从头开始训练\n')
 
+        # 不需要每个 epoch 都重新赋值的变量
+        last_val_acc = 0  # 记录上一轮的验证精度 如果精度上升则保存模型
+        val_acc = 0  # 验证精度
+        train_acc = 0  # 训练精度
 
         # try:
         for i in range(prog_args.train_epoch):  # epoch
@@ -162,9 +166,7 @@ def main():
             # 记录正确预测的 报文 个数
             pred_train_correct = 0
             pred_val_correct = 0
-            last_val_acc = 0  # 记录上一轮的验证精度 如果精度上升则保存模型
-            train_acc = 0  # 训练精度
-            val_acc = 0  # 验证精度
+
 
             while True:
 
@@ -281,10 +283,10 @@ def main():
                 # 保存本次的验证精度
                 last_val_acc = val_acc
                 # 保存强化学习模型
-                agent.save(i, str('%.4f' % train_acc), log_out_dir)
+                agent.save(i, str('%.4f' % val_acc), log_out_dir)
                 # 保存图模型
-                graph_model_path = log_out_dir + str(i) + '_graph_model.pth'
-                graph_model_para_path = log_out_dir + str(i) + '_graph_model_para.pth'
+                graph_model_path = log_out_dir + 'epoch_' + str(i) + '_graph_model.pth'
+                graph_model_para_path = log_out_dir + 'epoch_' + str(i) + '_graph_model_para.pth'
                 torch.save(graph_task.model, graph_model_path)
                 torch.save(graph_task.model.state_dict(), graph_model_para_path)
 
