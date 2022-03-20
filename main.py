@@ -278,6 +278,8 @@ def main():
             graph_task.origin_can_obj.val_done = False
 
             if val_acc > last_val_acc:
+                # 保存本次的验证精度
+                last_val_acc = val_acc
                 # 保存强化学习模型
                 agent.save(i, str('%.4f' % train_acc), log_out_dir)
                 # 保存图模型
