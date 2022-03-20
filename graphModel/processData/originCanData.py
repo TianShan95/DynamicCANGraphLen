@@ -1,6 +1,8 @@
 import pandas as pd
 import networkx as nx
 import copy
+from random import shuffle
+from utils.logger import logger
 import collections
 import matplotlib.pyplot as plt
 from utils.logger import logger
@@ -31,9 +33,27 @@ class OriginCanData:
         self.data_total_len = len(self.df)
 
         self.df_train = self.df.iloc[:int(self.data_total_len*args.train_ratio), :]
+        # 把训练部分平均分为10份，打乱
+        self.df_train_list = [self.df.iloc[:int(self.data_total_len*args.train_ratio*0.1), :],
+                              self.df.iloc[int(self.data_total_len*args.train_ratio*0.1):int(self.data_total_len*args.train_ratio*0.2), :],
+                              self.df.iloc[int(self.data_total_len*args.train_ratio*0.2):int(self.data_total_len*args.train_ratio*0.3), :],
+                              self.df.iloc[int(self.data_total_len*args.train_ratio*0.3):int(self.data_total_len*args.train_ratio*0.4), :],
+                              self.df.iloc[int(self.data_total_len*args.train_ratio*0.4):int(self.data_total_len*args.train_ratio*0.5), :],
+                              self.df.iloc[int(self.data_total_len*args.train_ratio*0.5):int(self.data_total_len*args.train_ratio*0.6), :],
+                              self.df.iloc[int(self.data_total_len*args.train_ratio*0.6):int(self.data_total_len*args.train_ratio*0.7), :],
+                              self.df.iloc[int(self.data_total_len*args.train_ratio*0.7):int(self.data_total_len*args.train_ratio*0.8), :],
+                              self.df.iloc[int(self.data_total_len*args.train_ratio*0.8):int(self.data_total_len*args.train_ratio*0.9), :],
+                              self.df.iloc[int(self.data_total_len*args.train_ratio*0.9):int(self.data_total_len*args.train_ratio*1.0), :]]
+        self.train_order = [x for x in range(10)]
+        self.train_index = 0
+        shuffle(self.train_order)
+        logger.info(f'训练顺序: {self.train_order}')
+
         self.df_val = self.df.iloc[int(self.data_total_len*args.train_ratio):, :]
 
-        self.data_train_len = len(self.df_train)
+        # self.data_train_len = len(self.df_train)
+        self.data_train_block_len = len(self.df_train_list[self.train_index])
+
         self.data_val_len = len(self.df_val)
 
         self.train_done = False
@@ -50,7 +70,7 @@ class OriginCanData:
         if self.train_done:
             df = self.df_val.iloc[self.point:self.point + len_can, :]  # 从验证can报文 取出 特定长度 的 验证 can报文
         else:
-            df = self.df_train.iloc[self.point:self.point+len_can, :]  # 从训练can报文 取出 特定长度 的 训练 can报文
+            df = self.df_train_list[self.train_order[self.train_index]].iloc[self.point:self.point+len_can, :]  # 从训练can报文 取出 特定长度 的 训练 can报文
 
         # 图相关
         graph_label = 0  # 标识图标签 0：正常报文 1：入侵报文
@@ -85,11 +105,24 @@ class OriginCanData:
                 if not self.train_done:
                     # 训练阶段完成 置标志位 把报文指针置0
                     self.point = 0
-                    self.train_done = True
-                    self.get_ds_a(len_can)
+                    if self.train_index >= 9:
+                        self.train_index = 0  # 训练部分执行完毕 训练块索引 置位
+                        self.train_done = True
+                    else:  # 如果训练块没有结束 执行下一个块
+                        self.train_index += 1
+                        # 下一个块的 报文总帧数
+                        self.data_train_block_len = len(self.df_train_list[self.train_index])
+                    # 训练部分结束
+                    # 重新获取 验证的报文长度
+                    return self.get_ds_a(len_can)
                 else:
+                    # 验证阶段完成 置标志位 把报文指针置0 以便下一个epoch进行
+                    self.point = 0
                     self.val_done = True
 
+                    # 重新打乱 训练集
+                    shuffle(self.train_order)
+                    logger.info(f'训练顺序: {self.train_order}')
                 break
 
         # print(f'节点数: {len(hex2num_dict)}')

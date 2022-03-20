@@ -191,6 +191,10 @@ def main():
 
                 # 最后结束
                 if val_done:
+                    # 把 train_done 和 val_done 置位
+                    graph_task.origin_can_obj.train_done = False
+                    graph_task.origin_can_obj.val_done = False
+
                     agent.writer.add_scalar('ep_r', ep_r, global_step=i)
                     # if i % args_RL.print_log == 0:
                     #     print("Ep_i \t{}, the ep_r is \t{:0.2f}, the step is \t{}".format(i, ep_r, t))
@@ -211,7 +215,8 @@ def main():
                     train_acc = pred_train_correct/graph_train_step
                     # 结果写入 log
                     logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
-                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_train_len}; '
+                                f'block_{graph_task.origin_can_obj.train_index}: {graph_task.origin_can_obj.train_order[graph_task.origin_can_obj.train_index]}'
+                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_train_block_len}; '
                                 f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
                                 f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; g_loss: {graph_loss:<8.6f}; '
                                 f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
@@ -262,7 +267,7 @@ def main():
 
             # 记录此次的训练精度 和 验证精度
             logger.info(f'epoch-{i}-over '
-                        f'trian-times: {train_times}'
+                        f'trian-times: {train_times} '
                         f'train_acc: {train_acc:<4.6f} '
                         f'val_acc: {val_acc:<4.6f}')
             # 跳出whileTrue 结束epoch 保存模型
