@@ -230,6 +230,11 @@ def main():
                 # 训练部分
                 if not train_done:
 
+                    # 实时绘制 图神经网络的loss曲线
+                    graph_task.history1.log((i, graph_train_step), graph_train_loss=graph_loss)
+                    with graph_task.canvas1:
+                        graph_task.canvas1.draw_plot(graph_task.history1["graph_train_loss"])
+
                     # push 经验
                     for singleCan in range(prog_args.graph_batchsize):
                         # 存入 经验
@@ -260,11 +265,6 @@ def main():
                     logger.info(f'len_can_list: {len_can_list}')
                     logger.info(f'labe: {label}')
                     logger.info(f'pred: {pred}')
-
-                    # 实时绘制 图神经网络的loss曲线
-                    graph_task.history1.log((i, graph_train_step), graph_train_loss=graph_loss)
-                    with graph_task.canvas1:
-                        graph_task.canvas1.draw_plot(graph_task.history1["graph_train_loss"])
 
                 # 验证部分
                 else:
