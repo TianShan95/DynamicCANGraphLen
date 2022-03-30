@@ -104,7 +104,8 @@ def main():
     # log 写入 参数
     logger.info(f'输出 log 文件路径: {log_out_file}')
     logger.info(f'{prog_args}')
-    logger.info(f'学习率: {prog_args.lr}')
+    logger.info(f'图模型- 学习率: {prog_args.graph_lr}')
+    logger.info(f'强化学习学习率: {prog_args.reforce_lr}')
 
     error = None  # 表示实验是否发生异常
     retrain = False  # 表示模型是否是从开开始训练 False: 从头训练 True: 继续训练
