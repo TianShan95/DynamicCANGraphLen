@@ -59,14 +59,14 @@ class Task:
                                                         dropout=args.dropout, mask=args.mask, args=args, device=device)
 
         # 定义优化器
-        self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.lr, weight_decay=args.weight_decay)
+        self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.graph_lr, weight_decay=args.weight_decay)
 
         self.history1 = hl.History()
         self.canvas1 = hl.Canvas()
 
         print('self.pool_sizes: ', self.pool_sizes)
         
-    def benchmark_task_val(self, feat, pred_hidden_dims, len_can):
+    def benchmark_task_val(self, feat, pred_hidden_dims, len_can_list):
         '''
         self.args:
             epoch: 代数
@@ -80,8 +80,8 @@ class Task:
             first: 是否第一次调用 第一次调用需要定义一次模型 之后再调用则不需要再次定义模型 模型变量 self.model
         '''
 
-        sample_graph, train_done, val_done = self.origin_can_obj.get_ds_a(len_can)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
-
+        sample_graphs, train_done, val_done = self.origin_can_obj.get_ds_a(len_can_list)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
+        coarsen_graphs = []
         after_gcn_vector = None
         reward = 0
         label = None
@@ -89,26 +89,27 @@ class Task:
         graph_loss = 0
         # val_done 是最后的结束标志
         if not val_done:
-            adj = nx.adjacency_matrix(sample_graph)  # 大图 邻接矩阵
-            coarsen_graph = gp(adj.todense().astype(float), self.pool_sizes)  # 实例化 要进行塌缩的 图
-            coarsen_graph.coarsening_pooling(self.args.normalize)  # 进行 图 塌缩
 
             # 指定 图 特征
             # 使用节点 标签特征
-            for u in sample_graph.nodes():
-                sample_graph.nodes[u]['feat'] = np.array(sample_graph.nodes[u]['label'])
+            for G in sample_graphs:
+                adj = nx.adjacency_matrix(G)  # 大图 邻接矩阵
+                coarsen_graph = gp(adj.todense().astype(float), self.pool_sizes)  # 实例化 要进行塌缩的 图
+                coarsen_graph.coarsening_pooling(self.args.normalize)  # 进行 图 塌缩
+                coarsen_graphs.append(coarsen_graph)
 
-
-            # 生成训练数据
-            train_data = prepare_data(sample_graph, coarsen_graph, self.args, max_nodes=self.args.max_nodes)
+                for u in G.nodes():
+                    G.nodes[u]['feat'] = np.array(G.nodes[u]['label'])
 
             if train_done:
                 # # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
                 # # 在进行表示学习时 不进行模型更新
-                after_gcn_vector, reward, label, pred = evaluate(train_data, self.model, self.args, device=self.device)
+                val_data = prepare_data(sample_graphs, coarsen_graphs, self.args, max_nodes=self.args.max_nodes) # 生成验证数据
+                after_gcn_vector, reward, label, pred = evaluate(val_data, self.model, self.args, device=self.device)
             else:
                 # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
                 # 在进行表示学习时 进行模型更新
+                train_data = prepare_data(sample_graphs, coarsen_graphs, self.args, max_nodes=self.args.max_nodes) # 生成训练数据
                 after_gcn_vector, reward, label, pred, graph_loss = train(train_data, self.model, self.args, self.optimizer, device=self.device)
 
 

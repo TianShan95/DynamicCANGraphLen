@@ -38,7 +38,7 @@ class Replay_buffer():
             x.append(np.array(X, copy=False))
             y.append(np.array(Y, copy=False))
             u.append(np.array(U, copy=False))
-            r.append(np.array(R.cpu().detach().numpy(), copy=False))
+            r.append(np.array(R, copy=False))
             d.append(np.array(D, copy=False))
 
         return np.array(x), np.array(y), np.array(u), np.array(r).reshape(-1, 1), np.array(d).reshape(-1, 1)

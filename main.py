@@ -6,6 +6,7 @@ import time
 import logging
 import traceback
 # 工程参数
+import utils.utils
 from args import arg_parse
 # 强化学习
 from RLModel.model.td3 import TD3
@@ -19,6 +20,7 @@ from utils.logger import logger
 # 警告处理
 import warnings
 warnings.filterwarnings('ignore')  # 忽略警告
+import sys
 
 # 参数初始化
 prog_args = arg_parse()
@@ -78,8 +80,14 @@ def main():
     graph_task = Task(prog_args, device)
     pred_hidden_dims = [int(i) for i in prog_args.pred_hidden.split('_')]
 
-    # 定义此次实验的 log 文件夹
+    # 获取当地时间
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+
+    # 记录本次实验的输入参数
+    with open('../experiment/exp-record.txt', 'a') as f:
+        f.write(time_mark + '\t' + '\t'.join(sys.argv) + '\n')
+        f.close()
+    # 定义此次实验的 log 文件夹
     log_out_dir = prog_args.out_dir + '/' + 'Rl_' + time_mark + '_multiDim_log/'
     if not os.path.exists(log_out_dir):
         os.makedirs(log_out_dir, exist_ok=True)
@@ -110,9 +118,9 @@ def main():
         # for i in range(prog_args.train_epoch):
         # 随机获取 初始状态
         # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
-        graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
+        graph_len_list = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
 
-        state, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
+        state, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_list)
 
         while True:
             action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 维度是 报文长度可选择数量
@@ -139,10 +147,9 @@ def main():
         logger.info("Collection Experience...")
         logger.info("====================================")
 
-        # 若指定 载入模型参数 则 载入
+        # 若指定强化学习 载入模型参数 则 载入
         if prog_args.load:
-            print(f'加载模型 {prog_args.model_load_dir}')
-            logger.info(f'加载模型... {prog_args.model_load_dir}\n')
+            logger.info(f'加载模型 {prog_args.model_load_dir}')
             agent.load()  # 载入模型
         else:
             logger.info(f'模型从头开始训练\n')
@@ -155,10 +162,10 @@ def main():
         # try:
         for i in range(prog_args.train_epoch):  # epoch
 
-            # 第一次随机 图的长度 [50-300] 闭空间 给出强化学习的 初始 state
-            graph_len_ = random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
-            # 随机获取 初始状态
-            state, _ , _, _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_)
+            # 第一次随机 图的长度 [50-300] 闭空间 并且是batchsize个给出强化学习的 初始 state
+            graph_len_list = utils.utils.random_list(prog_args.msg_smallest_num, prog_args.msg_biggest_num, prog_args.graph_batchsize)
+            # 随机获取 初始状态 next_state, reward, train_done, val_done, label, pred, graph_loss
+            state, _ , _, _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_list)
             # print(f'随机得到的状态是 {state}')
             # 记录 图模型 执行 步数
             graph_train_step = 0
@@ -166,30 +173,43 @@ def main():
             # 记录正确预测的 报文 个数
             pred_train_correct = 0
             pred_val_correct = 0
-
+            train_done = False
 
             while True:
-
                 # 强化学习网络
-                action = agent.select_action(state)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
-                # action = action + np.random.normal(0.2, args_RL.exploration_noise, size=action.shape[0])  # 给强化学习的输出加入噪声
-                # action = action.clip(env.action_space.low, env.action_space.high)
+                # 串行把 batchsize 大小的数据输入 强化学习 得到batchsize大小个 can 数据长度
+                len_can_list = []
+                actions = []
+                for singleCan in range(prog_args.graph_batchsize):
+                    action = agent.select_action(state[singleCan])  # 从 现在的 状态 得到一个动作 报文长度可选择数量
+                    actions.append(action)
+                    # action = action + np.random.normal(0.2, args_RL.exploration_noise, size=action.shape[0])  # 给强化学习的输出加入噪声
+                    # action = action.clip(env.action_space.low, env.action_space.high)
 
-                # 下个状态 奖励 是否完成
+                    # 训练阶段
+                    if not train_done:
+                        # 图操作 训练步数 自增 1
+                        graph_train_step += 1
+                    else:
+                        # 图操作 验证步数自增 1
+                        graph_val_step += 1
 
-                len_can = 0
-                # 选取 前5 个最大的可能里 选择报文数最大的
-                if prog_args.choice_graph_len_mode == 0:
-                    len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-                elif prog_args.choice_graph_len_mode == 1:
+                    len_can = 0
                     # 选取 前5 个最大的可能里 选择报文数最大的
-                    len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
-                elif prog_args.choice_graph_len_mode == 2:
-                    # 在 前 5 个最大的可能里 随机选择一个报文长度
-                    alter = random.randint(0, 4)
-                    len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
+                    if prog_args.choice_graph_len_mode == 0:
+                        len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+                    elif prog_args.choice_graph_len_mode == 1:
+                        # 选取 前5 个最大的可能里 选择报文数最大的
+                        len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
+                    elif prog_args.choice_graph_len_mode == 2:
+                        # 在 前 5 个最大的可能里 随机选择一个报文长度
+                        alter = random.randint(0, 4)
+                        len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
 
-                next_state, reward, train_done, val_done, label, pred, graph_loss = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can)
+                    # 把神经网络得到的长度加入列表
+                    len_can_list.append(len_can)
+
+                next_state, reward, train_done, val_done, label, pred, graph_loss = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can_list)
 
                 # 最后结束
                 if val_done:
@@ -208,29 +228,37 @@ def main():
 
                 # 训练部分
                 if not train_done:
-                    # 图操作 训练步数 自增 1
-                    graph_train_step += 1
+
+                    # push 经验
+                    for singleCan in range(prog_args.graph_batchsize):
+                        # 存入 经验
+                        if label[singleCan] == pred[singleCan]:
+                            reward = abs(reward)
+                        else:
+                            reward = -abs(reward)
+                        agent.memory.push((state[singleCan].cpu().data.numpy().flatten(),
+                                           next_state[singleCan].cpu().data.numpy().flatten(),
+                                           actions[singleCan], reward, np.float(train_done)))
+                        if len(agent.memory.storage) >= prog_args.capacity - 1:
+                            train_times, avg_Q1_loss, avg_Q2_loss = agent.update(num_iteration=10)  # 使用经验回放 更新网络
+
                     # 计数训练时 预测正确的个数
-                    if reward > 0:
-                        pred_train_correct += 1
+                    for index, singlab in enumerate(label):
+                        if singlab == pred[index]:
+                            pred_train_correct += 1
+
                     # 得到训练精度
                     train_acc = pred_train_correct/graph_train_step
                     # 结果写入 log
                     logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
                                 f'block_{graph_task.origin_can_obj.train_index}: {graph_task.origin_can_obj.train_order[graph_task.origin_can_obj.train_index]}; '
                                 f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_train_block_len}; '
-                                f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
+                                f'reward: {reward:<8.3f}; '
                                 f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; g_loss: {graph_loss:<8.6f}; '
                                 f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
-
-                    # 存入 经验
-                    agent.memory.push((state.cpu().data.numpy().flatten(), next_state.cpu().data.numpy().flatten(),
-                                       action, reward, np.float(train_done)))
-        #             if i+1 % 10 == 0:
-        #                 print('Episode {},  The memory size is {} '.format(i, len(agent.memory.storage)))
-                    if len(agent.memory.storage) >= prog_args.capacity-1:
-                        train_times, avg_Q1_loss, avg_Q2_loss = agent.update(10)  # 使用经验回放 更新网络
-
+                    logger.info(f'len_can_list: {len_can_list}')
+                    logger.info(f'labe: {label}')
+                    logger.info(f'pred: {pred}')
 
                     # 实时绘制 图神经网络的loss曲线
                     graph_task.history1.log((i, graph_train_step), graph_train_loss=graph_loss)
@@ -239,28 +267,26 @@ def main():
 
                 # 验证部分
                 else:
-                    # 图操作 验证步数自增 1
-                    graph_val_step += 1
+
                     # 计数训练时 预测正确的个数
-                    if reward > 0:
-                        pred_val_correct += 1
+                    for index, singlab in enumerate(label):
+                        if singlab == pred[index]:
+                            pred_train_correct += 1
                     # 得到验证精度
                     val_acc = pred_val_correct/graph_val_step
                     # 结果写入 log
                     logger.info(f'epoch-val: {i:<3}; step: {graph_val_step:<6}; '
                                 f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_val_len}; '
-                                f'label: {label}; pred: {pred}; len: {len_can:<3}; reward: {reward:<8.3f}; '
+                                f'reward: {reward:<8.3f}; '
                                 f'acc: {val_acc:<4.2f}; ep_r: {ep_r:.2f}')
+                    logger.info(f'len_can_list: {len_can_list}')
+                    logger.info(f'labe: {label}')
+                    logger.info(f'pred: {pred}')
 
                 # 更新 状态
                 state = next_state
 
-                # # 短期退出 epoch 验证 程序可运行行
-                # if graph_step > 20:
-                #     print(f'大于 20步')
-                #     print(f'i {i}')
-                #     break
-                #     raise Exception
+
 
                 # # 保存 模型
                 # if graph_step % args_RL.log_interval == 0:

@@ -16,7 +16,7 @@ def arg_parse():
     parser.add_argument('--train_epoch', default=1, type=int)  # 训练代数
     # parser.add_argument('--test_iteration', default=5, type=int)
 
-    parser.add_argument('--learning_rate', default=3e-4, type=float)
+    # parser.add_argument('--learning_rate', default=3e-4, type=float)
     parser.add_argument('--gamma', default=0.99, type=int)  # discounted factor
     parser.add_argument('--capacity', default=1000, type=int)  # replay buffer size 1000
     parser.add_argument('--batch_size', default=100, type=int)  # mini batch size  100
@@ -53,13 +53,15 @@ def arg_parse():
     parser.add_argument('--max-nodes', dest='max_nodes', type=int,
             help='Maximum number of nodes (ignore graghs with nodes exceeding the number.')
 
-    # parser.add_argument('--graph_model_path',
-    #                     default='../experiment/20220311_215200_randGen_1_Normlize_True_concat_1_log/0.85_better_model__totalEpoch_300_epoch_78_ps_10_nor_1.pth',
-    #                     type=str)
     parser.add_argument('--graph_model_path',
-                        default='',
+                        default='../experiment/randGen_42_Normlize_True_concat_1_20220312_211619_log/0.87_better_model__totalEpoch_300_epoch_132_ps_10_nor_1.pth',
                         type=str)
-    parser.add_argument('--num_workers', dest='num_workers', type=int,
+    # parser.add_argument('--graph_model_path',
+    #                     default='',
+    #                     type=str)
+    parser.add_argument('--graph_batchsize', dest='graph_batchsize', type=int,
+                        help='batchsize to train graph neural network')
+    parser.add_argument('--graph_num_workers', dest='graph_num_workers', type=int,
             help='Number of workers to load processData.')
     parser.add_argument('--feature', dest='feature_type',
             help='Feature used for encoder. Can be: id, deg')
@@ -148,12 +150,13 @@ def arg_parse():
 
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
-                        lr=0.1,  # 0.001
+                        graph_lr=0.001,  # 0.001
+                        reforce_lr=0.1,  # 0.001
                         clip=2.0,
                         train_ratio=0.8,
-                        batch_size=64,  # 一个图的选择是一个动作
+                        graph_batchsize=64,  # 一个图的选择是一个动作
                         train_epoch=20,
-                        num_workers=2,
+                        graph_num_workers=8,
                         input_dim=81,
                         hidden_dim=20,
                         output_dim=20,

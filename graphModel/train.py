@@ -6,7 +6,7 @@ import torch.nn as nn
 
 def train(dataset, model, args, optimizer, mask_nodes=True, log_dir=None, device='cpu'):
 
-    model.train()
+    model.train()  # 模型训练模式
 
     for batch_idx, data in enumerate(dataset):
 
@@ -63,22 +63,24 @@ def train(dataset, model, args, optimizer, mask_nodes=True, log_dir=None, device
         nn.utils.clip_grad_norm(model.parameters(), args.clip)
         optimizer.step()
 
-        _, pre_label = torch.max(ypred, 1)
+        pre_label = torch.argmax(ypred, 1)
+        ypred_dim0, ypred_dim1 = ypred.shape
 
-        ypred_np = ypred.cpu().detach().numpy()
+        # ypred_np = ypred.cpu().detach().numpy()
         # logger.info(f'pred: {pre_label.item()}; {labels[batch_idx].astype(int)[0] == pre_label.item()}')
 
         # 制定 reward
         # print(f'pre_label: {pre_label.item()}')
         # print(f'label: {label.item()}')
+        all_reward = 0
+        for singleCAN in range(ypred_dim0):
+            if pre_label[singleCAN] == label[singleCAN]:
+                reward = abs(ypred[0, 0] - ypred[0, 1])
+            else:
+                reward = - abs(ypred[0, 0] - ypred[0, 1]) * 10  # 加大对错误的惩罚
+
+            all_reward += reward
 
 
-        if pre_label == label:
-            reward = abs(ypred_np[0, 0] - ypred[0, 1])
-        else:
-            reward = - abs(ypred_np[0, 0] - ypred[0, 1]) * 100  # 加大对错误的惩罚
 
-        # print(f'reward: {reward}')
-        # raise IOError
-
-        return  after_gcn_vector, reward, label.item(), pre_label.item(), loss.item()
+        return  after_gcn_vector, all_reward.cpu().detach().numpy().tolist(), label.cpu().detach().numpy().tolist(), pre_label.cpu().detach().numpy().tolist(), loss.item()

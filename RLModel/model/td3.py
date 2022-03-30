@@ -27,9 +27,9 @@ class TD3:
         self.critic_2 = Critic(state_dim, action_dim).to(device)
         self.critic_2_target = Critic(state_dim, action_dim).to(device)
 
-        self.actor_optimizer = optim.Adam(self.actor.parameters())
-        self.critic_1_optimizer = optim.Adam(self.critic_1.parameters())
-        self.critic_2_optimizer = optim.Adam(self.critic_2.parameters())
+        self.actor_optimizer = optim.Adam(self.actor.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
+        self.critic_1_optimizer = optim.Adam(self.critic_1.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
+        self.critic_2_optimizer = optim.Adam(self.critic_2.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
 
         self.actor_target.load_state_dict(self.actor.state_dict())
         self.critic_1_target.load_state_dict(self.critic_1.state_dict())
