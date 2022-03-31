@@ -4,7 +4,7 @@ from torch.autograd import Variable
 import torch.nn as nn
 
 
-def train(dataset, model, args, optimizer, mask_nodes=True, log_dir=None, device='cpu'):
+def train(dataset, model, args, optimizer, mask_nodes=True, device='cpu'):
 
     model.train()  # 模型训练模式
 
