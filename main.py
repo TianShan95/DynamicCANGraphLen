@@ -170,7 +170,7 @@ def main():
             # print(f'随机得到的状态是 {state}')
             # 记录 图模型 执行 步数
             graph_train_step = 0
-            graph_val_step = 0
+            graph_val_step = prog_args.graph_batchsize  # 因为模型读取train数据读完，未跳出读取 val 数据，所以需要赋予 batchsize 大小的初值
             # 记录正确预测的 报文 个数
             pred_train_correct = 0
             pred_val_correct = 0
