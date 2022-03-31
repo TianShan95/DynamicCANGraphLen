@@ -227,13 +227,13 @@ def main():
                 # 累加 奖励
                 ep_r += reward
 
+                # # 实时绘制 图神经网络的loss曲线
+                # graph_task.history1.log((i, graph_train_step), graph_train_loss=graph_loss)
+                # with graph_task.canvas1:
+                #     graph_task.canvas1.draw_plot(graph_task.history1["graph_train_loss"])
+
                 # 训练部分
                 if not train_done:
-
-                    # 实时绘制 图神经网络的loss曲线
-                    graph_task.history1.log((i, graph_train_step), graph_train_loss=graph_loss)
-                    with graph_task.canvas1:
-                        graph_task.canvas1.draw_plot(graph_task.history1["graph_train_loss"])
 
                     # push 经验
                     for singleCan in range(prog_args.graph_batchsize):
@@ -279,7 +279,7 @@ def main():
                     logger.info(f'epoch-val: {i:<3}; step: {graph_val_step:<6}; '
                                 f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_val_len}; '
                                 f'reward: {reward:<8.3f}; '
-                                f'acc: {val_acc:<4.2f}; ep_r: {ep_r:.2f}')
+                                f'acc: {val_acc:<4.2f}; g_loss: {graph_loss:<8.6f}; ep_r: {ep_r:.2f}')
                     logger.info(f'len_can_list: {len_can_list}')
                     logger.info(f'labe: {label}')
                     logger.info(f'pred: {pred}')

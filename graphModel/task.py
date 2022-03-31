@@ -105,7 +105,7 @@ class Task:
                 # # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
                 # # 在进行表示学习时 不进行模型更新
                 val_data = prepare_data(sample_graphs, coarsen_graphs, self.args, max_nodes=self.args.max_nodes) # 生成验证数据
-                after_gcn_vector, reward, label, pred = evaluate(val_data, self.model, self.args, device=self.device)
+                after_gcn_vector, reward, label, pred, graph_loss = evaluate(val_data, self.model, self.args, device=self.device)
             else:
                 # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
                 # 在进行表示学习时 进行模型更新
