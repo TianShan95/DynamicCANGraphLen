@@ -272,7 +272,7 @@ def main():
                     # 计数训练时 预测正确的个数
                     for index, singlab in enumerate(label):
                         if singlab == pred[index]:
-                            pred_train_correct += 1
+                            pred_val_correct += 1
                     # 得到验证精度
                     val_acc = pred_val_correct/graph_val_step
                     # 结果写入 log

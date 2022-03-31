@@ -116,7 +116,7 @@ class GcnEncoderGraph(nn.Module):
     def build_pred_layers(self, pred_input_dim, pred_hidden_dims, label_dim, num_aggs=1):
 
         pred_input_dim = pred_input_dim * num_aggs
-        if len(pred_hidden_dims) == 0:
+        if len(pred_hidden_dims) == 0:  # 如果没有 中间层 直接输入维度 连接 输出维度
             pred_model = nn.Linear(pred_input_dim, label_dim).to(self.device)
         else:
             pred_layers = []
