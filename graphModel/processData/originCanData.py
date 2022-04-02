@@ -164,7 +164,9 @@ class OriginCanData:
                 # print(f'节点编号{hex2num_dict.values()}')
 
                 # 实例化 图
-                graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
+                # graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
+                graph = nx.from_edgelist(adj_list, create_using=nx.DiGraph())  # 从边 列表 构造 图
+
                 graph.graph['label'] = graph_label
                 # print(f'报文类型: {graph_label}')
                 # logger.info(f'label: {graph_label}; canData length: {len(can_id_list):3}; schedule: {self.point:7}/{self.data_total_len}')
