@@ -102,6 +102,7 @@ def main():
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     # log 写入 参数
+    logger.info('\t'.join(sys.argv))  # 写入运行程序时输入的参数
     logger.info(f'输出 log 文件路径: {log_out_file}')
     logger.info(f'{prog_args}')
     logger.info(f'图模型- 学习率: {prog_args.graph_lr}')

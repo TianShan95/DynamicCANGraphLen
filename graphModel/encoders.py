@@ -171,8 +171,9 @@ class GcnEncoderGraph(nn.Module):
                 x = self.apply_bn(x)
             x_all.append(x)
 
-        x = conv_last(x, adj)  # 最后 一层卷积
-        x_all.append(x)
+        if conv_last:  # 可能存在最后一层卷积被屏蔽的情况
+            x = conv_last(x, adj)  # 最后 一层卷积
+            x_all.append(x)
 
         if self.concat:
             x_tensor = torch.cat(x_all, dim=2)
@@ -351,6 +352,7 @@ class WavePoolingGcnEncoder(GcnEncoderGraph):
             else:
                 embedding_mask = None
             adj_new = adj_pooled_list[i].type(torch.FloatTensor).to(self.device)
+            self.conv_last_after_pool[i] = None
             embedding_tensor = self.gcn_forward(embedding_tensor, adj_new,
                                                 self.conv_first_after_pool[i], self.conv_block_after_pool[i],
                                                 self.conv_last_after_pool[i], embedding_mask)

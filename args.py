@@ -98,7 +98,7 @@ def arg_parse():
     parser.add_argument('--normalize', type = int,
                         help='nomrlaized laplacian or not', default=1)
     parser.add_argument('--pred_hidden', type=str,
-                        help='pred_hidden', default='50')
+                        help='pred_hidden', default='120')
     parser.add_argument('--concat', type=int,
                         help='whether concat', default=1)  # 是否把每层卷积的特征向量都拼接起来 输出给图部分的预测层
     parser.add_argument('--feat', type=str,
@@ -161,7 +161,7 @@ def arg_parse():
                         hidden_dim=20,
                         output_dim=20,
                         num_classes=2,  # 正常报文和入侵报文
-                        num_gc_layers=3,
+                        num_gc_layers=2,
                         dropout=0.0,
                         bmname='Pre_train',
                         origin_can_datadir='../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/',
