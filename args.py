@@ -149,9 +149,9 @@ def arg_parse():
             help='Whether batch normalization is used')
 
     # 图网络学习率
-    parser.add_argument('--graph_lr', dest='graph_lr', help='learning rate of graph neural network')
+    parser.add_argument('--graph_lr', type=float, dest='graph_lr', help='learning rate of graph neural network')
     # 强化学习学习率
-    parser.add_argument('--reforce_lr', dest='reforce_lr', help='learning rate of reforcemet learning network')
+    parser.add_argument('--reforce_lr', type=float, dest='reforce_lr', help='learning rate of reforcemet learning network')
 
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
