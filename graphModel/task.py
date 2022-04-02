@@ -58,13 +58,14 @@ class Task:
                                                         concat=args.concat, bn=args.bn,
                                                         dropout=args.dropout, mask=args.mask, args=args, device=device)
 
+        logger.info(self.model)
         # 定义优化器
         self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=args.graph_lr, weight_decay=args.weight_decay)
 
         self.history1 = hl.History()
         self.canvas1 = hl.Canvas()
 
-        print('self.pool_sizes: ', self.pool_sizes)
+        logger.info('self.pool_sizes: ', self.pool_sizes)
         
     def benchmark_task_val(self, feat, pred_hidden_dims, len_can_list):
         '''
