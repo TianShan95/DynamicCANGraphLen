@@ -39,7 +39,10 @@ def arg_parse():
     # optional parameters
     parser.add_argument('--activation', default='Relu', type=str)
     # parser.add_argument('--log_interval', default=50, type=int)  # 打印 log 的间隔
-    parser.add_argument('--load', action="store_true",help='load rl model or not')  # load model  在训练时 强化学习是否加载模型
+    # parser.add_argument('--load', action="store_true",help='load rl model or not')  # load model  在训练时 强化学习是否加载模型
+    parser.add_argument('--load', dest='load', action='store_const',
+            const=True, default=False,
+            help='load rl model or not')
     # parser.add_argument('--render_interval', default=100, type=int)  # after render_interval, the env.render() will work
 
     parser.add_argument('--policy_delay', default=5, type=int)
