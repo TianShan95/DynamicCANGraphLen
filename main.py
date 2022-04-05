@@ -51,11 +51,22 @@ global train_times, avg_Q1_loss, avg_Q2_loss  # 系统时间
 
 
 def main():
+    # 获取当地时间
+    time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
 
     global sys_cst_time, train_times, avg_Q1_loss, avg_Q2_loss
     train_times = 0
     avg_Q1_loss = 0
     avg_Q2_loss = 0
+
+    # 记录本次实验的输入参数
+    with open('../experiment/exp-record.txt', 'a') as f:
+        f.write(time_mark + '\t' + '\t'.join(sys.argv) + '\n')
+        f.close()
+    # 定义此次实验的 log 文件夹
+    log_out_dir = prog_args.out_dir + '/' + 'Rl_' + time_mark + '_multiDim_log/'
+    if not os.path.exists(log_out_dir):
+        os.makedirs(log_out_dir, exist_ok=True)
 
     # 如果系统是 linux 则对系统时区进行设置
     # 避免日志文件中的日期 不是大陆时区
@@ -74,28 +85,15 @@ def main():
     #     time.sleep(0.5)
     # print(f'python 时间同步完成')
 
-    agent = TD3(state_dim, action_dim, 1, prog_args)
+    agent = TD3(state_dim, action_dim, 1, prog_args, log_out_dir)
     # 累加奖励
     ep_r = 0
     # 实例化 图任务
     graph_task = Task(prog_args, device)
     pred_hidden_dims = [int(i) for i in prog_args.pred_hidden.split('_')]
 
-    # 获取当地时间
-    time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-
-    # 记录本次实验的输入参数
-    with open('../experiment/exp-record.txt', 'a') as f:
-        f.write(time_mark + '\t' + '\t'.join(sys.argv) + '\n')
-        f.close()
-    # 定义此次实验的 log 文件夹
-    log_out_dir = prog_args.out_dir + '/' + 'Rl_' + time_mark + '_multiDim_log/'
-    if not os.path.exists(log_out_dir):
-        os.makedirs(log_out_dir, exist_ok=True)
-
     # 定义 并创建 log 文件
     log_out_file = log_out_dir + 'Rl_' + time_mark + '.log'
-
     # 配置日志 输出格式
     handler = logging.FileHandler(log_out_file)
     handler.setLevel(logging.DEBUG)
@@ -184,10 +182,11 @@ def main():
                 len_can_list = []
                 actions = []
                 for singleCan in range(prog_args.graph_batchsize):
+
                     action = agent.select_action(state[singleCan])  # 从 现在的 状态 得到一个动作 报文长度可选择数量
+                    action = action + np.random.normal(0, prog_args.exploration_noise, size=action.shape[0])
+                    action = action.clip(-1, 1)
                     actions.append(action)
-                    # action = action + np.random.normal(0.2, args_RL.exploration_noise, size=action.shape[0])  # 给强化学习的输出加入噪声
-                    # action = action.clip(env.action_space.low, env.action_space.high)
 
                     # 训练阶段
                     if not train_done:
@@ -199,15 +198,20 @@ def main():
 
                     len_can = 0
                     # 选取 前5 个最大的可能里 选择报文数最大的
-                    if prog_args.choice_graph_len_mode == 0:
+                    # if prog_args.choice_graph_len_mode == 0:
+                    #     len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+                    if np.random.uniform() > prog_args.epsilon:  # choosing action
+                        len_can = np.random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
+                    else:
                         len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-                    elif prog_args.choice_graph_len_mode == 1:
-                        # 选取 前5 个最大的可能里 选择报文数最大的
-                        len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
-                    elif prog_args.choice_graph_len_mode == 2:
-                        # 在 前 5 个最大的可能里 随机选择一个报文长度
-                        alter = random.randint(0, 4)
-                        len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
+
+                # elif prog_args.choice_graph_len_mode == 1:
+                    #     # 选取 前5 个最大的可能里 选择报文数最大的
+                    #     len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
+                    # elif prog_args.choice_graph_len_mode == 2:
+                    #     # 在 前 5 个最大的可能里 随机选择一个报文长度
+                    #     alter = random.randint(0, 4)
+                    #     len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
 
                     # 把神经网络得到的长度加入列表
                     len_can_list.append(len_can)
@@ -226,9 +230,6 @@ def main():
                     ep_r = 0
                     break  # break true
 
-                # 累加 奖励
-                ep_r += reward
-
                 # # 实时绘制 图神经网络的loss曲线
                 # graph_task.history1.log((i, graph_train_step), graph_train_loss=graph_loss)
                 # with graph_task.canvas1:
@@ -236,7 +237,7 @@ def main():
 
                 # 训练部分
                 if not train_done:
-
+                    # rewards = []
                     # push 经验
                     for singleCan in range(prog_args.graph_batchsize):
                         # 存入 经验
@@ -244,11 +245,14 @@ def main():
                             reward = abs(reward)
                         else:
                             reward = -abs(reward)
+                        # 累加 奖励
+                        ep_r += reward
+                        # rewards.append(reward)
                         agent.memory.push((state[singleCan].cpu().data.numpy().flatten(),
                                            next_state[singleCan].cpu().data.numpy().flatten(),
                                            actions[singleCan], reward, np.float(train_done)))
                         if len(agent.memory.storage) >= prog_args.capacity - 1:
-                            train_times, avg_Q1_loss, avg_Q2_loss = agent.update(num_iteration=10)  # 使用经验回放 更新网络
+                            train_times, avg_Q1_loss, avg_Q2_loss = agent.update(num_iteration=20)  # 使用经验回放 更新网络
 
                     # 计数训练时 预测正确的个数
                     for index, singlab in enumerate(label):
@@ -270,6 +274,14 @@ def main():
 
                 # 验证部分
                 else:
+                    for singleCan in range(prog_args.graph_batchsize):
+                        # 存入 经验
+                        if label[singleCan] == pred[singleCan]:
+                            reward = abs(reward)
+                        else:
+                            reward = -abs(reward)
+                        # 累加 奖励
+                        ep_r += reward
 
                     # 计数训练时 预测正确的个数
                     for index, singlab in enumerate(label):
@@ -288,8 +300,6 @@ def main():
 
                 # 更新 状态
                 state = next_state
-
-
 
                 # # 保存 模型
                 # if graph_step % args_RL.log_interval == 0:

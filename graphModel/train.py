@@ -60,7 +60,7 @@ def train(dataset, model, args, optimizer, mask_nodes=True, device='cpu'):
         loss.backward()
 
 
-        nn.utils.clip_grad_norm(model.parameters(), args.clip)
+        # nn.utils.clip_grad_norm(model.parameters(), args.clip)
         optimizer.step()
 
         pre_label = torch.argmax(ypred, 1)
@@ -77,10 +77,11 @@ def train(dataset, model, args, optimizer, mask_nodes=True, device='cpu'):
             if pre_label[singleCAN] == label[singleCAN]:
                 reward = abs(ypred[0, 0] - ypred[0, 1])
             else:
-                reward = - abs(ypred[0, 0] - ypred[0, 1]) * 10  # 加大对错误的惩罚
+                reward = - abs(ypred[0, 0] - ypred[0, 1])  # 加大对错误的惩罚
 
             all_reward += reward
 
+        all_reward = all_reward / (args.graph_batchsize * 10)
 
 
         return  after_gcn_vector, all_reward.cpu().detach().numpy().tolist(), label.cpu().detach().numpy().tolist(), pre_label.cpu().detach().numpy().tolist(), loss.item()

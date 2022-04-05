@@ -18,7 +18,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class TD3:
-    def __init__(self, state_dim, action_dim, max_action, args):
+    def __init__(self, state_dim, action_dim, max_action, args, log_out_dir):
 
         self.actor = Actor(state_dim, action_dim, max_action).to(device)  # 动作 网络
         self.actor_target = Actor(state_dim, action_dim, max_action).to(device)  # target 动作网络
@@ -37,7 +37,7 @@ class TD3:
 
         self.max_action = max_action
         self.memory = Replay_buffer(args.capacity)
-        self.writer = SummaryWriter(args.directory)
+        self.writer = SummaryWriter(log_out_dir)
         self.num_critic_update_iteration = 0
         self.num_actor_update_iteration = 0
         self.num_training = 0
@@ -49,7 +49,7 @@ class TD3:
         state = state.reshape(1, -1).clone().detach().requires_grad_(True)
         return self.actor(state).cpu().data.numpy().flatten()
 
-    def update(self, num_iteration):  # 在经验里随机取 10 次
+    def update(self, num_iteration):  # 在经验里随机取 20 次
 
         # if self.num_training % 500 == 0:
         # print("====================================")
@@ -66,14 +66,11 @@ class TD3:
             reward = torch.FloatTensor(r).to(device)
 
             # Select next action according to target policy:
-            # noise = torch.ones_like(action).data.normal_(0, self.args.policy_noise).to(device)  # 加入噪声用到的步骤
-            # noise = noise.clamp(-self.args.noise_clip, self.args.noise_clip)  # 加入噪声 用到的步骤
-            # print('### td3.py next_state.shape ###', next_state.shape)
-            # print('### td3.py next_action.shape ###', next_action.shape)
-            # next_action = (self.actor_target(next_state) + noise)  # 输出噪声
-            next_action = (self.actor_target(next_state))  # 对于预测的 can 长度不输出噪声
+            noise = torch.ones_like(action).data.normal_(0, self.args.policy_noise).to(device)  # 加入噪声用到的步骤
+            noise = noise.clamp(-self.args.noise_clip, self.args.noise_clip)  # 加入噪声 用到的步骤
+            next_action = (self.actor_target(next_state) + noise)  # 输出噪声
 
-            # next_action = next_action.clamp(-self.max_action, self.max_action)
+            next_action = next_action.clamp(-self.max_action, self.max_action)
 
             # Compute target Q-value:
             target_Q1 = self.critic_1_target(next_state, next_action)  # 打分1
@@ -82,9 +79,6 @@ class TD3:
             target_Q = reward + ((1 - done) * self.args.gamma * target_Q).detach()  # 更新部分真实 reward(过程累计到现在得到的分数) 计算得到的
 
             # Optimize Critic 1:
-            # print('## Optimize Critic 1 ##')
-            # print(state.shape)
-            # print(action.shape)
             current_Q1 = self.critic_1(state, action)
             loss_Q1 = F.mse_loss(current_Q1, target_Q)
             self.critic_1_optimizer.zero_grad()

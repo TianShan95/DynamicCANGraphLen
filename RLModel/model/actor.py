@@ -14,7 +14,7 @@ class Actor(nn.Module):
         torch.nn.Dropout(0.5)
         self.fc3 = nn.Linear(100, action_dim)
 
-        self.max_action = max_action
+        self.max_action = max_action  # 1
 
     def forward(self, state):
         # print(state.shape)

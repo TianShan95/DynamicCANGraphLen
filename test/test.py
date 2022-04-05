@@ -92,5 +92,7 @@ import re
 # print(df_val)
 
 # print('%.4f' % 3.1415926)
-graph_loss = 343434234223.141592642344234234
-print(f'g_loss: {graph_loss:<8.5f}')
+# graph_loss = 343434234223.141592642344234234
+# print(f'g_loss: {graph_loss:<8.5f}')
+import numpy as np
+print(type(np.random.uniform()))

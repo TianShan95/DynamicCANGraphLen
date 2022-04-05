@@ -14,7 +14,10 @@ def arg_parse():
     parser.add_argument('--tau', default=0.005, type=float)  # target smoothing coefficient
     parser.add_argument('--target_update_interval', default=1, type=int)
     parser.add_argument('--train_epoch', default=1, type=int)  # 训练代数
+    parser.add_argument('--exploration_noise', default=0.1, type=float)  # 拓展噪音
     # parser.add_argument('--test_iteration', default=5, type=int)
+    parser.add_argument('--policy_noise', default=0.2, type=float)
+    parser.add_argument('--noise_clip', default=0.5, type=float)
 
     # parser.add_argument('--learning_rate', default=3e-4, type=float)
     parser.add_argument('--gamma', default=0.99, type=int)  # discounted factor
@@ -28,7 +31,7 @@ def arg_parse():
     time_mark = time.strftime("%Y%m%d_%H%M%S", time.localtime())
     # parser.add_argument('--model_store_dir', default='../rl_model_store/' + time_mark + '_', type=str)
     parser.add_argument('--model_load_dir', default='../experiment/Rl_20220312_174654_multiDim_log/epoch_0_20220312_214619', type=str)
-    parser.add_argument('--directory', default='../rl_model_log/', type=str)
+    # parser.add_argument('--directory', default='../rl_model_log/', type=str)
 
     parser.add_argument('--out_dir', type=str,
                         help='out_dir', default='../experiment')  # 实验结果输出文件夹
@@ -39,7 +42,7 @@ def arg_parse():
     parser.add_argument('--load', default=False, type=bool)  # load model  在训练时 强化学习是否加载模型
     # parser.add_argument('--render_interval', default=100, type=int)  # after render_interval, the env.render() will work
 
-    parser.add_argument('--policy_delay', default=2, type=int)
+    parser.add_argument('--policy_delay', default=5, type=int)
     # parser.add_argument('--policy_noise', default=0.2, type=float)  #噪声相关
     # parser.add_argument('--noise_clip', default=0.5, type=float)  # 噪声相关
     # parser.add_argument('--exploration_noise', default=0.1, type=float)  # 对于强化学习输出的 选择can长度加入噪声
@@ -152,6 +155,9 @@ def arg_parse():
     parser.add_argument('--graph_lr', type=float, dest='graph_lr', help='learning rate of graph neural network')
     # 强化学习学习率
     parser.add_argument('--reforce_lr', type=float, dest='reforce_lr', help='learning rate of reforcemet learning network')
+    parser.add_argument('--epsilon', type=float, dest='epsilon', help='random exploration')
+
+
 
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
@@ -170,7 +176,17 @@ def arg_parse():
                         dropout=0.0,
                         bmname='Pre_train',
                         origin_can_datadir='../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/',
-                       )
+
+                        # train_epoch = 20,
+                        # graph_batchsize = 64,
+                        epsilon=0.9,
+                        msg_smallest_num = 200,
+                        msg_biggest_num = 500,
+                        graph_model_path = '../experiment/randGen_1_200_500_Normlize_1_concat_1_20220402_092504_log/0.87_better_model__totalEpoch_300_epoch_35_ps_10_nor_1.pth',
+                        # graph_lr = 0.01,
+                        # reforce_lr = 30,
+
+    )
 
     return parser.parse_args()
 
