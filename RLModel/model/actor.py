@@ -22,7 +22,7 @@ class Actor(nn.Module):
         self.max_action = max_action  # 1
 
         self.log_our_dir = log_dir
-        self.state_norm_np = np.array([])
+        self.state_norm_np = np.array([], [])
         self.step = 0
 
     def forward(self, state, p=False):

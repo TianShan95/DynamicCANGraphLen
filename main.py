@@ -179,7 +179,7 @@ def main():
             pred_val_correct = 0
             train_done = False
 
-            states_np = np.array([])  # 存储每次图卷积网络输出的状态向量
+            states_np = np.array([], [])  # 存储每次图卷积网络输出的状态向量
 
             while True:
                 # 强化学习网络
