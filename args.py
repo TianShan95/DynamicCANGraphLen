@@ -21,7 +21,7 @@ def arg_parse():
 
     # parser.add_argument('--learning_rate', default=3e-4, type=float)
     parser.add_argument('--gamma', default=0.99, type=int)  # discounted factor
-    parser.add_argument('--capacity', default=1000, type=int)  # replay buffer size 1000
+    parser.add_argument('--capacity', default=3000, type=int)  # replay buffer size 1000
     parser.add_argument('--batch_size', default=100, type=int)  # mini batch size  100
     parser.add_argument('--seed', default=1, type=int)
     parser.add_argument('--clip', dest='clip', type=float,
@@ -43,7 +43,7 @@ def arg_parse():
     parser.add_argument('-load', action='store_true', default=False)
     # parser.add_argument('--render_interval', default=100, type=int)  # after render_interval, the env.render() will work
 
-    parser.add_argument('--policy_delay', default=5, type=int)
+    parser.add_argument('--policy_delay', default=2, type=int)
     # parser.add_argument('--policy_noise', default=0.2, type=float)  #噪声相关
     # parser.add_argument('--noise_clip', default=0.5, type=float)  # 噪声相关
     # parser.add_argument('--exploration_noise', default=0.1, type=float)  # 对于强化学习输出的 选择can长度加入噪声
@@ -163,7 +163,7 @@ def arg_parse():
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
                         graph_lr=0.001,  # 0.001
-                        reforce_lr=0.1,  # 0.001
+                        reforce_lr=0.1,  # 0.1
                         clip=2.0,
                         train_ratio=0.8,
                         graph_batchsize=64,  # 一个图的选择是一个动作

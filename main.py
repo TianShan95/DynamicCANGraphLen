@@ -266,7 +266,7 @@ def main():
                                            next_state[singleCan].cpu().data.numpy().flatten(),
                                            actions[singleCan], reward, np.float(train_done)))
                         if len(agent.memory.storage) >= prog_args.capacity - 1:
-                            train_times, avg_Q1_loss, avg_Q2_loss = agent.update(num_iteration=20)  # 使用经验回放 更新网络
+                            train_times, avg_Q1_loss, avg_Q2_loss = agent.update(num_iteration=10)  # 使用经验回放 更新网络
 
                     # 计数训练时 预测正确的个数
                     for index, singlab in enumerate(label):
