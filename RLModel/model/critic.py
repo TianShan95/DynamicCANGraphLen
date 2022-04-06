@@ -7,6 +7,7 @@ class Critic(nn.Module):
 
     def __init__(self, state_dim, action_dim):
         super(Critic, self).__init__()
+        self.layernorm = nn.LayerNorm(state_dim + action_dim)
 
         self.fc1 = nn.Linear(state_dim + action_dim, 300)
         torch.nn.Dropout(0.5)
@@ -18,7 +19,9 @@ class Critic(nn.Module):
 
         state_action = torch.cat([state, action], 1)
 
-        q = F.relu(self.fc1(state_action))
+        q = self.layernorm(state_action)
+
+        q = F.relu(self.fc1(q))
         q = F.relu(self.fc2(q))
         q = self.fc3(q)
         return q

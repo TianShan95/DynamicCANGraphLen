@@ -20,8 +20,8 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 class TD3:
     def __init__(self, state_dim, action_dim, max_action, args, log_out_dir):
 
-        self.actor = Actor(state_dim, action_dim, max_action).to(device)  # 动作 网络
-        self.actor_target = Actor(state_dim, action_dim, max_action).to(device)  # target 动作网络
+        self.actor = Actor(state_dim, action_dim, max_action, log_out_dir).to(device)  # 动作 网络
+        self.actor_target = Actor(state_dim, action_dim, max_action, log_out_dir).to(device)  # target 动作网络
         self.critic_1 = Critic(state_dim, action_dim).to(device)  #
         self.critic_1_target = Critic(state_dim, action_dim).to(device)
         self.critic_2 = Critic(state_dim, action_dim).to(device)
@@ -44,10 +44,10 @@ class TD3:
         
         self.args = args
 
-    def select_action(self, state):
+    def select_action(self, state, p=False):
         # state = torch.tensor(state.reshape(1, -1)).float().to(device)
         state = state.reshape(1, -1).clone().detach().requires_grad_(True)
-        return self.actor(state).cpu().data.numpy().flatten()
+        return self.actor(state, p).cpu().data.numpy().flatten()
 
     def update(self, num_iteration):  # 在经验里随机取 20 次
 

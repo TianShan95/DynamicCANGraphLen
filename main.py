@@ -21,6 +21,8 @@ from utils.logger import logger
 import warnings
 warnings.filterwarnings('ignore')  # 忽略警告
 import sys
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # 参数初始化
 prog_args = arg_parse()
@@ -169,12 +171,15 @@ def main():
             state, _ , _, _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_list)
             # print(f'随机得到的状态是 {state}')
             # 记录 图模型 执行 步数
+            step = 0
             graph_train_step = 0
             graph_val_step = prog_args.graph_batchsize  # 因为模型读取train数据读完，未跳出读取 val 数据，所以需要赋予 batchsize 大小的初值
             # 记录正确预测的 报文 个数
             pred_train_correct = 0
             pred_val_correct = 0
             train_done = False
+
+            states_np = np.array([])  # 存储每次图卷积网络输出的状态向量
 
             while True:
                 # 强化学习网络
@@ -183,7 +188,7 @@ def main():
                 actions = []
                 for singleCan in range(prog_args.graph_batchsize):
 
-                    action = agent.select_action(state[singleCan])  # 从 现在的 状态 得到一个动作 报文长度可选择数量
+                    action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
                     action = action + np.random.normal(0, prog_args.exploration_noise, size=action.shape[0])
                     action = action.clip(-1, 1)
                     actions.append(action)
@@ -195,8 +200,14 @@ def main():
                     else:
                         # 图操作 验证步数自增 1
                         graph_val_step += 1
+                    step += 1  # 总 step
 
-                    len_can = 0
+                    if step % 1000 == 0:  #  每1000步输出 状态热力图
+                        sns.heatmap(states_np, annot=True, vmax=1, vmin=-1, square=True, cmap="YlGnBu")
+                        plt.savefig(log_out_dir + '/plt_state_%d' % step, dpi=300, bbox_inches='tight')
+                        plt.clf()  # 更新画布
+
+                    # len_can = 0
                     # 选取 前5 个最大的可能里 选择报文数最大的
                     # if prog_args.choice_graph_len_mode == 0:
                     #     len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
@@ -300,6 +311,8 @@ def main():
 
                 # 更新 状态
                 state = next_state
+                states_np = np.concatenate((states_np, state.cpu().detach().numpy()), axis=0)
+
 
                 # # 保存 模型
                 # if graph_step % args_RL.log_interval == 0:
