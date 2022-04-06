@@ -24,6 +24,7 @@ class Actor(nn.Module):
         self.log_our_dir = log_dir
         # self.state_norm_np = np.array([], [])
         self.step = 0
+        self.count = 0
 
     def forward(self, state, p=False):
         # print(state.shape)
@@ -36,13 +37,15 @@ class Actor(nn.Module):
             else:
                 self.state_norm_np = np.concatenate((self.state_norm_np, a.cpu().detach().numpy()), axis=0)
             if self.step % 1000 == 0:
+                self.count += 1
                 sns.heatmap(self.state_norm_np, cmap="YlGnBu", xticklabels=False, yticklabels=False)
-                plt.savefig(self.log_our_dir + '/plt_norm_state_%d' % self.step, dpi=300, bbox_inches='tight')
+                plt.savefig(self.log_our_dir + '/plt_norm_state_%d' % self.count, dpi=300, bbox_inches='tight')
                 plt.clf()  # 更新画布
                 self.step = 0
 
         a = F.relu(self.fc1(a))
         # a = F.relu(self.fc2(a))
+        a = F.tanh(a)
         a = self.fc3(a)
 
         # a = torch.tanh(self.fc3(a)) * self.max_action

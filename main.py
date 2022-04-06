@@ -206,7 +206,7 @@ def main():
                     if step % 1000 == 0:  #  每1000步输出 状态热力图
                         fig, ax = plt.subplots(figsize=(10, 10))
                         sns.heatmap(states_np, cmap="YlGnBu")
-                        plt.savefig(log_out_dir + '/plt_state_%d' % step, dpi=300, bbox_inches='tight')
+                        plt.savefig(log_out_dir + '/plt_state_%d_%d' % (i, step), dpi=300, bbox_inches='tight')
                         plt.clf()  # 更新画布
                         states_np = None
 
