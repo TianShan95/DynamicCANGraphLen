@@ -17,7 +17,7 @@ class Actor(nn.Module):
         torch.nn.Dropout(0.5)
         # self.fc2 = nn.Linear(300, 200)
         # torch.nn.Dropout(0.5)
-        self.fc3 = nn.Linear(200, action_dim)
+        self.fc3 = nn.Linear(500, action_dim)
 
         self.max_action = max_action  # 1
 
