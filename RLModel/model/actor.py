@@ -10,7 +10,7 @@ class Actor(nn.Module):
 
         self.fc1 = nn.Linear(state_dim, 300)
         torch.nn.Dropout(0.5)
-        self.fc2 = nn.Linear(300, 100)
+        self.fc2 = nn.Linear(300, 200)
         torch.nn.Dropout(0.5)
         self.fc3 = nn.Linear(100, action_dim)
 
@@ -20,5 +20,7 @@ class Actor(nn.Module):
         # print(state.shape)
         a = F.relu(self.fc1(state))
         a = F.relu(self.fc2(a))
-        a = torch.tanh(self.fc3(a)) * self.max_action
+        a = self.fc3(a)
+
+        # a = torch.tanh(self.fc3(a)) * self.max_action
         return a

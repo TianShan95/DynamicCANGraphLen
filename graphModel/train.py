@@ -81,7 +81,7 @@ def train(dataset, model, args, optimizer, mask_nodes=True, device='cpu'):
 
             all_reward += reward
 
-        all_reward = all_reward / (args.graph_batchsize * 10)
+        all_reward = all_reward / args.graph_batchsize
 
 
         return  after_gcn_vector, all_reward.cpu().detach().numpy().tolist(), label.cpu().detach().numpy().tolist(), pre_label.cpu().detach().numpy().tolist(), loss.item()
