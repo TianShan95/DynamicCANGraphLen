@@ -31,7 +31,7 @@ class Actor(nn.Module):
 
         if p:  # 如果是在强化学习输出过程则记录 训练过程则不记录
             self.step += 1
-            self.state_norm_np = np.concatenate((self.state_norm_np, a), axis=0)
+            self.state_norm_np = np.concatenate((self.state_norm_np, a.cpu().detach().numpy()), axis=0)
             if self.step % 1000 == 0:
                 sns.heatmap(self.state_norm_np, annot=True, vmax=1, vmin=-1, square=True, cmap="YlGnBu")
                 plt.savefig(self.log_our_dir + '/plt_norm_state_%d' % self.step, dpi=300, bbox_inches='tight')
