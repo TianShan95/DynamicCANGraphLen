@@ -42,7 +42,7 @@ class Actor(nn.Module):
                 self.step = 0
 
         a = F.relu(self.fc1(a))
-        a = F.relu(self.fc2(a))
+        # a = F.relu(self.fc2(a))
         a = self.fc3(a)
 
         # a = torch.tanh(self.fc3(a)) * self.max_action
