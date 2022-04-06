@@ -77,7 +77,7 @@ def train(dataset, model, args, optimizer, mask_nodes=True, device='cpu'):
             if pre_label[singleCAN] == label[singleCAN]:
                 reward = abs(ypred[0, 0] - ypred[0, 1])
             else:
-                reward = - abs(ypred[0, 0] - ypred[0, 1])  # 加大对错误的惩罚
+                reward = - abs(ypred[0, 0] - ypred[0, 1])*10  # 加大对错误的惩罚
 
             all_reward += reward
 
