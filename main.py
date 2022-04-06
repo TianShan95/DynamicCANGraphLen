@@ -179,7 +179,7 @@ def main():
             pred_val_correct = 0
             train_done = False
 
-            states_np = np.array([], [])  # 存储每次图卷积网络输出的状态向量
+            # states_np = np.array([], [])  # 存储每次图卷积网络输出的状态向量
 
             while True:
                 # 强化学习网络
@@ -311,7 +311,11 @@ def main():
 
                 # 更新 状态
                 state = next_state
-                states_np = np.concatenate((states_np, state.cpu().detach().numpy()), axis=0)
+
+                if graph_train_step < 100:
+                    states_np = state.cpu().detach().numpy()
+                else:
+                    states_np = np.concatenate((states_np, state.cpu().detach().numpy()), axis=0)
 
 
                 # # 保存 模型
