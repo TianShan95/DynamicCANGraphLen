@@ -178,6 +178,7 @@ def main():
             pred_train_correct = 0
             pred_val_correct = 0
             train_done = False
+            states_np = None
 
             # states_np = np.array([], [])  # 存储每次图卷积网络输出的状态向量
 
@@ -203,9 +204,11 @@ def main():
                     step += 1  # 总 step
 
                     if step % 1000 == 0:  #  每1000步输出 状态热力图
-                        sns.heatmap(states_np, annot=True, vmax=1, vmin=-1, square=True, cmap="YlGnBu")
+                        fig, ax = plt.subplots(figsize=(10, 10))
+                        sns.heatmap(states_np, cmap="YlGnBu")
                         plt.savefig(log_out_dir + '/plt_state_%d' % step, dpi=300, bbox_inches='tight')
                         plt.clf()  # 更新画布
+                        states_np = None
 
                     # len_can = 0
                     # 选取 前5 个最大的可能里 选择报文数最大的
@@ -312,7 +315,7 @@ def main():
                 # 更新 状态
                 state = next_state
 
-                if graph_train_step < 100:
+                if graph_train_step < 100 or states_np is None:
                     states_np = state.cpu().detach().numpy()
                 else:
                     states_np = np.concatenate((states_np, state.cpu().detach().numpy()), axis=0)

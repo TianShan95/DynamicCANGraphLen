@@ -13,10 +13,10 @@ class Actor(nn.Module):
 
         self.layernorm = nn.LayerNorm(state_dim)
 
-        self.fc1 = nn.Linear(state_dim, 300)
+        self.fc1 = nn.Linear(state_dim, 500)
         torch.nn.Dropout(0.5)
-        self.fc2 = nn.Linear(300, 200)
-        torch.nn.Dropout(0.5)
+        # self.fc2 = nn.Linear(300, 200)
+        # torch.nn.Dropout(0.5)
         self.fc3 = nn.Linear(200, action_dim)
 
         self.max_action = max_action  # 1
@@ -36,9 +36,10 @@ class Actor(nn.Module):
             else:
                 self.state_norm_np = np.concatenate((self.state_norm_np, a.cpu().detach().numpy()), axis=0)
             if self.step % 1000 == 0:
-                sns.heatmap(self.state_norm_np, annot=True, vmax=1, vmin=-1, square=True, cmap="YlGnBu")
+                sns.heatmap(self.state_norm_np, cmap="YlGnBu", xticklabels=False, yticklabels=False)
                 plt.savefig(self.log_our_dir + '/plt_norm_state_%d' % self.step, dpi=300, bbox_inches='tight')
                 plt.clf()  # 更新画布
+                self.step = 0
 
         a = F.relu(self.fc1(a))
         a = F.relu(self.fc2(a))
