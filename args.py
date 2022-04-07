@@ -158,6 +158,9 @@ def arg_parse():
     parser.add_argument('--reforce_lr', type=float, dest='reforce_lr', help='learning rate of reforcemet learning network')
     parser.add_argument('--epsilon', type=float, dest='epsilon', help='random exploration')
 
+    parser.add_argument('--Di_graph', type=int,
+                        help='Whether is Di-graph', default=1)  # 是否是有向图 默认为有向图
+
 
 
     parser.set_defaults(max_nodes=81,

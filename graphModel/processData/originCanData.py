@@ -59,6 +59,8 @@ class OriginCanData:
         self.train_done = False
         self.val_done = False
 
+        self.args = args
+
         # print(self.df.head())
         # print(self.df.tail())
 
@@ -165,7 +167,10 @@ class OriginCanData:
 
                 # 实例化 图
                 # graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
-                graph = nx.from_edgelist(adj_list, create_using=nx.DiGraph())  # 从边 列表 构造 图
+                if self.args.Di_graph:
+                    graph = nx.from_edgelist(adj_list, create_using=nx.DiGraph())  # 从边 列表 构造 图
+                else:
+                    graph = nx.from_edgelist(adj_list)  # 从边 列表 构造 图
 
                 graph.graph['label'] = graph_label
                 # print(f'报文类型: {graph_label}')

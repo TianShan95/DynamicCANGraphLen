@@ -37,7 +37,7 @@ setup_seed(prog_args.seed)
 # state_dim = ((prog_args.num_gc_layers - 1) * prog_args.hidden_dim + prog_args.output_dim) * 2  # 60 * 2
 state_dim = 60
 # 动作维度
-action_dim = prog_args.msg_biggest_num - prog_args.msg_smallest_num  # 每个图可选取报文长度的范围
+action_dim = prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1  # 每个图可选取报文长度的范围 动作空间 左闭右闭 [200, 500]
 
 '''
 Implementation of TD3 with pytorch 
@@ -193,8 +193,29 @@ def main():
                     # action = action + np.random.normal(0, prog_args.exploration_noise, size=action.shape[0])
                     # action = action.clip(-1, 1)
 
+                    # len_can = 0
+                    # 选取 前5 个最大的可能里 选择报文数最大的
+                    # if prog_args.choice_graph_len_mode == 0:
+                    #     len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+                    if np.random.uniform() > prog_args.epsilon:  # choosing action
+                        len_can = np.random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
+                    else:
+                        # len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+                        # np.random.choice 是左闭右开 所以加 1
+                        len_can = np.random.choice(prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1, 1, action.tolist())[0] + prog_args.msg_smallest_num
+
+                    # elif prog_args.choice_graph_len_mode == 1:
+                    #     # 选取 前5 个最大的可能里 选择报文数最大的
+                    #     len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
+                    # elif prog_args.choice_graph_len_mode == 2:
+                    #     # 在 前 5 个最大的可能里 随机选择一个报文长度
+                    #     alter = random.randint(0, 4)
+                    #     len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
+
+                    action_store = [1 if _ == (len_can - prog_args.msg_smallest_num) else 0 for _ in range(prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1)]
+
                     # 输出 softmax 各个动作的概率
-                    actions.append(action)
+                    actions.append(action_store)
 
                     # 训练阶段
                     if not train_done:
@@ -212,23 +233,6 @@ def main():
                     #     plt.clf()  # 更新画布
                     #     states_np = None
 
-                    # len_can = 0
-                    # 选取 前5 个最大的可能里 选择报文数最大的
-                    # if prog_args.choice_graph_len_mode == 0:
-                    #     len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-                    if np.random.uniform() > prog_args.epsilon:  # choosing action
-                        len_can = np.random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
-                    else:
-                        # len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-                        len_can = np.random.choice(prog_args.msg_biggest_num - prog_args.msg_smallest_num, 1, action.tolist())[0] + prog_args.msg_smallest_num
-
-                    # elif prog_args.choice_graph_len_mode == 1:
-                    #     # 选取 前5 个最大的可能里 选择报文数最大的
-                    #     len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
-                    # elif prog_args.choice_graph_len_mode == 2:
-                    #     # 在 前 5 个最大的可能里 随机选择一个报文长度
-                    #     alter = random.randint(0, 4)
-                    #     len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
 
                     # 把神经网络得到的长度加入列表
                     len_can_list.append(len_can)
