@@ -263,19 +263,24 @@ def main():
                         #     reward = abs(reward)
                         # else:
                         #     reward = -abs(reward)
-                        if reward > 0.75:  # 预测准确率达 0.75
+                        if reward > 0.75:  # 预测准确率达 0.75 - 1
                             if label[singleCan] == pred[singleCan]:
                                 store_reward.append(100)
                             else:
                                 store_reward.append(-1)
-                        elif reward > 0.5:  # 预测准确率达 0.5
+                        elif reward > 0.5:  # 预测准确率达 0.5 - 0.75
                             if label[singleCan] == pred[singleCan]:
                                 store_reward.append(10)
                             else:
                                 store_reward.append(-100)
-                        elif reward > 0.25:  # 预测准确率达 0.25
+                        elif reward > 0.25:  # 预测准确率达 0.25 - 0.5
                             if label[singleCan] == pred[singleCan]:
                                 store_reward.append(-10)
+                            else:
+                                store_reward.append(-100)
+                        else :  # 预测准确率达 0.25
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(-50)
                             else:
                                 store_reward.append(-100)
 
@@ -318,19 +323,24 @@ def main():
                         #     reward = -abs(reward)
                         # # 累加 奖励
                         # ep_r += reward
-                        if reward > 0.75:  # 预测准确率达 0.75
+                        if reward > 0.75:  # 预测准确率达 0.75 - 1
                             if label[singleCan] == pred[singleCan]:
                                 store_reward.append(100)
                             else:
                                 store_reward.append(-1)
-                        elif reward > 0.5:  # 预测准确率达 0.5
+                        elif reward > 0.5:  # 预测准确率达 0.5 - 0.75
                             if label[singleCan] == pred[singleCan]:
                                 store_reward.append(10)
                             else:
                                 store_reward.append(-100)
-                        elif reward > 0.25:  # 预测准确率达 0.25
+                        elif reward > 0.25:  # 预测准确率达 0.25 - 0.5
                             if label[singleCan] == pred[singleCan]:
                                 store_reward.append(-10)
+                            else:
+                                store_reward.append(-100)
+                        else:  # 预测准确率达 0.25
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(-50)
                             else:
                                 store_reward.append(-100)
 
