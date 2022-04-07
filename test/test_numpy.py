@@ -9,6 +9,8 @@ import numpy as np
 # # a = np.round(data1, 2)
 # print(a)
 
-states_np = np.array([])
-a = np.array([1, 2, 3])
-print(np.concatenate((states_np, a), axis=0))
+# states_np = np.array([])
+# a = np.array([1, 2, 3])
+# print(np.concatenate((states_np, a), axis=0))
+
+print(np.random.choice(5, 3, p=np.array([0.2, 0.1, 0.3, 0.4, 0])))

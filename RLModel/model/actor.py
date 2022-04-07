@@ -30,23 +30,24 @@ class Actor(nn.Module):
         # print(state.shape)
         a = self.layernorm(state)
 
-        if p:  # 如果是在强化学习输出过程则记录 训练过程则不记录
-            self.step += 1
-            if self.step == 1:
-                self.state_norm_np = a.cpu().detach().numpy()
-            else:
-                self.state_norm_np = np.concatenate((self.state_norm_np, a.cpu().detach().numpy()), axis=0)
-            if self.step % 1000 == 0:
-                self.count += 1
-                sns.heatmap(self.state_norm_np, cmap="YlGnBu", xticklabels=False, yticklabels=False)
-                plt.savefig(self.log_our_dir + '/plt_norm_state_%d' % self.count, dpi=300, bbox_inches='tight')
-                plt.clf()  # 更新画布
-                self.step = 0
+        # if p:  # 如果是在强化学习输出过程则记录 训练过程则不记录
+        #     self.step += 1
+        #     if self.step == 1:
+        #         self.state_norm_np = a.cpu().detach().numpy()
+        #     else:
+        #         self.state_norm_np = np.concatenate((self.state_norm_np, a.cpu().detach().numpy()), axis=0)
+        #     if self.step % 1000 == 0:
+        #         self.count += 1
+        #         sns.heatmap(self.state_norm_np, cmap="YlGnBu", xticklabels=False, yticklabels=False)
+        #         plt.savefig(self.log_our_dir + '/plt_norm_state_%d' % self.count, dpi=300, bbox_inches='tight')
+        #         plt.clf()  # 更新画布
+        #         self.step = 0
 
         a = F.relu(self.fc1(a))
         # a = F.relu(self.fc2(a))
-        a = F.tanh(a)
+        # a = F.tanh(a)
         a = self.fc3(a)
+        a = F.softmax(a)
 
         # a = torch.tanh(self.fc3(a)) * self.max_action
         return a

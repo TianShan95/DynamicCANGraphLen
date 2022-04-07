@@ -72,16 +72,25 @@ def train(dataset, model, args, optimizer, mask_nodes=True, device='cpu'):
         # 制定 reward
         # print(f'pre_label: {pre_label.item()}')
         # print(f'label: {label.item()}')
-        all_reward = 0
+        # all_reward = 0
+        # for singleCAN in range(ypred_dim0):
+        #     if pre_label[singleCAN] == label[singleCAN]:
+        #         reward = abs(ypred[0, 0] - ypred[0, 1])
+        #     else:
+        #         reward = - abs(ypred[0, 0] - ypred[0, 1])*10  # 加大对错误的惩罚
+        #
+        #     all_reward += reward
+        #
+        # all_reward = all_reward / args.graph_batchsize
+
+        count_correct = 0
         for singleCAN in range(ypred_dim0):
             if pre_label[singleCAN] == label[singleCAN]:
-                reward = abs(ypred[0, 0] - ypred[0, 1])
-            else:
-                reward = - abs(ypred[0, 0] - ypred[0, 1])*10  # 加大对错误的惩罚
+                count_correct += 1
 
-            all_reward += reward
-
-        all_reward = all_reward / args.graph_batchsize
+        count_correct = count_correct / args.graph_batchsize
 
 
-        return  after_gcn_vector, all_reward.cpu().detach().numpy().tolist(), label.cpu().detach().numpy().tolist(), pre_label.cpu().detach().numpy().tolist(), loss.item()
+        # return  after_gcn_vector, all_reward.cpu().detach().numpy().tolist(), label.cpu().detach().numpy().tolist(), pre_label.cpu().detach().numpy().tolist(), loss.item()
+
+        return  after_gcn_vector, count_correct, label.cpu().detach().numpy().tolist(), pre_label.cpu().detach().numpy().tolist(), loss.item()

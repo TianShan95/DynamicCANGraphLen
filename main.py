@@ -188,10 +188,12 @@ def main():
                 len_can_list = []
                 actions = []
                 for singleCan in range(prog_args.graph_batchsize):
-
                     action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
-                    action = action + np.random.normal(0, prog_args.exploration_noise, size=action.shape[0])
-                    action = action.clip(-1, 1)
+
+                    # action = action + np.random.normal(0, prog_args.exploration_noise, size=action.shape[0])
+                    # action = action.clip(-1, 1)
+
+                    # 输出 softmax 各个动作的概率
                     actions.append(action)
 
                     # 训练阶段
@@ -203,12 +205,12 @@ def main():
                         graph_val_step += 1
                     step += 1  # 总 step
 
-                    if step % 1000 == 0:  #  每1000步输出 状态热力图
-                        fig, ax = plt.subplots(figsize=(10, 10))
-                        sns.heatmap(states_np, cmap="YlGnBu")
-                        plt.savefig(log_out_dir + '/plt_state_%d_%d' % (i, step), dpi=300, bbox_inches='tight')
-                        plt.clf()  # 更新画布
-                        states_np = None
+                    # if step % 1000 == 0:  #  每1000步输出 状态热力图
+                    #     fig, ax = plt.subplots(figsize=(10, 10))
+                    #     sns.heatmap(states_np, cmap="YlGnBu")
+                    #     plt.savefig(log_out_dir + '/plt_state_%d_%d' % (i, step), dpi=300, bbox_inches='tight')
+                    #     plt.clf()  # 更新画布
+                    #     states_np = None
 
                     # len_can = 0
                     # 选取 前5 个最大的可能里 选择报文数最大的
@@ -217,9 +219,10 @@ def main():
                     if np.random.uniform() > prog_args.epsilon:  # choosing action
                         len_can = np.random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
                     else:
-                        len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+                        # len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+                        len_can = np.random.choice(prog_args.msg_biggest_num - prog_args.msg_smallest_num, 1, action.tolist())[0] + prog_args.msg_smallest_num
 
-                # elif prog_args.choice_graph_len_mode == 1:
+                    # elif prog_args.choice_graph_len_mode == 1:
                     #     # 选取 前5 个最大的可能里 选择报文数最大的
                     #     len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
                     # elif prog_args.choice_graph_len_mode == 2:
@@ -253,18 +256,35 @@ def main():
                 if not train_done:
                     # rewards = []
                     # push 经验
+                    store_reward = []
                     for singleCan in range(prog_args.graph_batchsize):
-                        # 存入 经验
-                        if label[singleCan] == pred[singleCan]:
-                            reward = abs(reward)
-                        else:
-                            reward = -abs(reward)
+                        # # 存入 经验
+                        # if label[singleCan] == pred[singleCan]:
+                        #     reward = abs(reward)
+                        # else:
+                        #     reward = -abs(reward)
+                        if reward > 0.75:  # 预测准确率达 0.75
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(100)
+                            else:
+                                store_reward.append(-1)
+                        elif reward > 0.5:  # 预测准确率达 0.5
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(10)
+                            else:
+                                store_reward.append(-100)
+                        elif reward > 0.25:  # 预测准确率达 0.25
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(-10)
+                            else:
+                                store_reward.append(-100)
+
                         # 累加 奖励
                         ep_r += reward
                         # rewards.append(reward)
                         agent.memory.push((state[singleCan].cpu().data.numpy().flatten(),
                                            next_state[singleCan].cpu().data.numpy().flatten(),
-                                           actions[singleCan], reward, np.float(train_done)))
+                                           actions[singleCan], store_reward[-1], np.float(train_done)))
                         if len(agent.memory.storage) >= prog_args.capacity - 1:
                             train_times, avg_Q1_loss, avg_Q2_loss = agent.update(num_iteration=10)  # 使用经验回放 更新网络
 
@@ -285,17 +305,34 @@ def main():
                     logger.info(f'len_can_list: {len_can_list}')
                     logger.info(f'labe: {label}')
                     logger.info(f'pred: {pred}')
+                    logger.info(f'swrd: {store_reward}')
 
                 # 验证部分
                 else:
+                    store_reward = []
                     for singleCan in range(prog_args.graph_batchsize):
-                        # 存入 经验
-                        if label[singleCan] == pred[singleCan]:
-                            reward = abs(reward)
-                        else:
-                            reward = -abs(reward)
-                        # 累加 奖励
-                        ep_r += reward
+                        # # 存入 经验
+                        # if label[singleCan] == pred[singleCan]:
+                        #     reward = abs(reward)
+                        # else:
+                        #     reward = -abs(reward)
+                        # # 累加 奖励
+                        # ep_r += reward
+                        if reward > 0.75:  # 预测准确率达 0.75
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(100)
+                            else:
+                                store_reward.append(-1)
+                        elif reward > 0.5:  # 预测准确率达 0.5
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(10)
+                            else:
+                                store_reward.append(-100)
+                        elif reward > 0.25:  # 预测准确率达 0.25
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(-10)
+                            else:
+                                store_reward.append(-100)
 
                     # 计数训练时 预测正确的个数
                     for index, singlab in enumerate(label):
@@ -311,14 +348,15 @@ def main():
                     logger.info(f'len_can_list: {len_can_list}')
                     logger.info(f'labe: {label}')
                     logger.info(f'pred: {pred}')
+                    logger.info(f'swrd: {store_reward}')
 
                 # 更新 状态
                 state = next_state
 
-                if graph_train_step < 100 or states_np is None:
-                    states_np = state.cpu().detach().numpy()
-                else:
-                    states_np = np.concatenate((states_np, state.cpu().detach().numpy()), axis=0)
+                # if graph_train_step < 100 or states_np is None:
+                #     states_np = state.cpu().detach().numpy()
+                # else:
+                #     states_np = np.concatenate((states_np, state.cpu().detach().numpy()), axis=0)
 
 
                 # # 保存 模型
