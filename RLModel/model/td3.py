@@ -35,6 +35,11 @@ class TD3:
         # critic_graph.theme = hl.graph.THEMES["blue"].copy()
         # actor_graph.save(f"{log_out_dir}/actor.png", format='png')
         # critic_graph.save(f"{log_out_dir}/critic.png", format='png')
+        self.writer = SummaryWriter(log_out_dir)
+
+        # self.writer.add_graph(self.actor, torch.zeros([1, 1, args.state_dim]))
+        # self.writer.add_graph(self.critic_1, [torch.zeros([1,  args.state_dim]), torch.zeros([1, args.msg_biggest_num - args.msg_smallest_num + 1])])
+
 
         self.actor_optimizer = optim.Adam(self.actor.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
         self.critic_1_optimizer = optim.Adam(self.critic_1.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
@@ -46,7 +51,7 @@ class TD3:
 
         self.max_action = max_action
         self.memory = Replay_buffer(args.capacity)
-        self.writer = SummaryWriter(log_out_dir)
+
         self.num_critic_update_iteration = 0
         self.num_actor_update_iteration = 0
         self.num_training = 0
@@ -109,7 +114,8 @@ class TD3:
             # 延迟更新 策略网络
             if i % self.args.policy_delay == 0:
                 # Compute actor loss:
-                actor_loss = (self.critic_1(state, self.actor(state)) * torch.log(self.actor(state))).mean()
+                # actor_loss = (self.critic_1(state, self.actor(state)) * torch.log(self.actor(state))).mean()
+                actor_loss = - (self.critic_1(state, self.actor(state))).mean()
 
                 # Optimize the actor
                 self.actor_optimizer.zero_grad()

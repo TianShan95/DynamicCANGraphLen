@@ -186,7 +186,7 @@ def arg_parse():
 
                         # train_epoch = 20,
                         # graph_batchsize = 64,
-                        epsilon=0.8,
+                        epsilon=0.9,
                         msg_smallest_num = 200,
                         msg_biggest_num = 500,
                         graph_model_path = '../experiment/randGen_1_200_500_Normlize_1_concat_1_20220402_092504_log/0.87_better_model__totalEpoch_300_epoch_35_ps_10_nor_1.pth',

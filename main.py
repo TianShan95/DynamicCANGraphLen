@@ -23,6 +23,7 @@ warnings.filterwarnings('ignore')  # 忽略警告
 import sys
 import seaborn as sns
 import matplotlib.pyplot as plt
+from utils.WrapperModel import Wrapper as Model_Wrapper
 
 # 参数初始化
 prog_args = arg_parse()
@@ -87,7 +88,12 @@ def main():
     #     time.sleep(0.5)
     # print(f'python 时间同步完成')
 
-    agent = TD3(state_dim, action_dim, 1, prog_args, log_out_dir)
+    agent = TD3(state_dim, action_dim, 1, prog_args, log_out_dir)  # 创建 agent 对象
+
+    # tensorboard 可视化 actor 和 critic
+    Wrapper = Model_Wrapper(agent.actor, agent.critic_1, prog_args)
+    agent.writer.add_graph(Wrapper, [torch.zeros([1,  prog_args.state_dim]), torch.zeros([1, prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1])])
+
     # 累加奖励
     ep_r = 0
     # 实例化 图任务
@@ -304,6 +310,10 @@ def main():
 
                         # 得到训练精度
                         train_acc = pred_train_correct/graph_train_step
+                        agent.writer.add_scalar('acc/train_acc', train_acc, global_step=graph_train_step)
+                        agent.writer.add_scalar('Loss/graph_train_loss', graph_loss, global_step=graph_train_step)
+
+
                         # 结果写入 log
                         logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
                                     f'block_{graph_task.origin_can_obj.train_index}: {graph_task.origin_can_obj.train_order[graph_task.origin_can_obj.train_index]}; '
@@ -354,6 +364,9 @@ def main():
                                 pred_val_correct += 1
                         # 得到验证精度
                         val_acc = pred_val_correct/graph_val_step
+
+                        agent.writer.add_scalar('acc/val_acc', val_acc, global_step=graph_val_step)
+                        agent.writer.add_scalar('Loss/graph_val_loss', graph_loss, global_step=graph_val_step)
                         # 结果写入 log
                         logger.info(f'epoch-val: {i:<3}; step: {graph_val_step:<6}; '
                                     f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_val_len}; '
