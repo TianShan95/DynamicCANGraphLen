@@ -161,8 +161,9 @@ def fourier(L, algo='eigh', k=1, norm = 2):
         try:
             lamb, U = np.linalg.eigh(L.toarray())
         except np.linalg.LinAlgError:
-            logger.info(f'np.linalg.LinAlgError')
-            logger.info({L})
+            logger.info(f'np.linalg.LinAlgError1')
+            logger.info({L.toarray()})
+            logger.info(f'np.linalg.LinAlgError2')
             lamb, U = scipy.linalg.eigh(L.toarray())
 
     elif algo is 'eigs':
