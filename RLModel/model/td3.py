@@ -109,7 +109,7 @@ class TD3:
             # 延迟更新 策略网络
             if i % self.args.policy_delay == 0:
                 # Compute actor loss:
-                actor_loss = - self.critic_1(state, self.actor(state)).mean()
+                actor_loss = - (self.critic_1(state, self.actor(state)) * torch.log(self.actor_target(state))).mean()
 
                 # Optimize the actor
                 self.actor_optimizer.zero_grad()
