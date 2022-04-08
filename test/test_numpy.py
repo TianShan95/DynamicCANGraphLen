@@ -1,5 +1,6 @@
 # import pandas as pd
 import numpy as np
+from utils.logger import logger
 
 # data1 = [[1,0.196699884,-0.077219634],[0.196699884,1,-0.668343535],[-0.077219634,-0.668343535,1]]
 # data1 = [1,0.196699884,-0.077219634]
@@ -17,3 +18,7 @@ import numpy as np
 a = 2
 b = np.array([1 if i == 2 else 0 for i in range(10)])
 print(b)
+logger.info(b)
+c = b.tolist()
+print(c)
+logger.info(c)
