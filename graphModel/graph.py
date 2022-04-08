@@ -3,6 +3,7 @@ import sklearn.neighbors
 import matplotlib.pyplot as plt
 import scipy.sparse
 import scipy.sparse.linalg
+import scipy.linalg
 import scipy.spatial.distance
 import numpy as np
 from sklearn import preprocessing
@@ -160,9 +161,10 @@ def fourier(L, algo='eigh', k=1, norm = 2):
         try:
             lamb, U = np.linalg.eigh(L.toarray())
         except np.linalg.LinAlgError:
-            lamb, U = scipy.linalg.eigh(L.toarray())
             logger.info(f'np.linalg.LinAlgError')
             logger.info({L})
+            lamb, U = scipy.linalg.eigh(L.toarray())
+
     elif algo is 'eigs':
         lamb, U = scipy.sparse.linalg.eigs(L, k=k, which='SM')
         lamb, U = sort(lamb, U)
