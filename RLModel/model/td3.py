@@ -35,10 +35,10 @@ class TD3:
         # critic_graph.theme = hl.graph.THEMES["blue"].copy()
         # actor_graph.save(f"{log_out_dir}/actor.png", format='png')
         # critic_graph.save(f"{log_out_dir}/critic.png", format='png')
-        #
-        # self.actor_optimizer = optim.Adam(self.actor.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
-        # self.critic_1_optimizer = optim.Adam(self.critic_1.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
-        # self.critic_2_optimizer = optim.Adam(self.critic_2.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
+
+        self.actor_optimizer = optim.Adam(self.actor.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
+        self.critic_1_optimizer = optim.Adam(self.critic_1.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
+        self.critic_2_optimizer = optim.Adam(self.critic_2.parameters(),  lr=args.reforce_lr, weight_decay=args.weight_decay)
 
         self.actor_target.load_state_dict(self.actor.state_dict())
         self.critic_1_target.load_state_dict(self.critic_1.state_dict())
