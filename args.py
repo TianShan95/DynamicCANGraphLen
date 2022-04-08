@@ -161,6 +161,9 @@ def arg_parse():
     parser.add_argument('--Di_graph', type=int,
                         help='Whether is Di-graph', default=1)  # 是否是有向图 默认为有向图
 
+    parser.add_argument('--state_dim', type=int,
+                        help='Whether is Di-graph', default=60)  # 是否是有向图 默认为有向图
+
 
 
     parser.set_defaults(max_nodes=81,

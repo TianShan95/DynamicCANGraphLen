@@ -6,6 +6,7 @@ import scipy.sparse.linalg
 import scipy.spatial.distance
 import numpy as np
 from sklearn import preprocessing
+from utils.logger import logger
 
 
 def grid(m, dtype=np.float32):
@@ -156,7 +157,12 @@ def fourier(L, algo='eigh', k=1, norm = 2):
         lamb, U = np.linalg.eig(L.toarray())
         lamb, U = sort(lamb, U)
     elif algo is 'eigh':
-        lamb, U = np.linalg.eigh(L.toarray())
+        try:
+            lamb, U = np.linalg.eigh(L.toarray())
+        except np.linalg.LinAlgError:
+            lamb, U = scipy.linalg.eigh(L.toarray())
+            logger.info(f'np.linalg.LinAlgError')
+            logger.info({L})
     elif algo is 'eigs':
         lamb, U = scipy.sparse.linalg.eigs(L, k=k, which='SM')
         lamb, U = sort(lamb, U)
