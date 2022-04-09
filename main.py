@@ -194,6 +194,7 @@ def main():
                 len_can_list = []
                 actions = []
                 for singleCan in range(prog_args.graph_batchsize):
+                    agent.actor.eval()
                     action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
                     # print('aaron55')
                     #
