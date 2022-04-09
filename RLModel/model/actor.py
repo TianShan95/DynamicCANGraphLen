@@ -15,7 +15,7 @@ class Actor(nn.Module):
         # self.layernorm = nn.LayerNorm(state_dim)
 
         # batch norm
-        self.batchnorm = nn.BatchNorm1d(state_dim)
+        self.batchnorm = nn.BatchNorm1d(1)
 
         self.fc1 = nn.Linear(state_dim, 500)
         torch.nn.Dropout(0.5)

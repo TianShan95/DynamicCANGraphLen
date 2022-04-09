@@ -12,7 +12,7 @@ class Critic(nn.Module):
         # self.layernorm = nn.LayerNorm(state_dim + action_dim)
 
         # batch norm
-        self.batchnorm = nn.BatchNorm1d(state_dim + action_dim)
+        self.batchnorm = nn.BatchNorm1d(1)
 
         self.fc1 = nn.Linear(state_dim + action_dim, 300)
         torch.nn.Dropout(0.5)
