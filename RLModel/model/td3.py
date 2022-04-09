@@ -69,6 +69,14 @@ class TD3:
 
     def update(self, num_iteration):  # 在经验里随机取 20 次
 
+        # 首先把所有模型置为训练模式
+        self.actor.train()
+        self.actor_target.train()
+        self.critic_1.train()
+        self.critic_1_target.train()
+        self.critic_2.train()
+        self.critic_2_target.train()
+
         # if self.num_training % 500 == 0:
         # print("====================================")
         # print("model has been trained for {} times...".format(self.num_training))
@@ -141,6 +149,13 @@ class TD3:
         # 返回此次训练平均的 loss_Q1 loss_Q2
         # logger.info(f'loss_q1_list: {loss_q1_list}')
         # logger.info(f'loss_q2_list: {loss_q2_list}')
+        # 首先把所有模型置为训练模式
+        self.actor.eval()
+        self.actor_target.eval()
+        self.critic_1.eval()
+        self.critic_1_target.eval()
+        self.critic_2.eval()
+        self.critic_2_target.eval()
         return self.num_training, sum(loss_q1_list)/len(loss_q1_list), sum(loss_q2_list)/len(loss_q2_list)
 
     def save(self, epcoh, val_acc, save_dir):

@@ -186,15 +186,6 @@ def main():
                 train_done = False
                 states_np = None
 
-                # 首先把所有模型置为训练模式
-                agent.actor.train()
-                agent.actor_target.train()
-                agent.critic_1.train()
-                agent.critic_1_target.train()
-                agent.critic_2.train()
-                agent.critic_2_target.train()
-                model_mode_train = True
-
                 # states_np = np.array([], [])  # 存储每次图卷积网络输出的状态向量
 
                 while True:
@@ -340,14 +331,6 @@ def main():
 
                     # 验证部分
                     else:
-                        if model_mode_train:
-                            agent.actor.eval()
-                            agent.actor_target.eval()
-                            agent.critic_1.eval()
-                            agent.critic_1_target.eval()
-                            agent.critic_2.eval()
-                            agent.critic_2_target.eval()
-                            model_mode_train = False
 
                         store_reward = []
                         for singleCan in range(prog_args.graph_batchsize):
