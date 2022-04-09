@@ -30,8 +30,8 @@ class TD3:
         self.critic_2_target = Critic(state_dim, action_dim).to(device)
 
         # 可视化 Actor 和 Critic 网络
-        actor_graph = hl.build_graph(self.actor, torch.zeros([2, args.state_dim]).to(device))
-        critic_graph = hl.build_graph(self.critic_1, (torch.zeros([2,  args.state_dim]).to(device), torch.zeros([2, args.msg_biggest_num - args.msg_smallest_num + 1]).to(device)))
+        actor_graph = hl.build_graph(self.actor, torch.zeros([1, args.state_dim]).to(device))
+        critic_graph = hl.build_graph(self.critic_1, (torch.zeros([1,  args.state_dim]).to(device), torch.zeros([1, args.msg_biggest_num - args.msg_smallest_num + 1]).to(device)))
         actor_graph.theme = hl.graph.THEMES["blue"].copy()
         critic_graph.theme = hl.graph.THEMES["blue"].copy()
         actor_graph.save(f"{log_out_dir}/actor.png", format='png')

@@ -413,7 +413,7 @@ def main():
                     agent.save(i, str('%.4f' % val_acc), log_out_dir)
                     # 保存图模型
                     graph_model_path = log_out_dir + 'epoch_' + str(i) + '_graph_model.pth'
-                    graph_model_para_path = log_out_dir + 'epoch_' + str(i) + '_graph_model_para.pth'
+                    graph_model_para_path = log_out_dir + 'epoch_' + str(i) + '_graph_para.pth'
                     torch.save(graph_task.model, graph_model_path)
                     torch.save(graph_task.model.state_dict(), graph_model_para_path)
 
