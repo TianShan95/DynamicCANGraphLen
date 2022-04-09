@@ -38,8 +38,6 @@ class TD3:
         critic_graph.theme = hl.graph.THEMES["blue"].copy()
         actor_graph.save(f"{log_out_dir}/actor.png", format='png')
         critic_graph.save(f"{log_out_dir}/critic.png", format='png')
-        self.actor.train()
-        self.critic_1.train()
 
         self.writer = SummaryWriter(log_out_dir)
 
