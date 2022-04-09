@@ -168,274 +168,274 @@ def main():
         val_acc = 0  # 验证精度
         train_acc = 0  # 训练精度
 
-        try:
-            for i in range(prog_args.train_epoch):  # epoch
+        # try:
+        for i in range(prog_args.train_epoch):  # epoch
 
-                # 第一次随机 图的长度 [50-300] 闭空间 并且是batchsize个给出强化学习的 初始 state
-                graph_len_list = utils.utils.random_list(prog_args.msg_smallest_num, prog_args.msg_biggest_num, prog_args.graph_batchsize)
-                # 随机获取 初始状态 next_state, reward, train_done, val_done, label, pred, graph_loss
-                state, _ , _, _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_list)
-                # print(f'随机得到的状态是 {state}')
-                # 记录 图模型 执行 步数
-                step = 0
-                graph_train_step = 0
-                graph_val_step = prog_args.graph_batchsize  # 因为模型读取train数据读完，未跳出读取 val 数据，所以需要赋予 batchsize 大小的初值
-                # 记录正确预测的 报文 个数
-                pred_train_correct = 0
-                pred_val_correct = 0
-                train_done = False
-                states_np = None
+            # 第一次随机 图的长度 [50-300] 闭空间 并且是batchsize个给出强化学习的 初始 state
+            graph_len_list = utils.utils.random_list(prog_args.msg_smallest_num, prog_args.msg_biggest_num, prog_args.graph_batchsize)
+            # 随机获取 初始状态 next_state, reward, train_done, val_done, label, pred, graph_loss
+            state, _ , _, _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, graph_len_list)
+            # print(f'随机得到的状态是 {state}')
+            # 记录 图模型 执行 步数
+            step = 0
+            graph_train_step = 0
+            graph_val_step = prog_args.graph_batchsize  # 因为模型读取train数据读完，未跳出读取 val 数据，所以需要赋予 batchsize 大小的初值
+            # 记录正确预测的 报文 个数
+            pred_train_correct = 0
+            pred_val_correct = 0
+            train_done = False
+            states_np = None
 
-                # states_np = np.array([], [])  # 存储每次图卷积网络输出的状态向量
+            # states_np = np.array([], [])  # 存储每次图卷积网络输出的状态向量
 
-                while True:
-                    # 强化学习网络
-                    # 串行把 batchsize 大小的数据输入 强化学习 得到batchsize大小个 can 数据长度
-                    len_can_list = []
-                    actions = []
-                    for singleCan in range(prog_args.graph_batchsize):
-                        action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
-                        # print('aaron55')
-                        #
-                        # agent.writer.add_graph(Wrapper, [torch.unsqueeze(state[singleCan], dim=0), torch.unsqueeze(torch.from_numpy(action).to(device), dim=0)])
+            while True:
+                # 强化学习网络
+                # 串行把 batchsize 大小的数据输入 强化学习 得到batchsize大小个 can 数据长度
+                len_can_list = []
+                actions = []
+                for singleCan in range(prog_args.graph_batchsize):
+                    action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
+                    # print('aaron55')
+                    #
+                    # agent.writer.add_graph(Wrapper, [torch.unsqueeze(state[singleCan], dim=0), torch.unsqueeze(torch.from_numpy(action).to(device), dim=0)])
 
-                        # action = action + np.random.normal(0, prog_args.exploration_noise, size=action.shape[0])
-                        # action = action.clip(-1, 1)
+                    # action = action + np.random.normal(0, prog_args.exploration_noise, size=action.shape[0])
+                    # action = action.clip(-1, 1)
 
-                        # len_can = 0
-                        # 选取 前5 个最大的可能里 选择报文数最大的
-                        # if prog_args.choice_graph_len_mode == 0:
-                        #     len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-                        if np.random.uniform() > prog_args.epsilon:  # choosing action
-                            len_can = np.random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
-                        else:
-                            # len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
-                            # np.random.choice 是左闭右开 所以加 1
-                            len_can = np.random.choice(prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1, 1, action.tolist())[0] + prog_args.msg_smallest_num
-
-                        # elif prog_args.choice_graph_len_mode == 1:
-                        #     # 选取 前5 个最大的可能里 选择报文数最大的
-                        #     len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
-                        # elif prog_args.choice_graph_len_mode == 2:
-                        #     # 在 前 5 个最大的可能里 随机选择一个报文长度
-                        #     alter = random.randint(0, 4)
-                        #     len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
-
-                        action_store = [1 if _ == (len_can - prog_args.msg_smallest_num) else 0 for _ in range(prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1)]
-
-                        # 输出 softmax 各个动作的概率
-                        actions.append(action_store)
-
-                        # 训练阶段
-                        if not train_done:
-                            # 图操作 训练步数 自增 1
-                            graph_train_step += 1
-                        else:
-                            # 图操作 验证步数自增 1
-                            graph_val_step += 1
-                        step += 1  # 总 step
-
-                        # if step % 1000 == 0:  #  每1000步输出 状态热力图
-                        #     fig, ax = plt.subplots(figsize=(10, 10))
-                        #     sns.heatmap(states_np, cmap="YlGnBu")
-                        #     plt.savefig(log_out_dir + '/plt_state_%d_%d' % (i, step), dpi=300, bbox_inches='tight')
-                        #     plt.clf()  # 更新画布
-                        #     states_np = None
-
-
-                        # 把神经网络得到的长度加入列表
-                        len_can_list.append(len_can)
-
-                    next_state, reward, train_done, val_done, label, pred, graph_loss = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can_list)
-
-                    # 最后结束
-                    if val_done:
-                        # 把 train_done 和 val_done 置位
-                        graph_task.origin_can_obj.train_done = False
-                        graph_task.origin_can_obj.val_done = False
-
-                        agent.writer.add_scalar('ep_r', ep_r, global_step=i)
-                        # if i % args_RL.print_log == 0:
-                        #     print("Ep_i \t{}, the ep_r is \t{:0.2f}, the step is \t{}".format(i, ep_r, t))
-                        ep_r = 0
-                        break  # break true
-
-                    # # 实时绘制 图神经网络的loss曲线
-                    # graph_task.history1.log((i, graph_train_step), graph_train_loss=graph_loss)
-                    # with graph_task.canvas1:
-                    #     graph_task.canvas1.draw_plot(graph_task.history1["graph_train_loss"])
-
-                    # 训练部分
-                    if not train_done:
-                        # rewards = []
-                        # push 经验
-                        store_reward = []
-                        for singleCan in range(prog_args.graph_batchsize):
-                            # # 存入 经验
-                            # if label[singleCan] == pred[singleCan]:
-                            #     reward = abs(reward)
-                            # else:
-                            #     reward = -abs(reward)
-                            if reward > 0.75:  # 预测准确率达 0.75 - 1
-                                if label[singleCan] == pred[singleCan]:
-                                    store_reward.append(100)
-                                else:
-                                    store_reward.append(-1)
-                            elif reward > 0.5:  # 预测准确率达 0.5 - 0.75
-                                if label[singleCan] == pred[singleCan]:
-                                    store_reward.append(10)
-                                else:
-                                    store_reward.append(-100)
-                            elif reward > 0.25:  # 预测准确率达 0.25 - 0.5
-                                if label[singleCan] == pred[singleCan]:
-                                    store_reward.append(-10)
-                                else:
-                                    store_reward.append(-100)
-                            else :  # 预测准确率达 0.25
-                                if label[singleCan] == pred[singleCan]:
-                                    store_reward.append(-50)
-                                else:
-                                    store_reward.append(-100)
-
-                            # 累加 奖励
-                            ep_r += reward
-                            # rewards.append(reward)
-                            agent.memory.push((state[singleCan].cpu().data.numpy().flatten(),
-                                               next_state[singleCan].cpu().data.numpy().flatten(),
-                                               actions[singleCan], store_reward[-1], np.float(train_done)))
-                            if len(agent.memory.storage) >= prog_args.capacity - 1:
-                                train_times, avg_Q1_loss, avg_Q2_loss = agent.update(num_iteration=10)  # 使用经验回放 更新网络
-
-                        # 计数训练时 预测正确的个数
-                        for index, singlab in enumerate(label):
-                            if singlab == pred[index]:
-                                pred_train_correct += 1
-
-                        # 得到训练精度
-                        train_acc = pred_train_correct/graph_train_step
-                        agent.writer.add_scalar('acc/train_acc', train_acc, global_step=graph_train_step)
-                        agent.writer.add_scalar('Loss/graph_train_loss', graph_loss, global_step=graph_train_step)
-
-
-                        # 结果写入 log
-                        logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
-                                    f'block_{graph_task.origin_can_obj.train_index}: {graph_task.origin_can_obj.train_order[graph_task.origin_can_obj.train_index]}; '
-                                    f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_train_block_len}; '
-                                    f'reward: {reward:<8.3f}; '
-                                    f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; g_loss: {graph_loss:<8.6f}; '
-                                    f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
-                        logger.info(f'len_can_list: {len_can_list}')
-                        logger.info(f'labe: {label}')
-                        logger.info(f'pred: {pred}')
-                        logger.info(f'swrd: {store_reward}')
-
-                    # 验证部分
+                    # len_can = 0
+                    # 选取 前5 个最大的可能里 选择报文数最大的
+                    # if prog_args.choice_graph_len_mode == 0:
+                    #     len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+                    if np.random.uniform() > prog_args.epsilon:  # choosing action
+                        len_can = np.random.randint(prog_args.msg_smallest_num, prog_args.msg_biggest_num)
                     else:
+                        # len_can = np.argmax(action) + prog_args.msg_smallest_num  # 得到 下一块 数据的长度
+                        # np.random.choice 是左闭右开 所以加 1
+                        len_can = np.random.choice(prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1, 1, action.tolist())[0] + prog_args.msg_smallest_num
 
-                        store_reward = []
-                        for singleCan in range(prog_args.graph_batchsize):
-                            # # 存入 经验
-                            # if label[singleCan] == pred[singleCan]:
-                            #     reward = abs(reward)
-                            # else:
-                            #     reward = -abs(reward)
-                            # # 累加 奖励
-                            # ep_r += reward
-                            if reward > 0.75:  # 预测准确率达 0.75 - 1
-                                if label[singleCan] == pred[singleCan]:
-                                    store_reward.append(100)
-                                else:
-                                    store_reward.append(-1)
-                            elif reward > 0.5:  # 预测准确率达 0.5 - 0.75
-                                if label[singleCan] == pred[singleCan]:
-                                    store_reward.append(10)
-                                else:
-                                    store_reward.append(-100)
-                            elif reward > 0.25:  # 预测准确率达 0.25 - 0.5
-                                if label[singleCan] == pred[singleCan]:
-                                    store_reward.append(-10)
-                                else:
-                                    store_reward.append(-100)
-                            else:  # 预测准确率达 0.25
-                                if label[singleCan] == pred[singleCan]:
-                                    store_reward.append(-50)
-                                else:
-                                    store_reward.append(-100)
+                    # elif prog_args.choice_graph_len_mode == 1:
+                    #     # 选取 前5 个最大的可能里 选择报文数最大的
+                    #     len_can = max(action.argsort()[::-1][0:5]) + prog_args.msg_smallest_num
+                    # elif prog_args.choice_graph_len_mode == 2:
+                    #     # 在 前 5 个最大的可能里 随机选择一个报文长度
+                    #     alter = random.randint(0, 4)
+                    #     len_can = action.argsort()[::-1][0:5][alter] + prog_args.msg_smallest_num
 
-                        # 计数训练时 预测正确的个数
-                        for index, singlab in enumerate(label):
-                            if singlab == pred[index]:
-                                pred_val_correct += 1
-                        # 得到验证精度
-                        val_acc = pred_val_correct/graph_val_step
+                    action_store = [1 if _ == (len_can - prog_args.msg_smallest_num) else 0 for _ in range(prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1)]
 
-                        agent.writer.add_scalar('acc/val_acc', val_acc, global_step=graph_val_step)
-                        agent.writer.add_scalar('Loss/graph_val_loss', graph_loss, global_step=graph_val_step)
-                        # 结果写入 log
-                        logger.info(f'epoch-val: {i:<3}; step: {graph_val_step:<6}; '
-                                    f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_val_len}; '
-                                    f'reward: {reward:<8.3f}; '
-                                    f'acc: {val_acc:<4.2f}; g_loss: {graph_loss:<8.6f}; ep_r: {ep_r:.2f}')
-                        logger.info(f'len_can_list: {len_can_list}')
-                        logger.info(f'labe: {label}')
-                        logger.info(f'pred: {pred}')
-                        logger.info(f'swrd: {store_reward}')
+                    # 输出 softmax 各个动作的概率
+                    actions.append(action_store)
 
-                    # 更新 状态
-                    state = next_state
+                    # 训练阶段
+                    if not train_done:
+                        # 图操作 训练步数 自增 1
+                        graph_train_step += 1
+                    else:
+                        # 图操作 验证步数自增 1
+                        graph_val_step += 1
+                    step += 1  # 总 step
 
-                    # if graph_train_step < 100 or states_np is None:
-                    #     states_np = state.cpu().detach().numpy()
-                    # else:
-                    #     states_np = np.concatenate((states_np, state.cpu().detach().numpy()), axis=0)
+                    # if step % 1000 == 0:  #  每1000步输出 状态热力图
+                    #     fig, ax = plt.subplots(figsize=(10, 10))
+                    #     sns.heatmap(states_np, cmap="YlGnBu")
+                    #     plt.savefig(log_out_dir + '/plt_state_%d_%d' % (i, step), dpi=300, bbox_inches='tight')
+                    #     plt.clf()  # 更新画布
+                    #     states_np = None
 
 
-                    # # 保存 模型
-                    # if graph_step % args_RL.log_interval == 0:
-                    #     agent.save()
-                    #     break
+                    # 把神经网络得到的长度加入列表
+                    len_can_list.append(len_can)
 
-                # 记录此次的训练精度 和 验证精度
-                logger.info(f'epoch-{i}-over '
-                            f'trian-times: {train_times} '
-                            f'train_acc: {train_acc:<4.6f} '
-                            f'val_acc: {val_acc:<4.6f}')
-                # 跳出whileTrue 结束epoch 保存模型
-                # 如果此次的验证精度上升则保存模型
+                next_state, reward, train_done, val_done, label, pred, graph_loss = graph_task.benchmark_task_val(prog_args.feat, pred_hidden_dims, len_can_list)
 
-                # 置位完成标识位
-                graph_task.origin_can_obj.train_done = False
-                graph_task.origin_can_obj.val_done = False
+                # 最后结束
+                if val_done:
+                    # 把 train_done 和 val_done 置位
+                    graph_task.origin_can_obj.train_done = False
+                    graph_task.origin_can_obj.val_done = False
 
-                if val_acc > last_val_acc:
-                    # 保存本次的验证精度
-                    last_val_acc = val_acc
-                    # 保存强化学习模型
-                    agent.save(i, str('%.4f' % val_acc), log_out_dir)
-                    # 保存图模型
-                    graph_model_path = log_out_dir + 'epoch_' + str(i) + '_graph_model.pth'
-                    graph_model_para_path = log_out_dir + 'epoch_' + str(i) + '_graph_para.pth'
-                    torch.save(graph_task.model, graph_model_path)
-                    torch.save(graph_task.model.state_dict(), graph_model_para_path)
+                    agent.writer.add_scalar('ep_r', ep_r, global_step=i)
+                    # if i % args_RL.print_log == 0:
+                    #     print("Ep_i \t{}, the ep_r is \t{:0.2f}, the step is \t{}".format(i, ep_r, t))
+                    ep_r = 0
+                    break  # break true
 
-                # # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
-                # content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
-                #           f'epoch: {i}\n'\
-                #           f'retrain: {retrain}\n'
-                # resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
-                # send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers,
-                #            prog_args.smtp_server, prog_args.port, content, resultfile)
+                # # 实时绘制 图神经网络的loss曲线
+                # graph_task.history1.log((i, graph_train_step), graph_train_loss=graph_loss)
+                # with graph_task.canvas1:
+                #     graph_task.canvas1.draw_plot(graph_task.history1["graph_train_loss"])
 
-        except Exception as e:  # 捕捉所有异常
-            logger.info(f'发生异常 {e}')
-            error = e
+                # 训练部分
+                if not train_done:
+                    # rewards = []
+                    # push 经验
+                    store_reward = []
+                    for singleCan in range(prog_args.graph_batchsize):
+                        # # 存入 经验
+                        # if label[singleCan] == pred[singleCan]:
+                        #     reward = abs(reward)
+                        # else:
+                        #     reward = -abs(reward)
+                        if reward > 0.75:  # 预测准确率达 0.75 - 1
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(100)
+                            else:
+                                store_reward.append(-1)
+                        elif reward > 0.5:  # 预测准确率达 0.5 - 0.75
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(10)
+                            else:
+                                store_reward.append(-100)
+                        elif reward > 0.25:  # 预测准确率达 0.25 - 0.5
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(-10)
+                            else:
+                                store_reward.append(-100)
+                        else :  # 预测准确率达 0.25
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(-50)
+                            else:
+                                store_reward.append(-100)
 
-        finally:
-            # 异常信息写入 log
-            logger.warning(f'error: {error}')
-            # 程序执行失败信息写入 log
-            traceback.print_exc()
-            logger.warning(f"执行失败信息: {traceback.format_exc()}")
+                        # 累加 奖励
+                        ep_r += reward
+                        # rewards.append(reward)
+                        agent.memory.push((state[singleCan].cpu().data.numpy().flatten(),
+                                           next_state[singleCan].cpu().data.numpy().flatten(),
+                                           actions[singleCan], store_reward[-1], np.float(train_done)))
+                        if len(agent.memory.storage) >= prog_args.capacity - 1:
+                            train_times, avg_Q1_loss, avg_Q2_loss = agent.update(num_iteration=10)  # 使用经验回放 更新网络
+
+                    # 计数训练时 预测正确的个数
+                    for index, singlab in enumerate(label):
+                        if singlab == pred[index]:
+                            pred_train_correct += 1
+
+                    # 得到训练精度
+                    train_acc = pred_train_correct/graph_train_step
+                    agent.writer.add_scalar('acc/train_acc', train_acc, global_step=graph_train_step)
+                    agent.writer.add_scalar('Loss/graph_train_loss', graph_loss, global_step=graph_train_step)
+
+
+                    # 结果写入 log
+                    logger.info(f'epoch-train: {i:<3}; train-step: {graph_train_step:<6}; '
+                                f'block_{graph_task.origin_can_obj.train_index}: {graph_task.origin_can_obj.train_order[graph_task.origin_can_obj.train_index]}; '
+                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_train_block_len}; '
+                                f'reward: {reward:<8.3f}; '
+                                f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; g_loss: {graph_loss:<8.6f}; '
+                                f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
+                    logger.info(f'len_can_list: {len_can_list}')
+                    logger.info(f'labe: {label}')
+                    logger.info(f'pred: {pred}')
+                    logger.info(f'swrd: {store_reward}')
+
+                # 验证部分
+                else:
+
+                    store_reward = []
+                    for singleCan in range(prog_args.graph_batchsize):
+                        # # 存入 经验
+                        # if label[singleCan] == pred[singleCan]:
+                        #     reward = abs(reward)
+                        # else:
+                        #     reward = -abs(reward)
+                        # # 累加 奖励
+                        # ep_r += reward
+                        if reward > 0.75:  # 预测准确率达 0.75 - 1
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(100)
+                            else:
+                                store_reward.append(-1)
+                        elif reward > 0.5:  # 预测准确率达 0.5 - 0.75
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(10)
+                            else:
+                                store_reward.append(-100)
+                        elif reward > 0.25:  # 预测准确率达 0.25 - 0.5
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(-10)
+                            else:
+                                store_reward.append(-100)
+                        else:  # 预测准确率达 0.25
+                            if label[singleCan] == pred[singleCan]:
+                                store_reward.append(-50)
+                            else:
+                                store_reward.append(-100)
+
+                    # 计数训练时 预测正确的个数
+                    for index, singlab in enumerate(label):
+                        if singlab == pred[index]:
+                            pred_val_correct += 1
+                    # 得到验证精度
+                    val_acc = pred_val_correct/graph_val_step
+
+                    agent.writer.add_scalar('acc/val_acc', val_acc, global_step=graph_val_step)
+                    agent.writer.add_scalar('Loss/graph_val_loss', graph_loss, global_step=graph_val_step)
+                    # 结果写入 log
+                    logger.info(f'epoch-val: {i:<3}; step: {graph_val_step:<6}; '
+                                f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_val_len}; '
+                                f'reward: {reward:<8.3f}; '
+                                f'acc: {val_acc:<4.2f}; g_loss: {graph_loss:<8.6f}; ep_r: {ep_r:.2f}')
+                    logger.info(f'len_can_list: {len_can_list}')
+                    logger.info(f'labe: {label}')
+                    logger.info(f'pred: {pred}')
+                    logger.info(f'swrd: {store_reward}')
+
+                # 更新 状态
+                state = next_state
+
+                # if graph_train_step < 100 or states_np is None:
+                #     states_np = state.cpu().detach().numpy()
+                # else:
+                #     states_np = np.concatenate((states_np, state.cpu().detach().numpy()), axis=0)
+
+
+                # # 保存 模型
+                # if graph_step % args_RL.log_interval == 0:
+                #     agent.save()
+                #     break
+
+            # 记录此次的训练精度 和 验证精度
+            logger.info(f'epoch-{i}-over '
+                        f'trian-times: {train_times} '
+                        f'train_acc: {train_acc:<4.6f} '
+                        f'val_acc: {val_acc:<4.6f}')
+            # 跳出whileTrue 结束epoch 保存模型
+            # 如果此次的验证精度上升则保存模型
+
+            # 置位完成标识位
+            graph_task.origin_can_obj.train_done = False
+            graph_task.origin_can_obj.val_done = False
+
+            if val_acc > last_val_acc:
+                # 保存本次的验证精度
+                last_val_acc = val_acc
+                # 保存强化学习模型
+                agent.save(i, str('%.4f' % val_acc), log_out_dir)
+                # 保存图模型
+                graph_model_path = log_out_dir + 'epoch_' + str(i) + '_graph_model.pth'
+                graph_model_para_path = log_out_dir + 'epoch_' + str(i) + '_graph_para.pth'
+                torch.save(graph_task.model, graph_model_path)
+                torch.save(graph_task.model.state_dict(), graph_model_para_path)
+
+            # # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
+            # content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
+            #           f'epoch: {i}\n'\
+            #           f'retrain: {retrain}\n'
+            # resultfile = packresult(log_out_dir[:-1], i)  # 1.传入log路径参数 去掉最后的 / 2. 训练结束的代数
+            # send_email(prog_args.username, prog_args.password, prog_args.sender, prog_args.receivers,
+            #            prog_args.smtp_server, prog_args.port, content, resultfile)
+
+        # except Exception as e:  # 捕捉所有异常
+        #     logger.info(f'发生异常 {e}')
+        #     error = e
+        #
+        # finally:
+        #     # 异常信息写入 log
+        #     logger.warning(f'error: {error}')
+        #     # 程序执行失败信息写入 log
+        #     traceback.print_exc()
+        #     logger.warning(f"执行失败信息: {traceback.format_exc()}")
             # 无论实验是否执行完毕 都把结果发送邮件
             # 跑完所有的 epoch 打包实验结果 返回带 .zip 的文件路径
             # print(f'正在打包结果文件夹  {log_out_dir}')
