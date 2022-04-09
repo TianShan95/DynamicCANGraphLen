@@ -91,8 +91,8 @@ def main():
     agent = TD3(state_dim, action_dim, 1, prog_args, log_out_dir)  # 创建 agent 对象
 
     # tensorboard 可视化 actor 和 critic
-    Wrapper = Model_Wrapper(agent.actor, agent.critic_1, prog_args)
-    agent.writer.add_graph(Wrapper, [torch.zeros([1,  prog_args.state_dim]), torch.zeros([1, prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1])])
+    Wrapper = Model_Wrapper(agent.actor, agent.critic_1)
+    agent.writer.add_graph(Wrapper, [torch.zeros([1,  prog_args.state_dim]).to(device), torch.zeros([1, prog_args.msg_biggest_num - prog_args.msg_smallest_num + 1]).to(device)])
 
     # 累加奖励
     ep_r = 0
@@ -195,6 +195,9 @@ def main():
                     actions = []
                     for singleCan in range(prog_args.graph_batchsize):
                         action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
+                        # print('aaron55')
+                        #
+                        # agent.writer.add_graph(Wrapper, [torch.unsqueeze(state[singleCan], dim=0), torch.unsqueeze(torch.from_numpy(action).to(device), dim=0)])
 
                         # action = action + np.random.normal(0, prog_args.exploration_noise, size=action.shape[0])
                         # action = action.clip(-1, 1)

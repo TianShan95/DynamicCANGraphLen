@@ -1,8 +1,9 @@
+from tensorboardX import SummaryWriter
 import torch
 from RLModel.model.actor import Actor
 from RLModel.model.critic import Critic
 from RLModel.model.replayBuff import Replay_buffer
-from tensorboardX import SummaryWriter
+
 import torch.optim as optim
 import torch.nn.functional as F
 from utils.logger import logger
@@ -28,13 +29,14 @@ class TD3:
         self.critic_2 = Critic(state_dim, action_dim).to(device)
         self.critic_2_target = Critic(state_dim, action_dim).to(device)
 
-        # # 可视化 Actor 和 Critic 网络
-        # actor_graph = hl.build_graph(self.actor, torch.zeros([1, 1, args.state_dim]))
-        # critic_graph = hl.build_graph(self.critic_1, (torch.zeros([1,  args.state_dim]), torch.zeros([1, args.msg_biggest_num - args.msg_smallest_num + 1])))
-        # actor_graph.theme = hl.graph.THEMES["blue"].copy()
-        # critic_graph.theme = hl.graph.THEMES["blue"].copy()
-        # actor_graph.save(f"{log_out_dir}/actor.png", format='png')
-        # critic_graph.save(f"{log_out_dir}/critic.png", format='png')
+        # 可视化 Actor 和 Critic 网络
+        actor_graph = hl.build_graph(self.actor, torch.zeros([1, 1, args.state_dim]).to(device))
+        critic_graph = hl.build_graph(self.critic_1, (torch.zeros([1,  args.state_dim]).to(device), torch.zeros([1, args.msg_biggest_num - args.msg_smallest_num + 1]).to(device)))
+        actor_graph.theme = hl.graph.THEMES["blue"].copy()
+        critic_graph.theme = hl.graph.THEMES["blue"].copy()
+        actor_graph.save(f"{log_out_dir}/actor.png", format='png')
+        critic_graph.save(f"{log_out_dir}/critic.png", format='png')
+
         self.writer = SummaryWriter(log_out_dir)
 
         # self.writer.add_graph(self.actor, torch.zeros([1, 1, args.state_dim]))

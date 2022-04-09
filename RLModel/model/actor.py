@@ -11,7 +11,11 @@ class Actor(nn.Module):
     def __init__(self, state_dim, action_dim, max_action, log_dir):
         super(Actor, self).__init__()
 
-        self.layernorm = nn.LayerNorm(state_dim)
+        # layer norm
+        # self.layernorm = nn.LayerNorm(state_dim)
+
+        # batch norm
+        self.batchnorm = nn.BatchNorm1d(state_dim)
 
         self.fc1 = nn.Linear(state_dim, 500)
         torch.nn.Dropout(0.5)
@@ -28,7 +32,7 @@ class Actor(nn.Module):
 
     def forward(self, state, p=False):
         # print(state.shape)
-        a = self.layernorm(state)
+        a = self.batchnorm(state)
 
         # if p:  # 如果是在强化学习输出过程则记录 训练过程则不记录
         #     self.step += 1
